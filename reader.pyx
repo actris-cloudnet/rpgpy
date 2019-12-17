@@ -3,6 +3,7 @@ from libc.stdio cimport *
 import numpy as np
 import rpg_header
 import numpy as np
+import utils
 
 DEF MAX_N_SPECTRAL_BLOCKS = 100
 DEF MAX_ALTITUDES = 1500
@@ -27,7 +28,7 @@ def read_bytes(str file_name, header):
         short int min_ind[MAX_N_SPECTRAL_BLOCKS]
         short int max_ind[MAX_N_SPECTRAL_BLOCKS]
 
-    level, version = rpg_header.get_rpg_file_type(header)
+    level, version = utils.rpg_header.get_rpg_file_type(header)
 
     ptr = fopen(fname, "rb")
 

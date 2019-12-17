@@ -1,6 +1,7 @@
 """Module for reading RPG 94 GHz radar header."""
 import numpy as np
 import numpy.ma as ma
+import utils
 
 
 def read_rpg_header(file_name):
@@ -19,7 +20,7 @@ def read_rpg_header(file_name):
         block = np.fromfile(file, np.dtype(list(fields)), 1)
         for name in block.dtype.names:
             array = block[name][0]
-            if _isscalar(array):
+            if utils.isscalar(array):
                 header[name] = array
             else:
                 header[name] = np.array(array, dtype=_get_dtype(array))
@@ -30,7 +31,7 @@ def read_rpg_header(file_name):
     read(('file_code', 'i4'),
          ('header_length', 'i4'))  # bytes
 
-    level, version = get_rpg_file_type(header)
+    level, version = utils.get_rpg_file_type(header)
 
     if version > 2:
         read(('_start_time', 'uint32'),
@@ -144,50 +145,3 @@ def _get_dtype(array):
     if array.dtype in (np.int8, np.int32, np.uint32):
         return int
     return float
-
-
-def get_rpg_file_type(header):
-    """Find level and version of RPG cloud radar binary file.
-
-    Args:
-        header (dict): Header of the radar file containing *file_code* key.
-
-    Returns:
-        tuple: 2-element tuple containing Level (0 or 1) and Version (2 or 3).
-
-    Raises:
-        RuntimeError: Unknown file type.
-
-    """
-    file_code = header['file_code']
-    if file_code == 789346:
-        return 0, 2
-    elif file_code == 889346:
-        return 0, 3
-    elif file_code == 789347:
-        return 1, 2
-    elif file_code == 889347:
-        return 1, 3
-    raise RuntimeError('Unknown RPG binary file.')
-
-
-def _isscalar(array):
-    """Tests if input is scalar.
-
-    By "scalar" we mean that array has a single value.
-
-    Examples:
-        >>> isscalar(1)
-            True
-        >>> isscalar([1])
-            True
-        >>> isscalar(np.array(1))
-            True
-        >>> isscalar(np.array([1]))
-            True
-
-    """
-    arr = ma.array(array)
-    if not hasattr(arr, '__len__') or arr.shape == () or len(arr) == 1:
-        return True
-    return False
