@@ -1,12 +1,12 @@
 """RPG cloud radar binary reader in Cython."""
 from libc.stdio cimport *
+from libc.stdlib cimport malloc, free
 import numpy as np
 import rpg_header
 import numpy as np
 import utils
 
 DEF MAX_N_SPECTRAL_BLOCKS = 100
-DEF MAX_ALTITUDES = 1500
 
 def read_data(str file_name):
 
@@ -25,10 +25,10 @@ def read_data(str file_name):
         int compression = header['compression']
         int polarization = header['dual_polarization']
         int anti_alias = header['anti_alias']
-        char is_data[MAX_ALTITUDES]
-        int n_samples_at_each_height[MAX_ALTITUDES]
         short int min_ind[MAX_N_SPECTRAL_BLOCKS]
         short int max_ind[MAX_N_SPECTRAL_BLOCKS]
+        char *is_data = <char *> malloc(n_levels * sizeof(char))
+        int *n_samples_at_each_height = <int *> malloc(n_levels * sizeof(int))
 
     level, version = utils.get_rpg_file_type(header)
 
@@ -43,7 +43,7 @@ def read_data(str file_name):
         int [:] SampBytes = np.empty(n_samples, np.int32)
         unsigned int [:] Time = np.empty(n_samples, np.uint32)
         int [:] MSec = np.empty(n_samples, np.int32)
-        int [:] QF = np.empty(n_samples, np.int32)
+        char [:] QF = np.empty(n_samples, np.int8)
         float [:] RR = np.empty(n_samples, np.float32)
         float [:] RelHum = np.empty(n_samples, np.float32)
         float [:] EnvTemp = np.empty(n_samples, np.float32)
@@ -75,25 +75,22 @@ def read_data(str file_name):
         float [:, :] TotNoisePow = np.zeros((n_samples, n_levels), np.float32)
         float [:, :] HNoisePow = np.zeros((n_samples, n_levels), np.float32)
         float [:, :] MinVel = np.zeros((n_samples, n_levels), np.float32)
-        # cdef int [:, :] AliasMsk = np.zeros((n_samples, n_levels), np.int32)
+        char [:, :] AliasMsk = np.zeros((n_samples, n_levels), np.int8)
         int n_dummy = header['_n_temperature_levels'] + 2*header['_n_humidity_levels'] + 2*n_levels
 
     if level == 0 and polarization > 0:
         n_dummy += 2*n_levels
 
     if compression == 0:
-        temp = _get_n_samples(header)
-        for i in range(len(temp)):
-            n_samples_at_each_height[i] = temp[i]
-
-    # Loop over time
+        for i, n in enumerate(_get_n_samples(header)):
+            n_samples_at_each_height[i] = n
+            
     for sample in range(n_samples):
 
         ret = fread(&SampBytes[sample], 4, 1, ptr)
         ret = fread(&Time[sample], 4, 1, ptr)
         ret = fread(&MSec[sample], 4, 1, ptr)
-        #ret = fread(&QF[sample], 1, 1, ptr)
-        fseek(ptr, 1, SEEK_CUR)
+        ret = fread(&QF[sample], 1, 1, ptr)
         ret = fread(&RR[sample], 4, 1, ptr)
         ret = fread(&RelHum[sample], 4, 1, ptr)
         ret = fread(&EnvTemp[sample], 4, 1, ptr)
@@ -113,10 +110,7 @@ def read_data(str file_name):
         ret = fread(&PCT[sample], 4, 1, ptr)
         fseek(ptr, (3 + n_dummy)*4, SEEK_CUR)
 
-        # Read altitudes where we actually have some data
-        #ret = fread(is_data, 1, n_levels, ptr)
-        for i in range(n_levels):
-            ret = fread(&is_data[i], 1, 1, ptr)
+        ret = fread(is_data, 1, n_levels, ptr)
 
         for alt_ind in range(n_levels):
 
@@ -125,7 +119,6 @@ def read_data(str file_name):
                 ret = fread(&n_bytes, 4, 1, ptr)
 
                 if compression == 0:
-
                     for n in range(n_samples_at_each_height[alt_ind]):
                         ret = fread(&TotSpec[sample, alt_ind, n], 4, 1, ptr)
 
@@ -147,9 +140,10 @@ def read_data(str file_name):
                         ret = fread(&max_ind[m], 2, 1, ptr)
 
                     for m in range(n_blocks):
+                        
                         for n in range(min_ind[m], max_ind[m]+1):
                             ret = fread(&TotSpec[sample, alt_ind, n], 4, 1, ptr)
-
+                        
                         if polarization > 0:
                             for n in range(min_ind[m], max_ind[m]+1):
                                 ret = fread(&HSpec[sample, alt_ind, n], 4, 1, ptr)
@@ -182,12 +176,13 @@ def read_data(str file_name):
                         ret = fread(&HNoisePow[sample, alt_ind], 4, 1, ptr)
                         
                     if anti_alias == 1:
-                        #ret = fread(&AliasMsk[sample, alt_ind], 1, 1, ptr)
-                        fseek(ptr, 1, SEEK_CUR)
+                        ret = fread(&AliasMsk[sample, alt_ind], 1, 1, ptr)
                         ret = fread(&MinVel[sample, alt_ind], 4, 1, ptr)
 
     fclose(ptr)
-
+    free(is_data)
+    free(n_samples_at_each_height)
+    
     return {'TotSpec': np.asarray(TotSpec),
             'HSpec': np.asarray(HSpec),
             'ReVHSpec': np.asarray(ReVHSpec),
