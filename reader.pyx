@@ -8,8 +8,10 @@ import utils
 DEF MAX_N_SPECTRAL_BLOCKS = 100
 DEF MAX_ALTITUDES = 1500
 
-def read_bytes(str file_name, header):
+def read_data(str file_name):
 
+    header, _ = rpg_header.read_rpg_header(file_name)
+    
     filename_byte_string = file_name.encode("UTF-8")
     cdef:
         char* fname = filename_byte_string
@@ -37,44 +39,45 @@ def read_bytes(str file_name, header):
     fseek(ptr, header_length, SEEK_CUR)
     ret = fread(&n_samples, 4, 1, ptr)
 
-    cdef int [:] SampBytes = np.empty(n_samples, np.int32)
-    cdef unsigned int [:] Time = np.empty(n_samples, np.uint32)
-    cdef int [:] MSec = np.empty(n_samples, np.int32)
-    cdef int [:] QF = np.empty(n_samples, np.int32)
-    cdef float [:] RR = np.empty(n_samples, np.float32)
-    cdef float [:] RelHum = np.empty(n_samples, np.float32)
-    cdef float [:] EnvTemp = np.empty(n_samples, np.float32)
-    cdef float [:] BaroP = np.empty(n_samples, np.float32)
-    cdef float [:] WS = np.empty(n_samples, np.float32)
-    cdef float [:] WD = np.empty(n_samples, np.float32)
-    cdef float [:] DDVolt = np.empty(n_samples, np.float32)
-    cdef float [:] DDTb = np.empty(n_samples, np.float32)
-    cdef float [:] LWP = np.empty(n_samples, np.float32)
-    cdef float [:] PowIF = np.empty(n_samples, np.float32)
-    cdef float [:] Elev = np.empty(n_samples, np.float32)
-    cdef float [:] Azi = np.empty(n_samples, np.float32)
-    cdef float [:] Status = np.empty(n_samples, np.float32)
-    cdef float [:] TransPow = np.empty(n_samples, np.float32)
-    cdef float [:] TransT = np.empty(n_samples, np.float32)
-    cdef float [:] RecT = np.empty(n_samples, np.float32)
-    cdef float [:] PCT = np.empty(n_samples, np.float32)
-    cdef float [:, :, :] TotSpec = np.zeros((n_samples, n_levels, n_spectra), np.float32)
-    cdef float [:, :, :] HSpec = np.zeros((n_samples, n_levels, n_spectra), np.float32)
-    cdef float [:, :, :] ReVHSpec = np.zeros((n_samples, n_levels, n_spectra), np.float32)
-    cdef float [:, :, :] ImVHSpec = np.zeros((n_samples, n_levels, n_spectra), np.float32)
-    cdef float [:, :, :] RefRat = np.zeros((n_samples, n_levels, n_spectra), np.float32)
-    cdef float [:, :, :] CorrCoeff = np.zeros((n_samples, n_levels, n_spectra), np.float32)
-    cdef float [:, :, :] DiffPh = np.zeros((n_samples, n_levels, n_spectra), np.float32)
-    cdef float [:, :, :] SLDR = np.zeros((n_samples, n_levels, n_spectra), np.float32)
-    cdef float [:, :, :] SCorrCoeff = np.zeros((n_samples, n_levels, n_spectra), np.float32)
-    cdef float [:, :] KDP = np.zeros((n_samples, n_levels), np.float32)
-    cdef float [:, :] DiffAtt = np.zeros((n_samples, n_levels), np.float32)
-    cdef float [:, :] TotNoisePow = np.zeros((n_samples, n_levels), np.float32)
-    cdef float [:, :] HNoisePow = np.zeros((n_samples, n_levels), np.float32)
-    #cdef int [:, :] AliasMsk = np.zeros((n_samples, n_levels), np.int32)
-    cdef float [:, :] MinVel = np.zeros((n_samples, n_levels), np.float32)
+    cdef:
+        int [:] SampBytes = np.empty(n_samples, np.int32)
+        unsigned int [:] Time = np.empty(n_samples, np.uint32)
+        int [:] MSec = np.empty(n_samples, np.int32)
+        int [:] QF = np.empty(n_samples, np.int32)
+        float [:] RR = np.empty(n_samples, np.float32)
+        float [:] RelHum = np.empty(n_samples, np.float32)
+        float [:] EnvTemp = np.empty(n_samples, np.float32)
+        float [:] BaroP = np.empty(n_samples, np.float32)
+        float [:] WS = np.empty(n_samples, np.float32)
+        float [:] WD = np.empty(n_samples, np.float32)
+        float [:] DDVolt = np.empty(n_samples, np.float32)
+        float [:] DDTb = np.empty(n_samples, np.float32)
+        float [:] LWP = np.empty(n_samples, np.float32)
+        float [:] PowIF = np.empty(n_samples, np.float32)
+        float [:] Elev = np.empty(n_samples, np.float32)
+        float [:] Azi = np.empty(n_samples, np.float32)
+        float [:] Status = np.empty(n_samples, np.float32)
+        float [:] TransPow = np.empty(n_samples, np.float32)
+        float [:] TransT = np.empty(n_samples, np.float32)
+        float [:] RecT = np.empty(n_samples, np.float32)
+        float [:] PCT = np.empty(n_samples, np.float32)
+        float [:, :, :] TotSpec = np.zeros((n_samples, n_levels, n_spectra), np.float32)
+        float [:, :, :] HSpec = np.zeros((n_samples, n_levels, n_spectra), np.float32)
+        float [:, :, :] ReVHSpec = np.zeros((n_samples, n_levels, n_spectra), np.float32)
+        float [:, :, :] ImVHSpec = np.zeros((n_samples, n_levels, n_spectra), np.float32)
+        float [:, :, :] RefRat = np.zeros((n_samples, n_levels, n_spectra), np.float32)
+        float [:, :, :] CorrCoeff = np.zeros((n_samples, n_levels, n_spectra), np.float32)
+        float [:, :, :] DiffPh = np.zeros((n_samples, n_levels, n_spectra), np.float32)
+        float [:, :, :] SLDR = np.zeros((n_samples, n_levels, n_spectra), np.float32)
+        float [:, :, :] SCorrCoeff = np.zeros((n_samples, n_levels, n_spectra), np.float32)
+        float [:, :] KDP = np.zeros((n_samples, n_levels), np.float32)
+        float [:, :] DiffAtt = np.zeros((n_samples, n_levels), np.float32)
+        float [:, :] TotNoisePow = np.zeros((n_samples, n_levels), np.float32)
+        float [:, :] HNoisePow = np.zeros((n_samples, n_levels), np.float32)
+        float [:, :] MinVel = np.zeros((n_samples, n_levels), np.float32)
+        # cdef int [:, :] AliasMsk = np.zeros((n_samples, n_levels), np.int32)
+        int n_dummy = header['_n_temperature_levels'] + 2*header['_n_humidity_levels'] + 2*n_levels
 
-    cdef int n_dummy = header['_n_temperature_levels'] + 2*header['_n_humidity_levels'] + 2*n_levels
     if level == 0 and polarization > 0:
         n_dummy += 2*n_levels
 
@@ -182,7 +185,6 @@ def read_bytes(str file_name, header):
                         #ret = fread(&AliasMsk[sample, alt_ind], 1, 1, ptr)
                         fseek(ptr, 1, SEEK_CUR)
                         ret = fread(&MinVel[sample, alt_ind], 4, 1, ptr)
-
 
     fclose(ptr)
 

@@ -1,13 +1,14 @@
 import reader
-import rpg_header
 import time
 
-file_name = 'data/191108_030000_P10_ZEN.LV0'
-#file_name = 'data/joyrad94_20191108120000_P01_ZEN.lv0'
+files = ['191108_030000_P10_ZEN.LV0',
+         'joyrad94_20191108120000_P01_ZEN.lv0',
+         'joyrad94_20191108000001_P01_ZEN.lv0']
+         
 
-start = time.time()
-header, _ = rpg_header.read_rpg_header(file_name)
-res = reader.read_bytes(file_name, header)
-end = time.time()
-print(end-start)
+for file in files:
+    start = time.time()
+    res = reader.read_data(f"data/{file}")
+    end = time.time()
+    print(end-start)
 
