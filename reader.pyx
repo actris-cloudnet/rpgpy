@@ -28,7 +28,7 @@ def read_bytes(str file_name, header):
         short int min_ind[MAX_N_SPECTRAL_BLOCKS]
         short int max_ind[MAX_N_SPECTRAL_BLOCKS]
 
-    level, version = utils.rpg_header.get_rpg_file_type(header)
+    level, version = utils.get_rpg_file_type(header)
 
     ptr = fopen(fname, "rb")
 

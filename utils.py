@@ -1,3 +1,5 @@
+import numpy.ma as ma
+
 def get_rpg_file_type(header):
     """Find level and version of RPG cloud radar binary file.
 
