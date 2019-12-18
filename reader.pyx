@@ -8,7 +8,7 @@ import utils
 
 DEF MAX_N_SPECTRAL_BLOCKS = 100
 
-def read_data(str file_name):
+def read_rpg_l0(str file_name):
 
     header, _ = rpg_header.read_rpg_header(file_name)
     
@@ -126,6 +126,7 @@ def read_data(str file_name):
                         ret = fread(&ImVHSpec[sample, alt_ind, 0], 4, n_points, ptr)
 
                 else:
+                    
                     ret = fread(&n_blocks, 1, 1, ptr)
                     ret = fread(&min_ind[0], 2, n_blocks, ptr)
                     ret = fread(&max_ind[0], 2, n_blocks, ptr)
@@ -150,7 +151,7 @@ def read_data(str file_name):
                                 ret = fread(&SLDR[sample, alt_ind, min_ind[m]], 4, n_points, ptr)
                                 ret = fread(&SCorrCoeff[sample, alt_ind, min_ind[m]], 4, n_points, ptr)
 
-                    if polarization == 2 and compression == 2:
+                    if compression == 2 and polarization == 2:
                         ret = fread(&KDP[sample, alt_ind], 4, 1, ptr)
                         ret = fread(&DiffAtt[sample, alt_ind], 4, 1, ptr)
 
@@ -167,19 +168,12 @@ def read_data(str file_name):
     free(is_data)
     free(n_samples_at_each_height)
 
-    keys = ['TotSpec', 'HSpec', 'ReVHSpec', 'ImVHSpec', 'RefRat',
-            'CorrCoeff', 'DiffPh', 'SLDR', 'SCorrCoeff', 'KDP',
-            'DiffAtt', 'TotNoisePow', 'HNoisePow', 'MinVel', 'AliasMsk',
-            'SampBytes', 'Time', 'MSec', 'QF', 'RR', 'RelHum',
-            'EnvTemp', 'BaroP', 'WS', 'WD', 'DDVolt', 'DDTb',
-            'LWP', 'PowIF', 'Elev', 'Azi', 'Status', 'TransPow',
-            'TransT', 'RecT', 'PCT']
-    
-    var_names = locals()
+    # If big-endian machine: need to swap bytes....
 
-    # If big-endian machine: need to swap bytes.
+    var_names = locals()
+    keys = _get_valid_keys(header)
     
-    return {key: np.asarray(var_names[key]) for key in keys if key in var_names}
+    return {key: np.asarray(var_names[key]) for key in keys}
 
 
 def _get_n_samples(header):
@@ -188,3 +182,32 @@ def _get_n_samples(header):
     sub_arrays = np.split(array, header['chirp_start_indices'][1:])
     sub_arrays *= header['n_spectral_samples']
     return np.concatenate(sub_arrays)
+
+
+def _get_valid_keys(header):
+    """Controls which variables our provided as output."""
+    
+    keys = ['TotSpec', 'SampBytes', 'Time', 'MSec', 'QF', 'RR',
+            'RelHum', 'EnvTemp', 'BaroP', 'WS', 'WD', 'DDVolt',
+            'DDTb', 'LWP', 'PowIF', 'Elev', 'Azi', 'Status',
+            'TransPow', 'TransT', 'RecT', 'PCT']
+
+    if header['compression'] > 0:
+        keys += ['TotNoisePow']
+
+    if header['compression'] == 2:
+        keys += ['RefRat', 'CorrCoeff', 'DiffPh']
+        
+    if header['dual_polarization'] > 0:
+        keys += ['HSpec', 'ReVHSpec', 'ImVHSpec']
+
+    if header['compression'] > 0 and header['dual_polarization'] > 0:
+        keys += ['HNoisePow']
+        
+    if header['compression'] == 2 and header['dual_polarization'] == 2:
+        keys += ['SLDR', 'SCorrCoeff', 'KDP', 'DiffAtt']
+
+    if header['anti_alias'] == 1:
+        keys += ['AliasMsk', 'MinVel']
+        
+    return keys

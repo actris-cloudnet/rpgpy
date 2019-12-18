@@ -8,7 +8,7 @@ files = ['191108_030000_P10_ZEN.LV0',
 
 for file in files:
     start = time.time()
-    res = reader.read_data(f"data/{file}")
+    res = reader.read_rpg_l0(f"data/{file}")
     end = time.time()
     print(end-start)
 
