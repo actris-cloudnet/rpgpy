@@ -1,4 +1,4 @@
-# rpg_cython
+# rpgPy
 Cython reader for RPG cloud radar binary files
 
 $ python3 setup.py build_ext --inplace
