@@ -182,12 +182,17 @@ def read_data(str file_name):
     fclose(ptr)
     free(is_data)
     free(n_samples_at_each_height)
+
+    keys = ['TotSpec', 'HSpec', 'ReVHSpec', 'ImVHSpec', 'RefRat',
+            'CorrCoeff', 'DiffPh', 'SLDR', 'SCorrCoeff', 'KDP',
+            'DiffAtt', 'TotNoisePow', 'HNoisePow', 'MinVel', 'AliasMsk',
+            'SampBytes', 'Time', 'MSec', 'QF', 'RR', 'RelHum',
+            'EnvTemp', 'BaroP', 'WS', 'WD', 'DDVolt', 'DDTb',
+            'LWP', 'PowIF', 'Elev', 'Azi', 'Status', 'TransPow',
+            'TransT', 'RecT', 'PCT']
     
-    return {'TotSpec': np.asarray(TotSpec),
-            'HSpec': np.asarray(HSpec),
-            'ReVHSpec': np.asarray(ReVHSpec),
-            'ImVHSpec': np.asarray(ImVHSpec),
-            }
+    var_names = locals()
+    return {key: np.asarray(var_names[key]) for key in keys}
 
 
 def _get_n_samples(header):
