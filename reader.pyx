@@ -16,7 +16,7 @@ def read_data(str file_name):
     cdef:
         char* fname = filename_byte_string
         FILE *ptr
-        int ret, header_length, n_samples, sample, j, n, m, alt_ind
+        int ret=0, header_length=0, n_samples=0, sample=0, j=0, n=0, m=0, alt_ind=0, n_points=0
         int level, version
         char n_blocks
         int n_spectra = max(header['n_spectral_samples'])
@@ -116,52 +116,39 @@ def read_data(str file_name):
                 fseek(ptr, 4, SEEK_CUR)
 
                 if compression == 0:
-                    for n in range(n_samples_at_each_height[alt_ind]):
-                        ret = fread(&TotSpec[sample, alt_ind, n], 4, 1, ptr)
 
+                    n_points = n_samples_at_each_height[alt_ind]
+                    ret = fread(&TotSpec[sample, alt_ind, 0], 4, n_points, ptr)
+                    
                     if polarization > 0:
-                        for n in range(n_samples_at_each_height[alt_ind]):
-                            ret = fread(&HSpec[sample, alt_ind, n], 4, 1, ptr)
-                        for n in range(n_samples_at_each_height[alt_ind]):
-                            ret = fread(&ReVHSpec[sample, alt_ind, n], 4, 1, ptr)
-                        for n in range(n_samples_at_each_height[alt_ind]):
-                            ret = fread(&ImVHSpec[sample, alt_ind, n], 4, 1, ptr)
+                        ret = fread(&HSpec[sample, alt_ind, 0], 4, n_points, ptr)
+                        ret = fread(&ReVHSpec[sample, alt_ind, 0], 4, n_points, ptr)
+                        ret = fread(&ImVHSpec[sample, alt_ind, 0], 4, n_points, ptr)
 
                 else:
-
                     ret = fread(&n_blocks, 1, 1, ptr)
-
-                    for m in range(n_blocks):
-                        ret = fread(&min_ind[m], 2, 1, ptr)
-                    for m in range(n_blocks):
-                        ret = fread(&max_ind[m], 2, 1, ptr)
-
+                    ret = fread(&min_ind[0], 2, n_blocks, ptr)
+                    ret = fread(&max_ind[0], 2, n_blocks, ptr)
+                    
                     for m in range(n_blocks):
                         
-                        for n in range(min_ind[m], max_ind[m]+1):
-                            ret = fread(&TotSpec[sample, alt_ind, n], 4, 1, ptr)
+                        n_points = max_ind[m]-min_ind[m]+1
+
+                        ret = fread(&TotSpec[sample, alt_ind, min_ind[m]], 4, n_points, ptr)                    
                         
                         if polarization > 0:
-                            for n in range(min_ind[m], max_ind[m]+1):
-                                ret = fread(&HSpec[sample, alt_ind, n], 4, 1, ptr)
-                            for n in range(min_ind[m], max_ind[m]+1):
-                                ret = fread(&ReVHSpec[sample, alt_ind, n], 4, 1, ptr)
-                            for n in range(min_ind[m], max_ind[m]+1):
-                                ret = fread(&ImVHSpec[sample, alt_ind, n], 4, 1, ptr)
+                            ret = fread(&HSpec[sample, alt_ind, min_ind[m]], 4, n_points, ptr)
+                            ret = fread(&ReVHSpec[sample, alt_ind, min_ind[m]], 4, n_points, ptr)
+                            ret = fread(&ImVHSpec[sample, alt_ind, min_ind[m]], 4, n_points, ptr)
 
                         if compression == 2:
-                            for n in range(min_ind[m], max_ind[m]+1):
-                                ret = fread(&RefRat[sample, alt_ind, n], 4, 1, ptr)
-                            for n in range(min_ind[m], max_ind[m]+1):
-                                ret = fread(&CorrCoeff[sample, alt_ind, n], 4, 1, ptr)
-                            for n in range(min_ind[m], max_ind[m]+1):
-                                ret = fread(&DiffPh[sample, alt_ind, n], 4, 1, ptr)
+                            ret = fread(&RefRat[sample, alt_ind, min_ind[m]], 4, n_points, ptr)
+                            ret = fread(&CorrCoeff[sample, alt_ind, min_ind[m]], 4, n_points, ptr)
+                            ret = fread(&DiffPh[sample, alt_ind, min_ind[m]], 4, n_points, ptr)
 
                             if polarization == 2:
-                                for n in range(min_ind[m], max_ind[m]+1):
-                                    ret = fread(&SLDR[sample, alt_ind, n], 4, 1, ptr)
-                                for n in range(min_ind[m], max_ind[m]+1):
-                                    ret = fread(&SCorrCoeff[sample, alt_ind, n], 4, 1, ptr)
+                                ret = fread(&SLDR[sample, alt_ind, min_ind[m]], 4, n_points, ptr)
+                                ret = fread(&SCorrCoeff[sample, alt_ind, min_ind[m]], 4, n_points, ptr)
 
                     if polarization == 2 and compression == 2:
                         ret = fread(&KDP[sample, alt_ind], 4, 1, ptr)
@@ -189,6 +176,9 @@ def read_data(str file_name):
             'TransT', 'RecT', 'PCT']
     
     var_names = locals()
+
+    # If big-endian machine: need to swap bytes.
+    
     return {key: np.asarray(var_names[key]) for key in keys if key in var_names}
 
 
