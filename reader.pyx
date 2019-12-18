@@ -16,10 +16,9 @@ def read_data(str file_name):
     cdef:
         char* fname = filename_byte_string
         FILE *ptr
-        int ret, header_length, n_samples, sample, j, n_bytes, n, m, alt_ind
+        int ret, header_length, n_samples, sample, j, n, m, alt_ind
         int level, version
-        char dummy_char, n_blocks
-        float value
+        char n_blocks
         int n_spectra = max(header['n_spectral_samples'])
         int n_levels = header['_n_range_levels']
         int compression = header['compression']
@@ -33,7 +32,6 @@ def read_data(str file_name):
     level, version = utils.get_rpg_file_type(header)
 
     ptr = fopen(fname, "rb")
-
     fseek(ptr, 4, SEEK_CUR)
     ret = fread(&header_length, 4, 1, ptr)
     fseek(ptr, header_length, SEEK_CUR)
@@ -114,9 +112,8 @@ def read_data(str file_name):
 
         for alt_ind in range(n_levels):
 
-            if is_data[alt_ind] == 1:
-                
-                ret = fread(&n_bytes, 4, 1, ptr)
+            if is_data[alt_ind] == 1:                
+                fseek(ptr, 4, SEEK_CUR)
 
                 if compression == 0:
                     for n in range(n_samples_at_each_height[alt_ind]):
@@ -192,7 +189,7 @@ def read_data(str file_name):
             'TransT', 'RecT', 'PCT']
     
     var_names = locals()
-    return {key: np.asarray(var_names[key]) for key in keys}
+    return {key: np.asarray(var_names[key]) for key in keys if key in var_names}
 
 
 def _get_n_samples(header):
