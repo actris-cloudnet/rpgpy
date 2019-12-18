@@ -16,8 +16,8 @@ def read_rpg_l0(str file_name):
     cdef:
         char* fname = filename_byte_string
         FILE *ptr
-        int ret=0, header_length=0, n_samples=0, sample=0, j=0, n=0, m=0, alt_ind=0, n_points=0
-        int level, version
+        int ret=0, header_length=0, n_samples=0, sample=0, j=0, n=0, m=0,
+        int alt_ind=0, n_points=0, level=0, version=0, ind1=0
         char n_blocks
         int n_spectra = max(header['n_spectral_samples'])
         int n_levels = header['_n_range_levels']
@@ -132,24 +132,25 @@ def read_rpg_l0(str file_name):
                     ret = fread(&max_ind[0], 2, n_blocks, ptr)
                     
                     for m in range(n_blocks):
-                        
-                        n_points = max_ind[m]-min_ind[m]+1
 
-                        ret = fread(&TotSpec[sample, alt_ind, min_ind[m]], 4, n_points, ptr)                    
+                        ind1 = min_ind[m]
+                        n_points = max_ind[m]-ind1+1
+
+                        ret = fread(&TotSpec[sample, alt_ind, ind1], 4, n_points, ptr)
                         
                         if polarization > 0:
-                            ret = fread(&HSpec[sample, alt_ind, min_ind[m]], 4, n_points, ptr)
-                            ret = fread(&ReVHSpec[sample, alt_ind, min_ind[m]], 4, n_points, ptr)
-                            ret = fread(&ImVHSpec[sample, alt_ind, min_ind[m]], 4, n_points, ptr)
+                            ret = fread(&HSpec[sample, alt_ind, ind1], 4, n_points, ptr)
+                            ret = fread(&ReVHSpec[sample, alt_ind, ind1], 4, n_points, ptr)
+                            ret = fread(&ImVHSpec[sample, alt_ind, ind1], 4, n_points, ptr)
 
                         if compression == 2:
-                            ret = fread(&RefRat[sample, alt_ind, min_ind[m]], 4, n_points, ptr)
-                            ret = fread(&CorrCoeff[sample, alt_ind, min_ind[m]], 4, n_points, ptr)
-                            ret = fread(&DiffPh[sample, alt_ind, min_ind[m]], 4, n_points, ptr)
+                            ret = fread(&RefRat[sample, alt_ind, ind1], 4, n_points, ptr)
+                            ret = fread(&CorrCoeff[sample, alt_ind, ind1], 4, n_points, ptr)
+                            ret = fread(&DiffPh[sample, alt_ind, ind1], 4, n_points, ptr)
 
                             if polarization == 2:
-                                ret = fread(&SLDR[sample, alt_ind, min_ind[m]], 4, n_points, ptr)
-                                ret = fread(&SCorrCoeff[sample, alt_ind, min_ind[m]], 4, n_points, ptr)
+                                ret = fread(&SLDR[sample, alt_ind, ind1], 4, n_points, ptr)
+                                ret = fread(&SCorrCoeff[sample, alt_ind, ind1], 4, n_points, ptr)
 
                     if compression == 2 and polarization == 2:
                         ret = fread(&KDP[sample, alt_ind], 4, 1, ptr)
