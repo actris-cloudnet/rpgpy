@@ -1,6 +1,17 @@
 # rpgPy
-Cython reader for RPG cloud radar binary files
 
-$ python3 setup.py build_ext --inplace
+Installation
+------------
 
-$ python3 read_rgp.py
+```
+$ pip3 install cython rpgpy
+```
+
+Usage
+-----
+
+```python
+>>> from rpgpy.rpg_cython import read_rpg
+>>> header, data = read_rpg('rpg_file.LV0')
+```
+
