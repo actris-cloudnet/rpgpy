@@ -12,9 +12,8 @@ DEF MAX_N_SPECTRAL_BLOCKS = 100
 def read_rpg(file_name):
     header, _ = rpg_header.read_rpg_header(file_name)
     level, version = utils.get_rpg_file_type(header)
-    if level == 0:
-        return _read_rpg_l0(file_name, header)
-    return _read_rpg_l1(file_name, header)
+    fun = _read_rpg_l0 if level == 0 else _read_rpg_l1
+    return header, fun(file_name, header)
 
 
 def _read_rpg_l0(file_name, header):
@@ -275,7 +274,7 @@ def _read_rpg_l1(file_name, header):
 
     if polarization > 0:
         n_dummy += n_levels
-            
+
     for sample in range(n_samples):
 
         fread(&SampBytes[sample], 4, 1, ptr)
@@ -328,7 +327,7 @@ def _read_rpg_l1(file_name, header):
 
     var_names = locals()
     keys = _get_valid_l1_keys(header)
-    
+
     return {key: np.asarray(var_names[key]) for key in keys}
 
 

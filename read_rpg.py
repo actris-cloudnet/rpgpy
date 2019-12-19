@@ -1,5 +1,6 @@
 import reader
 import time
+import matplotlib.pyplot as plt
 
 files = ['191108_030000_P10_ZEN.LV0',
          '191108_100002_P10_ZEN.LV0',
@@ -9,7 +10,8 @@ files = ['191108_030000_P10_ZEN.LV0',
 
 for file in files:
     start = time.time()
-    res = reader.read_rpg(f"data/{file}")
+    header, data = reader.read_rpg(f"data/{file}")
     end = time.time()
     print(end-start)
-
+    plt.plot(data['EnvTemp'])
+    plt.show()
