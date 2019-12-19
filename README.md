@@ -1,6 +1,6 @@
 # rpgPy
 
-RpgPy is a Python / Cython implementation for reading RPG cloud radar binary files.
+RpgPy is a Python / Cython software for reading RPG cloud radar binary files.
 
 Installation
 ------------
