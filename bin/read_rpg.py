@@ -2,7 +2,7 @@ import os
 import rpg_cython
 import time
 
-directory = 'data/'
+directory = '../data/'
 
 for file in os.listdir(directory):
     start = time.time()

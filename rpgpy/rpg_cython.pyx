@@ -2,9 +2,7 @@
 from libc.stdio cimport *
 from libc.stdlib cimport malloc, free
 import numpy as np
-import rpg_header
-import numpy as np
-import utils
+from rpgpy import utils, rpg_header
 
 DEF MAX_N_SPECTRAL_BLOCKS = 100
 

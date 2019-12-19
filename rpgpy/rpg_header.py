@@ -1,7 +1,7 @@
 """Module for reading RPG 94 GHz radar header."""
 import numpy as np
 import numpy.ma as ma
-import utils
+from rpgpy import utils
 
 
 def read_rpg_header(file_name):
