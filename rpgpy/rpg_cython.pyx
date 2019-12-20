@@ -7,14 +7,26 @@ from rpgpy import utils, rpg_header
 DEF MAX_N_SPECTRAL_BLOCKS = 100
 
 
-def read_rpg(file_name):
+def read_rpg(file_name, rpg_names=True):
+    """ Reads RPG Level 1 / Level 0 binary file.
+
+    Args:
+        file_name (str): File name.
+        rpg_names (bool, optional): If True, uses RPG naming scheme 
+            for the returned data dict. Otherwise uses custom names. 
+            Default is True.
+
+    Returns:
+        tuple: 2-element tuple containing header (dict) and data (dict).
+
+    """
     header, _ = rpg_header.read_rpg_header(file_name)
     level, version = utils.get_rpg_file_type(header)
     fun = _read_rpg_l0 if level == 0 else _read_rpg_l1
-    return header, fun(file_name, header)
+    return header, fun(file_name, header, rpg_names)
 
 
-def _read_rpg_l0(file_name, header):
+def _read_rpg_l0(file_name, header, rpg_names):
     """Reads RPG LV0 binary file."""
     
     filename_byte_string = file_name.encode("UTF-8")
@@ -175,8 +187,10 @@ def _read_rpg_l0(file_name, header):
 
     var_names = locals()
     keys = _get_valid_l0_keys(header)
-    
-    return {key: np.asarray(var_names[key]) for key in keys}
+
+    if rpg_names:
+        return {key: np.asarray(var_names[key]) for key in keys}
+    return {OUTPUT_KEYS[key]: np.asarray(var_names[key]) for key in keys}
 
 
 def _get_n_samples(header):
@@ -216,7 +230,7 @@ def _get_valid_l0_keys(header):
     return keys
 
 
-def _read_rpg_l1(file_name, header):
+def _read_rpg_l1(file_name, header, rpg_names):
     """Reads RPG LV1 binary file."""
     
     filename_byte_string = file_name.encode("UTF-8")
@@ -262,10 +276,10 @@ def _read_rpg_l1(file_name, header):
         float [:, :] Skewn = np.zeros((n_samples, n_levels), np.float32)
         float [:, :] Kurt = np.zeros((n_samples, n_levels), np.float32)
         float [:, :] RefRat = np.zeros((n_samples, n_levels), np.float32)
-        float [:, :] CorrC = np.zeros((n_samples, n_levels), np.float32)
+        float [:, :] CorrCoeff = np.zeros((n_samples, n_levels), np.float32)
         float [:, :] DiffPh = np.zeros((n_samples, n_levels), np.float32)
         float [:, :] SLDR = np.zeros((n_samples, n_levels), np.float32)
-        float [:, :] SCorrC = np.zeros((n_samples, n_levels), np.float32)
+        float [:, :] SCorrCoeff = np.zeros((n_samples, n_levels), np.float32)
         float [:, :] KDP = np.zeros((n_samples, n_levels), np.float32)
         float [:, :] DiffAtt = np.zeros((n_samples, n_levels), np.float32)
         int n_dummy = 3 + header['_n_temperature_levels'] + 2*header['_n_humidity_levels'] + n_levels
@@ -310,13 +324,13 @@ def _read_rpg_l1(file_name, header):
 
                 if polarization > 0:
                     fread(&RefRat[sample, alt_ind], 4, 1, ptr)
-                    fread(&CorrC[sample, alt_ind], 4, 1, ptr)
+                    fread(&CorrCoeff[sample, alt_ind], 4, 1, ptr)
                     fread(&DiffPh[sample, alt_ind], 4, 1, ptr)
 
                 if polarization == 2:
                     fseek(ptr, 1, SEEK_CUR)
                     fread(&SLDR[sample, alt_ind], 4, 1, ptr)
-                    fread(&SCorrC[sample, alt_ind], 4, 1, ptr)
+                    fread(&SCorrCoeff[sample, alt_ind], 4, 1, ptr)
                     fread(&KDP[sample, alt_ind], 4, 1, ptr)
                     fread(&DiffAtt[sample, alt_ind], 4, 1, ptr)
 
@@ -326,7 +340,9 @@ def _read_rpg_l1(file_name, header):
     var_names = locals()
     keys = _get_valid_l1_keys(header)
 
-    return {key: np.asarray(var_names[key]) for key in keys}
+    if rpg_names:
+        return {key: np.asarray(var_names[key]) for key in keys}
+    return {OUTPUT_KEYS[key]: np.asarray(var_names[key]) for key in keys}
 
 
 def _get_valid_l1_keys(header):
@@ -339,10 +355,10 @@ def _get_valid_l1_keys(header):
             'SpecWidth', 'Skewn', 'Kurt']
 
     if header['dual_polarization']:
-        keys += ['RefRat', 'CorrC', 'DiffPh']
+        keys += ['RefRat', 'CorrCoeff', 'DiffPh']
 
     if header['dual_polarization'] == 2:
-        keys += ['SLDR', 'SCorrC', 'KDP', 'DiffAtt']
+        keys += ['SLDR', 'SCorrCoeff', 'KDP', 'DiffAtt']
 
     return keys
 
@@ -372,9 +388,9 @@ OUTPUT_KEYS = {
     'ReVHSpec': 'covariance_spectrum_re',
     'ImVHSpec': 'covariance_spectrum_im',
     'RefRat': 'differential_reflectivity',
-    'CorrCoeff': 'correlation_coefficient',
     'DiffPh': 'differential_phase',
     'SLDR': 'ldr_slanted',
+    'CorrCoeff': 'correlation_coefficient',
     'SCorrCoeff': 'correlation_coefficient_slanted',
     'KDP': 'differential_phase_shift',
     'DiffAtt': 'differential_attenuation',
@@ -382,4 +398,10 @@ OUTPUT_KEYS = {
     'HNoisePow': 'integrated_noise_h',
     'AliasMsk': 'anti_alias_correction',
     'MinVel': 'minimum_velocity',
-    }
+    'PowIF': 'IF_power',
+    'Ze': 'reflectivity',
+    'MeanVel': 'velocity',
+    'SpecWidth': 'width',
+    'Skewn': 'skewness',
+    'Kurt': 'kurtosis',
+}
