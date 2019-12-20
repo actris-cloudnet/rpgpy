@@ -1,6 +1,6 @@
 # rpgPy
 
-RpgPy is a Python / Cython software for reading RPG cloud radar binary files.
+RpgPy is a Python / Cython software for reading [RPG cloud radar](https://www.radiometer-physics.de/products/microwave-remote-sensing-instruments/94-ghz-fmcw-doppler-cloud-radar/) binary files.
 
 Installation
 ------------
