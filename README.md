@@ -19,7 +19,7 @@ Usage
 >>> header, data = read_rpg('rpg_file.LV0')
 ```
 
-By default, the data dictionary keys are taken from the RPG manual. Optionally, custom keys can be chosen:
+By default, the data dictionary keys are taken from the RPG manual. Optionally, taylored variable names can be chosen:
 
 ```python
 >>> header, data = read_rpg('rpg_file.LV0', rpg_names=False)
