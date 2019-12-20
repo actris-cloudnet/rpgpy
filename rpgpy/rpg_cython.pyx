@@ -190,10 +190,10 @@ def _get_n_samples(header):
 def _get_valid_l0_keys(header):
     """Controls which variables our provided as output."""
     
-    keys = ['TotSpec', 'SampBytes', 'Time', 'MSec', 'QF', 'RR',
-            'RelHum', 'EnvTemp', 'BaroP', 'WS', 'WD', 'DDVolt',
-            'DDTb', 'LWP', 'PowIF', 'Elev', 'Azi', 'Status',
-            'TransPow', 'TransT', 'RecT', 'PCT']
+    keys = ['Time', 'MSec', 'QF', 'RR', 'RelHum', 'EnvTemp',
+            'BaroP', 'WS', 'WD', 'DDVolt', 'DDTb', 'LWP',
+            'PowIF', 'Elev', 'Azi', 'Status', 'TransPow',
+            'TransT', 'RecT', 'PCT', 'TotSpec']
 
     if header['compression'] > 0:
         keys += ['TotNoisePow']
@@ -332,10 +332,10 @@ def _read_rpg_l1(file_name, header):
 def _get_valid_l1_keys(header):
     """Controls which variables our provided as output."""
     
-    keys = ['SampBytes', 'Time', 'MSec', 'QF', 'RR',
-            'RelHum', 'EnvTemp', 'BaroP', 'WS', 'WD', 'DDVolt',
-            'DDTb', 'LWP', 'PowIF', 'Elev', 'Azi', 'Status',
-            'TransPow', 'TransT', 'RecT', 'PCT']
+    keys = ['Time', 'MSec', 'QF', 'RR', 'RelHum', 'EnvTemp',
+            'BaroP', 'WS', 'WD', 'DDVolt', 'DDTb', 'LWP',
+            'PowIF', 'Elev', 'Azi', 'Status', 'TransPow',
+            'TransT', 'RecT', 'PCT']
 
     if header['dual_polarization']:
         keys += ['RefRat', 'CorrC', 'DiffPh']
