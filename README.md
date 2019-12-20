@@ -6,7 +6,7 @@ Installation
 ------------
 
 ``` 
-$ pip3 install cython && pip3 install rpgpy
+$ pip3 install rpgpy
 ```
 
 Usage
