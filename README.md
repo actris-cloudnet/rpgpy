@@ -8,8 +8,8 @@ Installation
 ``` 
 $ pip3 install rpgpy
 ```
-NOTE: Old pip versions are not able to automatically install Cython which is a build-dependency for rpgPy. 
-In this case, first install Cython manually with `$ pip3 install cython`. You also need to have a C-compiler installed because the Cython code is compiled locally during the installation.
+NOTE: old pip versions are not able to automatically install Cython which is a build-dependency for rpgPy. 
+In this case, first install it manually with `$ pip3 install cython`. You also need to have a C-compiler installed because the Cython code is compiled locally during the installation.
 
 Usage
 -----
