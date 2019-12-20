@@ -335,7 +335,8 @@ def _get_valid_l1_keys(header):
     keys = ['Time', 'MSec', 'QF', 'RR', 'RelHum', 'EnvTemp',
             'BaroP', 'WS', 'WD', 'DDVolt', 'DDTb', 'LWP',
             'PowIF', 'Elev', 'Azi', 'Status', 'TransPow',
-            'TransT', 'RecT', 'PCT']
+            'TransT', 'RecT', 'PCT', 'Ze', 'MeanVel',
+            'SpecWidth', 'Skewn', 'Kurt']
 
     if header['dual_polarization']:
         keys += ['RefRat', 'CorrC', 'DiffPh']
@@ -344,3 +345,41 @@ def _get_valid_l1_keys(header):
         keys += ['SLDR', 'SCorrC', 'KDP', 'DiffAtt']
 
     return keys
+
+
+OUTPUT_KEYS = {
+    'Time': 'time',
+    'MSec': 'time_ms',
+    'QF': 'quality_flag',
+    'RR': 'rain_rate',
+    'RelHum': 'relative_humidity',
+    'EnvTemp': 'temperature',
+    'BaroP': 'pressure',
+    'WS': 'wind_speed',
+    'WD': 'wind_direction',
+    'DDVolt': 'voltage',
+    'DDTb': 'brightness_temperature',
+    'TransPow': 'transmitted_power',
+    'TransT': 'transmitter_temperature',
+    'RecT': 'receiver_temperature',
+    'PCT': 'pc_temperature',
+    'LWP': 'lwp',
+    'Elev': 'elevation',
+    'Azi': 'azimuth',
+    'Status': 'status_flag',
+    'TotSpec': 'doppler_spectrum',
+    'HSpec': 'doppler_spectrum_h',
+    'ReVHSpec': 'covariance_spectrum_re',
+    'ImVHSpec': 'covariance_spectrum_im',
+    'RefRat': 'differential_reflectivity',
+    'CorrCoeff': 'correlation_coefficient',
+    'DiffPh': 'differential_phase',
+    'SLDR': 'ldr_slanted',
+    'SCorrCoeff': 'correlation_coefficient_slanted',
+    'KDP': 'differential_phase_shift',
+    'DiffAtt': 'differential_attenuation',
+    'TotNoisePow': 'integrated_noise',
+    'HNoisePow': 'integrated_noise_h',
+    'AliasMsk': 'anti_alias_correction',
+    'MinVel': 'minimum_velocity',
+    }
