@@ -27,3 +27,8 @@ By default, the *data* dictionary key names are taken from the RPG manual. Optio
 >>> header, data = read_rpg('rpg_file.LV0', rpg_names=False)
 ```
 
+Performance
+-----------
+
+RpgPy is roughly 20-30 times faster than the corresponding native Pyhon or Matlab implementations depending on the radar settings etc.
+
