@@ -8,8 +8,10 @@ Installation
 ``` 
 $ pip3 install rpgpy
 ```
-NOTE: old `pip` versions do not automatically install Cython which is a build-dependency for rpgPy. 
-In this case, first upgrade `pip` with `$ pip3 install --upgrade pip` or install Cython manually with `$ pip3 install cython`. You also need to have a C-compiler installed because the Cython code is compiled locally during the rpgPy installation.
+Old `pip` versions do not automatically install Cython which is a build-dependency for rpgPy. 
+In this case, first upgrade `pip` with `$ pip3 install --upgrade pip` or install Cython manually with `$ pip3 install cython`.
+
+You also need to have a C-compiler installed because the Cython code is compiled locally during the rpgPy installation. If you get an error about missing `Python.h`, you need to install the missing header files with `$ sudo apt install python3-dev`.
 
 Usage
 -----
