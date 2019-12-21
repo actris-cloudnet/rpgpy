@@ -30,5 +30,5 @@ By default, the *data* dictionary key names are taken from the RPG manual. Optio
 Performance
 -----------
 
-RpgPy is roughly 20-30 times faster than the corresponding native Python or Matlab implementations depending on the radar settings etc.
+RpgPy is roughly 20-30 times faster than equivalent native Python or Matlab implementations depending on the radar settings etc.
 
