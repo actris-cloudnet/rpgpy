@@ -62,8 +62,7 @@ def _read_rpg_l0(file_name, header, rpg_names):
         float [:, :, :] TotSpec = np.zeros((n_samples, n_levels, n_spectra), np.float32)
         float [:, :, :] HSpec, ReVHSpec, ImVHSpec, RefRat, CorrCoeff, DiffPh, SLDR, SCorrCoeff
         float [:, :] KDP, DiffAtt, TotNoisePow, HNoisePow, MinVel
-        char [:, :] AliasMsk
-        
+        char [:, :] AliasMsk        
         int n_dummy = 3 + header['_n_temperature_levels'] + 2*header['_n_humidity_levels'] + 2*n_levels
 
     (RR, RelHum, EnvTemp, BaroP, WS, WD, DDVolt, DDTb, LWP, PowIF, Elev, Azi, Status,
@@ -263,37 +262,17 @@ def _read_rpg_l1(file_name, header, rpg_names):
         unsigned int [:] Time = np.empty(n_samples, np.uint32)
         int [:] MSec = np.empty(n_samples, np.int32)
         char [:] QF = np.empty(n_samples, np.int8)
-        float [:] RR = np.empty(n_samples, np.float32)
-        float [:] RelHum = np.empty(n_samples, np.float32)
-        float [:] EnvTemp = np.empty(n_samples, np.float32)
-        float [:] BaroP = np.empty(n_samples, np.float32)
-        float [:] WS = np.empty(n_samples, np.float32)
-        float [:] WD = np.empty(n_samples, np.float32)
-        float [:] DDVolt = np.empty(n_samples, np.float32)
-        float [:] DDTb = np.empty(n_samples, np.float32)
-        float [:] LWP = np.empty(n_samples, np.float32)
-        float [:] PowIF = np.empty(n_samples, np.float32)
-        float [:] Elev = np.empty(n_samples, np.float32)
-        float [:] Azi = np.empty(n_samples, np.float32)
-        float [:] Status = np.empty(n_samples, np.float32)
-        float [:] TransPow = np.empty(n_samples, np.float32)
-        float [:] TransT = np.empty(n_samples, np.float32)
-        float [:] RecT = np.empty(n_samples, np.float32)
-        float [:] PCT = np.empty(n_samples, np.float32)
-        float [:, :] Ze = np.zeros((n_samples, n_levels), np.float32)
-        float [:, :] MeanVel = np.zeros((n_samples, n_levels), np.float32)
-        float [:, :] SpecWidth = np.zeros((n_samples, n_levels), np.float32)
-        float [:, :] Skewn = np.zeros((n_samples, n_levels), np.float32)
-        float [:, :] Kurt = np.zeros((n_samples, n_levels), np.float32)
-        float [:, :] RefRat = np.zeros((n_samples, n_levels), np.float32)
-        float [:, :] CorrCoeff = np.zeros((n_samples, n_levels), np.float32)
-        float [:, :] DiffPh = np.zeros((n_samples, n_levels), np.float32)
-        float [:, :] SLDR = np.zeros((n_samples, n_levels), np.float32)
-        float [:, :] SCorrCoeff = np.zeros((n_samples, n_levels), np.float32)
-        float [:, :] KDP = np.zeros((n_samples, n_levels), np.float32)
-        float [:, :] DiffAtt = np.zeros((n_samples, n_levels), np.float32)
+        float [:] RR, RelHum, EnvTemp, BaroP, WS, WD, DDVolt, DDTb, LWP, PowIF
+        float [:] Elev, Azi, Status, TransPow, TransT, RecT, PCT
+        float [:, :] Ze, MeanVel, SpecWidth, Skewn, Kurt, RefRat, CorrCoeff, DiffPh, SLDR, SCorrCoeff, KDP, DiffAtt
         int n_dummy = 3 + header['_n_temperature_levels'] + 2*header['_n_humidity_levels'] + n_levels
 
+    (RR, RelHum, EnvTemp, BaroP, WS, WD, DDVolt, DDTb, LWP, PowIF, Elev, Azi, Status,
+     TransPow, TransT, RecT, PCT) = [np.empty(n_samples, np.float32) for _ in range(17)]
+        
+    (Ze, MeanVel, SpecWidth, Skewn, Kurt, RefRat, CorrCoeff, DiffPh, SLDR, SCorrCoeff,
+     KDP, DiffAtt) = [np.zeros((n_samples, n_levels), np.float32) for _ in range(12)]
+        
     if polarization > 0:
         n_dummy += n_levels
 
