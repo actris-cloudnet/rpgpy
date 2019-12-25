@@ -2,7 +2,7 @@
 from libc.stdio cimport *
 from libc.stdlib cimport malloc, free
 import numpy as np
-from rpgpy import utils, rpg_header
+from rpgpy import utils, header
 
 DEF MAX_N_SPECTRAL_BLOCKS = 100
 
@@ -20,10 +20,10 @@ def read_rpg(file_name, rpg_names=True):
         tuple: 2-element tuple containing header (dict) and data (dict).
 
     """
-    header, _ = rpg_header.read_rpg_header(file_name)
-    level, version = utils.get_rpg_file_type(header)
+    file_header, _ = header.read_rpg_header(file_name)
+    level, version = utils.get_rpg_file_type(file_header)
     fun = _read_rpg_l0 if level == 0 else _read_rpg_l1
-    return header, fun(file_name, header, rpg_names)
+    return file_header, fun(file_name, file_header, rpg_names)
 
 
 def _read_rpg_l0(file_name, header, rpg_names):

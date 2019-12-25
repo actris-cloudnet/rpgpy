@@ -2,8 +2,8 @@ from setuptools import setup, find_packages, Extension
 from Cython.Build import cythonize
 
 extensions = [Extension(
-    name="rpgpy.rpg_cython",
-    sources=["rpgpy/rpg_cython.pyx"],
+    name="rpgpy.data",
+    sources=["rpgpy/data.pyx"],
     ),
 ]
 
@@ -11,13 +11,9 @@ version = {}
 with open("rpgpy/version.py") as f:
     exec(f.read(), version)
 
-#with open('README.md') as f:
-#    readme = f.read()
 
 setup(name='rpgPy',
       description='Cython code for reading binary files from RPG cloud radar.',
-      #long_description=readme,
-      #long_description_content_type='text/markdown',
       author='Simo Tukiainen',
       author_email='simo.tukiainen@fmi.fi',
       version=version['__version__'],
@@ -34,6 +30,6 @@ setup(name='rpgPy',
           "Intended Audience :: Science/Research",
           "Topic :: Scientific/Engineering",
       ],
-      ext_modules = cythonize(extensions),
+      ext_modules = cythonize(extensions, language_level=3),
 
 )
