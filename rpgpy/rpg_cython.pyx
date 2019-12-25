@@ -57,23 +57,8 @@ def _read_rpg_l0(file_name, header, rpg_names):
         unsigned int [:] Time = np.empty(n_samples, np.uint32)
         int [:] MSec = np.empty(n_samples, np.int32)
         char [:] QF = np.empty(n_samples, np.int8)
-        float [:] RR = np.empty(n_samples, np.float32)
-        float [:] RelHum = np.empty(n_samples, np.float32)
-        float [:] EnvTemp = np.empty(n_samples, np.float32)
-        float [:] BaroP = np.empty(n_samples, np.float32)
-        float [:] WS = np.empty(n_samples, np.float32)
-        float [:] WD = np.empty(n_samples, np.float32)
-        float [:] DDVolt = np.empty(n_samples, np.float32)
-        float [:] DDTb = np.empty(n_samples, np.float32)
-        float [:] LWP = np.empty(n_samples, np.float32)
-        float [:] PowIF = np.empty(n_samples, np.float32)
-        float [:] Elev = np.empty(n_samples, np.float32)
-        float [:] Azi = np.empty(n_samples, np.float32)
-        float [:] Status = np.empty(n_samples, np.float32)
-        float [:] TransPow = np.empty(n_samples, np.float32)
-        float [:] TransT = np.empty(n_samples, np.float32)
-        float [:] RecT = np.empty(n_samples, np.float32)
-        float [:] PCT = np.empty(n_samples, np.float32) 
+        float [:] RR, RelHum, EnvTemp, BaroP, WS, WD, DDVolt, DDTb, LWP, PowIF,
+        float [:] Elev, Azi, Status, TransPow, TransT, RecT, PCT
         float [:, :, :] TotSpec = np.zeros((n_samples, n_levels, n_spectra), np.float32)
         float [:, :, :] HSpec, ReVHSpec, ImVHSpec, RefRat, CorrCoeff, DiffPh, SLDR, SCorrCoeff
         float [:, :] KDP, DiffAtt, TotNoisePow, HNoisePow, MinVel
@@ -81,6 +66,9 @@ def _read_rpg_l0(file_name, header, rpg_names):
         
         int n_dummy = 3 + header['_n_temperature_levels'] + 2*header['_n_humidity_levels'] + 2*n_levels
 
+    (RR, RelHum, EnvTemp, BaroP, WS, WD, DDVolt, DDTb, LWP, PowIF, Elev, Azi, Status,
+     TransPow, TransT, RecT, PCT) = [np.empty(n_samples, np.float32) for _ in range(17)]
+        
     if polarization > 0:
         HSpec, ReVHSpec, ImVHSpec = [np.zeros((n_samples, n_levels, n_spectra), np.float32) for _ in range(3)]
     else:
@@ -116,7 +104,7 @@ def _read_rpg_l0(file_name, header, rpg_names):
     if compression == 0:
         for i, n in enumerate(_get_n_samples(header)):
             n_samples_at_each_height[i] = n
-            
+
     if polarization > 0:
         n_dummy += 2*n_levels
         
@@ -184,9 +172,9 @@ def _read_rpg_l0(file_name, header, rpg_names):
                             fread(&CorrCoeff[sample, alt_ind, ind1], 4, n_points, ptr)
                             fread(&DiffPh[sample, alt_ind, ind1], 4, n_points, ptr)
 
-                            if polarization == 2:
-                                fread(&SLDR[sample, alt_ind, ind1], 4, n_points, ptr)
-                                fread(&SCorrCoeff[sample, alt_ind, ind1], 4, n_points, ptr)
+                        if compression == 2  and polarization == 2:
+                            fread(&SLDR[sample, alt_ind, ind1], 4, n_points, ptr)
+                            fread(&SCorrCoeff[sample, alt_ind, ind1], 4, n_points, ptr)
 
                     if compression == 2 and polarization == 2:
                         fread(&KDP[sample, alt_ind], 4, 1, ptr)
