@@ -73,31 +73,59 @@ def _read_rpg_l0(file_name, header, rpg_names):
         float [:] TransPow = np.empty(n_samples, np.float32)
         float [:] TransT = np.empty(n_samples, np.float32)
         float [:] RecT = np.empty(n_samples, np.float32)
-        float [:] PCT = np.empty(n_samples, np.float32)
+        float [:] PCT = np.empty(n_samples, np.float32) 
         float [:, :, :] TotSpec = np.zeros((n_samples, n_levels, n_spectra), np.float32)
-        float [:, :, :] HSpec = np.zeros((n_samples, n_levels, n_spectra), np.float32)
-        float [:, :, :] ReVHSpec = np.zeros((n_samples, n_levels, n_spectra), np.float32)
-        float [:, :, :] ImVHSpec = np.zeros((n_samples, n_levels, n_spectra), np.float32)
-        float [:, :, :] RefRat = np.zeros((n_samples, n_levels, n_spectra), np.float32)
-        float [:, :, :] CorrCoeff = np.zeros((n_samples, n_levels, n_spectra), np.float32)
-        float [:, :, :] DiffPh = np.zeros((n_samples, n_levels, n_spectra), np.float32)
-        float [:, :, :] SLDR = np.zeros((n_samples, n_levels, n_spectra), np.float32)
-        float [:, :, :] SCorrCoeff = np.zeros((n_samples, n_levels, n_spectra), np.float32)
-        float [:, :] KDP = np.zeros((n_samples, n_levels), np.float32)
-        float [:, :] DiffAtt = np.zeros((n_samples, n_levels), np.float32)
-        float [:, :] TotNoisePow = np.zeros((n_samples, n_levels), np.float32)
-        float [:, :] HNoisePow = np.zeros((n_samples, n_levels), np.float32)
-        float [:, :] MinVel = np.zeros((n_samples, n_levels), np.float32)
-        char [:, :] AliasMsk = np.zeros((n_samples, n_levels), np.int8)
+        float [:, :, :] HSpec, ReVHSpec, ImVHSpec, RefRat, CorrCoeff, DiffPh, SLDR, SCorrCoeff
+        float [:, :] KDP, DiffAtt, TotNoisePow, HNoisePow, MinVel
+        char [:, :] AliasMsk
+        
         int n_dummy = 3 + header['_n_temperature_levels'] + 2*header['_n_humidity_levels'] + 2*n_levels
 
     if polarization > 0:
-        n_dummy += 2*n_levels
+        HSpec = np.zeros((n_samples, n_levels, n_spectra), np.float32)
+        ReVHSpec = np.zeros((n_samples, n_levels, n_spectra), np.float32)
+        ImVHSpec = np.zeros((n_samples, n_levels, n_spectra), np.float32)
+    else:
+        HSpec, ReVHSpec, ImVHSpec = [None]*3
 
+    if compression == 2 and polarization == 2:
+        SLDR = np.zeros((n_samples, n_levels, n_spectra), np.float32)
+        SCorrCoeff = np.zeros((n_samples, n_levels, n_spectra), np.float32)
+        KDP = np.zeros((n_samples, n_levels), np.float32)
+        DiffAtt = np.zeros((n_samples, n_levels), np.float32)
+    else:
+        SLDR, SCorrCoeff, KDP, DiffAtt = [None]*4
+
+    if compression == 2:
+        RefRat = np.zeros((n_samples, n_levels, n_spectra), np.float32)
+        CorrCoeff = np.zeros((n_samples, n_levels, n_spectra), np.float32)
+        DiffPh = np.zeros((n_samples, n_levels, n_spectra), np.float32)
+    else:
+        RefRat, CorrCoeff, DiffPh = [None]*3
+
+    if anti_alias == 1:
+        MinVel = np.zeros((n_samples, n_levels), np.float32)
+        AliasMsk = np.zeros((n_samples, n_levels), np.int8)
+    else:
+        MinVel, AliasMsk = [None]*2
+
+    if compression > 0:
+        TotNoisePow = np.zeros((n_samples, n_levels), np.float32)
+    else:
+        TotNoisePow = None
+
+    if compression > 0 and polarization > 0:
+        HNoisePow = np.zeros((n_samples, n_levels), np.float32)
+    else:
+        HNoisePow = None
+        
     if compression == 0:
         for i, n in enumerate(_get_n_samples(header)):
             n_samples_at_each_height[i] = n
             
+    if polarization > 0:
+        n_dummy += 2*n_levels
+        
     for sample in range(n_samples):
 
         fread(&SampBytes[sample], 4, 1, ptr)
