@@ -69,16 +69,16 @@ def _read_rpg_l0(file_name, header, rpg_names):
      TransPow, TransT, RecT, PCT) = [np.empty(n_samples, np.float32) for _ in range(17)]
         
     if polarization > 0:
+        n_dummy += 2*n_levels
         HSpec, ReVHSpec, ImVHSpec = [np.zeros((n_samples, n_levels, n_spectra), np.float32) for _ in range(3)]
     else:
         HSpec, ReVHSpec, ImVHSpec = [None]*3
 
-    if compression == 2 and polarization == 2:
-        SLDR, SCorrCoeff = [np.zeros((n_samples, n_levels, n_spectra), np.float32) for _ in range(2)]
-        KDP, DiffAtt = [np.zeros((n_samples, n_levels), np.float32) for _ in range(2)]
+    if compression > 0:
+        TotNoisePow = np.zeros((n_samples, n_levels), np.float32)
     else:
-        SLDR, SCorrCoeff, KDP, DiffAtt = [None]*4
-
+        TotNoisePow = None
+        
     if compression == 2:
         RefRat, CorrCoeff, DiffPh = [np.zeros((n_samples, n_levels, n_spectra), np.float32) for _ in range(3)]
     else:
@@ -90,23 +90,21 @@ def _read_rpg_l0(file_name, header, rpg_names):
     else:
         MinVel, AliasMsk = [None]*2
 
-    if compression > 0:
-        TotNoisePow = np.zeros((n_samples, n_levels), np.float32)
-    else:
-        TotNoisePow = None
-
     if compression > 0 and polarization > 0:
         HNoisePow = np.zeros((n_samples, n_levels), np.float32)
     else:
         HNoisePow = None
-        
+
+    if compression == 2 and polarization == 2:
+        SLDR, SCorrCoeff = [np.zeros((n_samples, n_levels, n_spectra), np.float32) for _ in range(2)]
+        KDP, DiffAtt = [np.zeros((n_samples, n_levels), np.float32) for _ in range(2)]
+    else:
+        SLDR, SCorrCoeff, KDP, DiffAtt = [None]*4
+    
     if compression == 0:
         for i, n in enumerate(_get_n_samples(header)):
             n_samples_at_each_height[i] = n
 
-    if polarization > 0:
-        n_dummy += 2*n_levels
-        
     for sample in range(n_samples):
 
         fread(&SampBytes[sample], 4, 1, ptr)
