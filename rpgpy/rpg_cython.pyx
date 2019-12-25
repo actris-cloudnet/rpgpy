@@ -82,24 +82,18 @@ def _read_rpg_l0(file_name, header, rpg_names):
         int n_dummy = 3 + header['_n_temperature_levels'] + 2*header['_n_humidity_levels'] + 2*n_levels
 
     if polarization > 0:
-        HSpec = np.zeros((n_samples, n_levels, n_spectra), np.float32)
-        ReVHSpec = np.zeros((n_samples, n_levels, n_spectra), np.float32)
-        ImVHSpec = np.zeros((n_samples, n_levels, n_spectra), np.float32)
+        HSpec, ReVHSpec, ImVHSpec = [np.zeros((n_samples, n_levels, n_spectra), np.float32) for _ in range(3)]
     else:
         HSpec, ReVHSpec, ImVHSpec = [None]*3
 
     if compression == 2 and polarization == 2:
-        SLDR = np.zeros((n_samples, n_levels, n_spectra), np.float32)
-        SCorrCoeff = np.zeros((n_samples, n_levels, n_spectra), np.float32)
-        KDP = np.zeros((n_samples, n_levels), np.float32)
-        DiffAtt = np.zeros((n_samples, n_levels), np.float32)
+        SLDR, SCorrCoeff = [np.zeros((n_samples, n_levels, n_spectra), np.float32) for _ in range(2)]
+        KDP, DiffAtt = [np.zeros((n_samples, n_levels), np.float32) for _ in range(2)]
     else:
         SLDR, SCorrCoeff, KDP, DiffAtt = [None]*4
 
     if compression == 2:
-        RefRat = np.zeros((n_samples, n_levels, n_spectra), np.float32)
-        CorrCoeff = np.zeros((n_samples, n_levels, n_spectra), np.float32)
-        DiffPh = np.zeros((n_samples, n_levels, n_spectra), np.float32)
+        RefRat, CorrCoeff, DiffPh = [np.zeros((n_samples, n_levels, n_spectra), np.float32) for _ in range(3)]
     else:
         RefRat, CorrCoeff, DiffPh = [None]*3
 
