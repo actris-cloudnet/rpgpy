@@ -41,7 +41,7 @@ def _write_initial_data(f, data):
     for key, array in data.items():
         if key in SKIP_ME:
             continue
-        x = f.createVariable(key, _get_dtype(array), _get_dim(array), zlib=True)
+        x = f.createVariable(key, _get_dtype(array), _get_dim(array), zlib=True, complevel=3, shuffle=False)
         x[:] = array
         for name in ('long_name', 'units', 'comment'):
             value = getattr(METADATA[key], name)
