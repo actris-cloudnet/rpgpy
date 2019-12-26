@@ -1,6 +1,5 @@
 """Module for reading RPG 94 GHz radar header."""
 import numpy as np
-import numpy.ma as ma
 from rpgpy import utils
 
 
@@ -28,89 +27,89 @@ def read_rpg_header(file_name):
     header = {}
     file = open(file_name, 'rb')
 
-    read(('file_code', 'i4'),
-         ('header_length', 'i4'))  # bytes
+    read(('FileCode', 'i4'),
+         ('HeaderLen', 'i4'))
 
     level, version = utils.get_rpg_file_type(header)
 
     if version > 2:
-        read(('_start_time', 'uint32'),
-             ('_stop_time', 'uint32'))
+        read(('StartTime', 'uint32'),
+             ('StopTime', 'uint32'))
 
-    read(('program_number', 'i4'),
-         ('model_number', 'i4'))  # 0 = Single pol. 1 = Dual pol.
+    read(('CGProg', 'i4'),
+         ('ModelNo', 'i4'))
 
-    header['_program_name'] = _read_string(file)
-    header['_customer_name'] = _read_string(file)
+    header['ProgName'] = _read_string(file)
+    header['CustName'] = _read_string(file)
 
-    read(('radar_frequency', 'f'),  # GHz
-         ('antenna_separation', 'f'),  # m
-         ('antenna_diameter', 'f'),  # m
-         ('antenna_gain', 'f'),
-         ('half_power_beam_width', 'f'))  # degrees
-
-    if level == 0:
-        read(('radar_constant', 'f'))
-
-    read(('dual_polarization', 'i1'))  # 0=Single, 1=Dual (LDR), 2=Dual (STSR)
+    read(('Freq', 'f'),
+         ('AntSep', 'f'),
+         ('AntDia', 'f'),
+         ('AntG', 'f'),
+         ('HPBW', 'f'))
 
     if level == 0:
-        read(('compression', 'i1'),  # 0=Not compressed, 1=Compressed
-             ('anti_alias', 'i1'))  # 0=Not anti-aliased, 1=Anti-aliased
+        read(('Cr', 'f'))
 
-    read(('sample_duration', 'f'),  # s
-         ('latitude', 'f'),
-         ('longitude', 'f'),
-         ('calibration_interval', 'i4'),
-         ('_n_range_levels', 'i4'),
-         ('_n_temperature_levels', 'i4'),
-         ('_n_humidity_levels', 'i4'),
-         ('_n_chirp_levels', 'i4'))
+    read(('DualPol', 'i1'))
+
+    if level == 0:
+        read(('CompEna', 'i1'),
+             ('AntiAlias', 'i1'))
+
+    read(('SampDur', 'f'),
+         ('GPSLat', 'f'),
+         ('GPSLong', 'f'),
+         ('CalInt', 'i4'),
+         ('RAltN', 'i4'),
+         ('TAltN', 'i4'),
+         ('HAltN', 'i4'),
+         ('SequN', 'i4'))
 
     n_levels, n_temp, n_humidity, n_chirp = _get_number_of_levels(header)
 
-    read(('range', _dim(n_levels)),
-         ('_temperature_levels', _dim(n_temp)),
-         ('_humidity_levels', _dim(n_humidity)))
+    read(('RAlts', _dim(n_levels)),
+         ('TAlts', _dim(n_temp)),
+         ('HAlts', _dim(n_humidity)))
 
     if level == 0:
-        read(('range_factors', _dim(n_levels)))
+        read(('Fr', _dim(n_levels)))
 
-    read(('n_spectral_samples', _dim(n_chirp, 'i4')),
-         ('chirp_start_indices', _dim(n_chirp, 'i4')),
-         ('_n_averaged_chirps', _dim(n_chirp, 'i4')),
-         ('integration_time', _dim(n_chirp)),  # s
-         ('range_resolution', _dim(n_chirp)),  # m
-         ('nyquist_velocity', _dim(n_chirp)))  # m/s
+    read(('SpecN', _dim(n_chirp, 'i4')),
+         ('RngOffs', _dim(n_chirp, 'i4')),
+         ('ChirpReps', _dim(n_chirp, 'i4')),
+         ('SeqIntTime', _dim(n_chirp)),
+         ('dR', _dim(n_chirp)),
+         ('MaxVel', _dim(n_chirp)))
 
     if version > 2:
         if level == 0:
-            read(('channel_bandwidth', _dim(n_chirp)),  # Hz
-                 ('chirp_low_if', _dim(n_chirp, 'i4')),  # Hz
-                 ('chirp_high_if', _dim(n_chirp, 'i4')),  # Hz
-                 ('range_min', _dim(n_chirp, 'i4')),  # m
-                 ('range_max', _dim(n_chirp, 'i4')),  # m
-                 ('chirp_fft_size', _dim(n_chirp, 'i4')),  # Must be power of 2
-                 ('n_invalid_samples', _dim(n_chirp, 'i4')),
-                 ('chirp_center_freq', _dim(n_chirp)),  # MHz
-                 ('chirp_bandwidth', _dim(n_chirp)),  # MHz
-                 ('fft_start_ind', _dim(n_chirp, 'i4')),
-                 ('fft_stop_ind', _dim(n_chirp, 'i4')),
-                 ('chrp_fft_no', _dim(n_chirp, 'i4')),
-                 ('adc_sample_rate', 'i4'),  # Hz
-                 ('max_range', 'i4'))  # m
+            read(('ChanBW', _dim(n_chirp)),
+                 ('ChirpLowIF', _dim(n_chirp, 'i4')),
+                 ('ChirpHighIF', _dim(n_chirp, 'i4')),
+                 ('RangeMin', _dim(n_chirp, 'i4')),
+                 ('RangeMax', _dim(n_chirp, 'i4')),
+                 ('ChirpFFTSize', _dim(n_chirp, 'i4')),
+                 ('ChirpInvSamples', _dim(n_chirp, 'i4')),
+                 ('ChirpCenterFr', _dim(n_chirp)),
+                 ('ChirpBWFr', _dim(n_chirp)),
+                 ('FFTStartInd', _dim(n_chirp, 'i4')),
+                 ('FFTStopInd', _dim(n_chirp, 'i4')),
+                 ('ChirpFFTNo', _dim(n_chirp, 'i4')),
+                 ('SampRate', 'i4'),
+                 ('MaxRange', 'i4'))
 
-        read(('is_power_levelling', 'i1'),  # 0=no, 1=yes
-             ('is_spike_filter', 'i1'),  # 0=no, 1=yes
-             ('is_phase_correction', 'i1'),  # 0=no, 1=yes
-             ('is_relative_power_correction', 'i1'),  # 0=no, 1=yes
-             ('fft_window', 'i1'),  # 0=square, 1=parzen, 2=blackman, 3=welch, 4=slepian2, 5=slepian3
-             ('adc_input_voltage_range', 'i4'),  # mV
-             ('noise_filter_threshold', 'f4'))  # multiple of STD in spectra
+        read(('SupPowLev', 'i1'),
+             ('SpkFilEna', 'i1'),
+             ('PhaseCorr', 'i1'),
+             ('RelPowCorr', 'i1'),
+             ('FFTWindow', 'i1'),
+             ('FFTInputRng', 'i4'),
+             ('NoiseFilt', 'f4'))
 
         if level == 0:
-            read(('reserved_1', _dim(25, 'i4')),
-                 ('reserved_2', _dim(10000, 'uint32')))
+            _ = np.fromfile(file, 'i4', 25)
+            _ = np.fromfile(file, 'uint32', 10000)
 
     file_position = file.tell()
     file.close()
@@ -133,8 +132,8 @@ def _read_string(file_id):
 
 
 def _get_number_of_levels(header):
-    for name in ('range', 'temperature', 'humidity', 'chirp'):
-        yield int(header[f"_n_{name}_levels"])
+    for name in ('RAltN', 'TAltN', 'HAltN', 'SequN'):
+        yield int(header[name])
 
 
 def _dim(length, dtype='f'):

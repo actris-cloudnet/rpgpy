@@ -2,7 +2,9 @@
 from libc.stdio cimport *
 from libc.stdlib cimport malloc, free
 import numpy as np
-from rpgpy import utils, header
+from rpgpy import utils
+from rpgpy import header as head
+from rpgpy.metadata import METADATA
 
 DEF MAX_N_SPECTRAL_BLOCKS = 100
 
@@ -12,21 +14,32 @@ def read_rpg(file_name, rpg_names=True):
 
     Args:
         file_name (str): File name.
-        rpg_names (bool, optional): If True, uses RPG naming scheme 
-            for the returned data dict. Otherwise uses custom names. 
+        rpg_names (bool, optional): If True, uses RPG naming scheme
+            for the returned data dict. Otherwise uses custom names.
             Default is True.
 
     Returns:
         tuple: 2-element tuple containing header (dict) and data (dict).
 
     """
-    file_header, _ = header.read_rpg_header(file_name)
-    level, version = utils.get_rpg_file_type(file_header)
+    header, _ = head.read_rpg_header(file_name)
+    level, version = utils.get_rpg_file_type(header)
     fun = _read_rpg_l0 if level == 0 else _read_rpg_l1
-    return file_header, fun(file_name, file_header, rpg_names)
+    data = fun(file_name, header)
+    if rpg_names == False:
+        data = _change_keys(data)
+        header = _change_keys(header)
+    return header, data
 
 
-def _read_rpg_l0(file_name, header, rpg_names):
+def _change_keys(a_dict):
+    dict_new = {}
+    for key in a_dict.keys():
+        dict_new[METADATA[key].long_name] = a_dict[key]
+    return dict_new
+
+
+def _read_rpg_l0(file_name, header):
     """Reads RPG LV0 binary file."""
     
     filename_byte_string = file_name.encode("UTF-8")
@@ -36,11 +49,11 @@ def _read_rpg_l0(file_name, header, rpg_names):
         int header_length=0, n_samples=0, sample=0, j=0, n=0, m=0
         int alt_ind=0, n_points=0, ind1=0
         char n_blocks
-        int n_spectra = max(header['n_spectral_samples'])
-        int n_levels = header['_n_range_levels']
-        int compression = header['compression']
-        int polarization = header['dual_polarization']
-        int anti_alias = header['anti_alias']
+        int n_spectra = max(header['SpecN'])
+        int n_levels = header['RAltN']
+        int compression = header['CompEna']
+        int polarization = header['DualPol']
+        int anti_alias = header['AntiAlias']
         short int min_ind[MAX_N_SPECTRAL_BLOCKS]
         short int max_ind[MAX_N_SPECTRAL_BLOCKS]
         char *is_data = <char *> malloc(n_levels * sizeof(char))
@@ -63,7 +76,7 @@ def _read_rpg_l0(file_name, header, rpg_names):
         float [:, :, :] HSpec, ReVHSpec, ImVHSpec, RefRat, CorrCoeff, DiffPh, SLDR, SCorrCoeff
         float [:, :] KDP, DiffAtt, TotNoisePow, HNoisePow, MinVel
         char [:, :] AliasMsk        
-        int n_dummy = 3 + header['_n_temperature_levels'] + 2*header['_n_humidity_levels'] + 2*n_levels
+        int n_dummy = 3 + header['TAltN'] + 2*header['HAltN'] + 2*n_levels
 
     (RR, RelHum, EnvTemp, BaroP, WS, WD, DDVolt, DDTb, LWP, PowIF, Elev, Azi, Status,
      TransPow, TransT, RecT, PCT) = [np.empty(n_samples, np.float32) for _ in range(17)]
@@ -195,16 +208,14 @@ def _read_rpg_l0(file_name, header, rpg_names):
     var_names = locals()
     keys = _get_valid_l0_keys(header)
 
-    if rpg_names:
-        return {key: np.asarray(var_names[key]) for key in keys}
-    return {OUTPUT_KEYS[key]: np.asarray(var_names[key]) for key in keys}
+    return {key: np.asarray(var_names[key]) for key in keys}
 
 
 def _get_n_samples(header):
     """Finds number of spectral samples at each height."""
-    array = np.ones(header['_n_range_levels'], dtype=int)
-    sub_arrays = np.split(array, header['chirp_start_indices'][1:])
-    sub_arrays *= header['n_spectral_samples']
+    array = np.ones(header['RAltN'], dtype=int)
+    sub_arrays = np.split(array, header['RngOffs'][1:])
+    sub_arrays *= header['SpecN']
     return np.concatenate(sub_arrays)
 
 
@@ -215,38 +226,38 @@ def _get_valid_l0_keys(header):
             'BaroP', 'WS', 'WD', 'DDVolt', 'DDTb', 'LWP',
             'PowIF', 'Elev', 'Azi', 'Status', 'TransPow',
             'TransT', 'RecT', 'PCT', 'TotSpec']
-
-    if header['compression'] > 0:
+    
+    if header['CompEna'] > 0:
         keys += ['TotNoisePow']
 
-    if header['compression'] == 2:
+    if header['CompEna'] == 2:
         keys += ['RefRat', 'CorrCoeff', 'DiffPh']
-        
-    if header['dual_polarization'] > 0:
+
+    if header['DualPol'] > 0:
         keys += ['HSpec', 'ReVHSpec', 'ImVHSpec']
 
-    if header['compression'] > 0 and header['dual_polarization'] > 0:
+    if header['CompEna'] > 0 and header['DualPol'] > 0:
         keys += ['HNoisePow']
-        
-    if header['compression'] == 2 and header['dual_polarization'] == 2:
+
+    if header['CompEna'] == 2 and header['DualPol'] == 2:
         keys += ['SLDR', 'SCorrCoeff', 'KDP', 'DiffAtt']
 
-    if header['anti_alias'] == 1:
+    if header['AntiAlias'] == 1:
         keys += ['AliasMsk', 'MinVel']
-        
+
     return keys
 
 
-def _read_rpg_l1(file_name, header, rpg_names):
+def _read_rpg_l1(file_name, header):
     """Reads RPG LV1 binary file."""
-    
+
     filename_byte_string = file_name.encode("UTF-8")
     cdef:
         char* fname = filename_byte_string
         FILE *ptr
         int header_length=0, n_samples=0, sample=0, alt_ind=0
-        int n_levels = header['_n_range_levels']
-        int polarization = header['dual_polarization']
+        int n_levels = header['RAltN']
+        int polarization = header['DualPol']
         char *is_data = <char *> malloc(n_levels * sizeof(char))
 
     ptr = fopen(fname, "rb")
@@ -263,7 +274,7 @@ def _read_rpg_l1(file_name, header, rpg_names):
         float [:] RR, RelHum, EnvTemp, BaroP, WS, WD, DDVolt, DDTb, LWP, PowIF
         float [:] Elev, Azi, Status, TransPow, TransT, RecT, PCT
         float [:, :] Ze, MeanVel, SpecWidth, Skewn, Kurt, RefRat, CorrCoeff, DiffPh, SLDR, SCorrCoeff, KDP, DiffAtt
-        int n_dummy = 3 + header['_n_temperature_levels'] + 2*header['_n_humidity_levels'] + n_levels
+        int n_dummy = 3 + header['TAltN'] + 2*header['HAltN'] + n_levels
 
     (RR, RelHum, EnvTemp, BaroP, WS, WD, DDVolt, DDTb, LWP, PowIF, Elev, Azi, Status,
      TransPow, TransT, RecT, PCT) = [np.empty(n_samples, np.float32) for _ in range(17)]
@@ -327,9 +338,7 @@ def _read_rpg_l1(file_name, header, rpg_names):
     var_names = locals()
     keys = _get_valid_l1_keys(header)
 
-    if rpg_names:
-        return {key: np.asarray(var_names[key]) for key in keys}
-    return {OUTPUT_KEYS[key]: np.asarray(var_names[key]) for key in keys}
+    return {key: np.asarray(var_names[key]) for key in keys}
 
 
 def _get_valid_l1_keys(header):
@@ -341,54 +350,10 @@ def _get_valid_l1_keys(header):
             'TransT', 'RecT', 'PCT', 'Ze', 'MeanVel',
             'SpecWidth', 'Skewn', 'Kurt']
 
-    if header['dual_polarization']:
+    if header['DualPol']:
         keys += ['RefRat', 'CorrCoeff', 'DiffPh']
 
-    if header['dual_polarization'] == 2:
+    if header['DualPol'] == 2:
         keys += ['SLDR', 'SCorrCoeff', 'KDP', 'DiffAtt']
 
     return keys
-
-
-OUTPUT_KEYS = {
-    'Time': 'time',
-    'MSec': 'time_ms',
-    'QF': 'quality_flag',
-    'RR': 'rain_rate',
-    'RelHum': 'relative_humidity',
-    'EnvTemp': 'temperature',
-    'BaroP': 'pressure',
-    'WS': 'wind_speed',
-    'WD': 'wind_direction',
-    'DDVolt': 'voltage',
-    'DDTb': 'brightness_temperature',
-    'TransPow': 'transmitted_power',
-    'TransT': 'transmitter_temperature',
-    'RecT': 'receiver_temperature',
-    'PCT': 'pc_temperature',
-    'LWP': 'lwp',
-    'Elev': 'elevation',
-    'Azi': 'azimuth',
-    'Status': 'status_flag',
-    'TotSpec': 'doppler_spectrum',
-    'HSpec': 'doppler_spectrum_h',
-    'ReVHSpec': 'covariance_spectrum_re',
-    'ImVHSpec': 'covariance_spectrum_im',
-    'RefRat': 'differential_reflectivity',
-    'DiffPh': 'differential_phase',
-    'SLDR': 'ldr_slanted',
-    'CorrCoeff': 'correlation_coefficient',
-    'SCorrCoeff': 'correlation_coefficient_slanted',
-    'KDP': 'differential_phase_shift',
-    'DiffAtt': 'differential_attenuation',
-    'TotNoisePow': 'integrated_noise',
-    'HNoisePow': 'integrated_noise_h',
-    'AliasMsk': 'anti_alias_correction',
-    'MinVel': 'minimum_velocity',
-    'PowIF': 'IF_power',
-    'Ze': 'reflectivity',
-    'MeanVel': 'velocity',
-    'SpecWidth': 'width',
-    'Skewn': 'skewness',
-    'Kurt': 'kurtosis',
-}

@@ -13,7 +13,7 @@ def get_rpg_file_type(header):
         RuntimeError: Unknown file type.
 
     """
-    file_code = header['file_code']
+    file_code = header['FileCode']
     if file_code == 789346:
         return 0, 2
     elif file_code == 889346:
