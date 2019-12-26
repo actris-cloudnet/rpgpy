@@ -21,7 +21,7 @@ Usage
 >>> header, data = read_rpg('rpg_file.LV0')
 ```
 
-By default, the *data* dictionary key names are taken from the RPG manual. Optionally, more explicit key names can be chosen:
+By default, the *header* and *data* dictionary key names are taken from the RPG manual. Optionally, more explicit key names can be chosen:
 
 ```python
 >>> header, data = read_rpg('rpg_file.LV0', rpg_names=False)
