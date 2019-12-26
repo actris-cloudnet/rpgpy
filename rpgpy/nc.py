@@ -22,7 +22,6 @@ def _write_initial_data(f, data):
     for key, array in data.items():
         x = f.createVariable(key, _get_dtype(array), _get_dim(array), zlib=True)
         x[:] = array
-        x.long_name = METADATA[key].long_name
         for name in ('long_name', 'units', 'comment'):
             value = getattr(METADATA[key], name)
             if value:
