@@ -26,7 +26,7 @@ def read_rpg(file_name, rpg_names=True):
     level, version = utils.get_rpg_file_type(header)
     fun = _read_rpg_l0 if level == 0 else _read_rpg_l1
     data = fun(file_name, header)
-    if rpg_names == False:
+    if not rpg_names:
         data = _change_keys(data)
         header = _change_keys(header)
     return header, data
