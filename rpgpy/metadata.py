@@ -213,7 +213,7 @@ METADATA = {
         long_name='pc_temperature',
         units='K'),
     'LWP': Meta(
-        long_name='lwp',
+        long_name='liquid_water_path',
         units='g/m2'),
     'Elev': Meta(
         long_name='elevation',
