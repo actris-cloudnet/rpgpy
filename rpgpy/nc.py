@@ -15,7 +15,24 @@ def rpg2nc(path_to_files, output_file, level):
     _create_dimensions(f, header)
     _create_global_attributes(f, header)
     _write_initial_data(f, data)
+
+    for file in files[1:]:
+        header, data = read_rpg(file)
+        _append_data(f, data)
+    
     f.close()
+
+
+def _append_data(f, data):
+    ind0 = len(f.variables['Time'])
+    for key, array in data.items():
+        ind1 = ind0 + array.shape[0]
+        if array.ndim == 1:
+            f.variables[key][ind0:ind1] = array
+        elif array.ndim == 2:
+            f.variables[key][ind0:ind1, :] = array
+        else:
+            f.variables[key][ind0:ind1, :, :] = array
 
 
 def _write_initial_data(f, data):
