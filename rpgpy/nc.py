@@ -1,13 +1,10 @@
 """Module for writing netCDF file."""
 import os
-import datetime
-import numpy as np
-import numpy.ma as ma
 from numpy.testing import assert_array_equal
 import netCDF4
+from tqdm import tqdm
 from rpgpy import read_rpg, utils
 from rpgpy.metadata import METADATA
-from tqdm import tqdm
 
 SKIP_ME = ('HeaderLen', 'StartTime', 'StopTime', 'RAltN', 'TAltN', 'HAltN',
            'SequN', 'RAlts', 'TAlts', 'HAlts', 'MinVel', 'HNoisePow',
@@ -18,14 +15,22 @@ SKIP_ME = ('HeaderLen', 'StartTime', 'StopTime', 'RAltN', 'TAltN', 'HAltN',
 
 
 def rpg2nc(path_to_files, output_file, level):
+    """Converts RPG binary files into a netCDF4 file.
+
+    Args:
+        path_to_files (str): Directory containing one day of RPG binary files.
+        output_file (str): Name of the output file.
+        level (int): Data level to be converterted: 0 or 1.
+
+    """
     files = _get_rpg_files(path_to_files, level)
     f = netCDF4.Dataset(output_file, 'w', format='NETCDF4_CLASSIC')
     print('Preparing file writing...')
     header, data = read_rpg(files[0])
     _create_dimensions(f, header)
-    _create_global_attributes(f, header)
+    _create_global_attributes(f)
     _write_initial_data(f, header)
-    _write_initial_data(f, data)   
+    _write_initial_data(f, data)
     print('Writing compressed netCDF4 file...')
     for file in tqdm(files[1:]):
         header, data = read_rpg(file)
@@ -74,7 +79,7 @@ def _append_data(f, data):
     ind1 = ind0 + data['Time'].shape[0]
     for key, array in data.items():
         if key in SKIP_ME:
-            continue        
+            continue
         if array.ndim == 1:
             f.variables[key][ind0:ind1] = array
         elif array.ndim == 2:
@@ -89,9 +94,9 @@ def _get_dtype(array):
     return 'f4'
 
 
-def _create_global_attributes(f, header):
+def _create_global_attributes(f):
     f.Conventions = 'CF-1.7'
-    
+
 
 def _get_rpg_files(path_to_files, level):
     """Returns list of RPG files for one day sorted by filename."""
