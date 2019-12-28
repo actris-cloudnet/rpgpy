@@ -13,7 +13,7 @@ SKIP_ME = ('HeaderLen', 'StartTime', 'StopTime', 'RAltN', 'TAltN', 'HAltN',
            'TotNoisePow', 'CorrCoeff', 'DiffPh', 'SLDR', 'SCorrCoeff',
            'DiffAtt', 'ReVHSpec', 'ImVHSpec', 'WS', 'WD', 'DDVolt',
            'DDTb', 'PowIF', 'Elev', 'Azi', 'TransPow', 'TransT',
-           'ProgName', 'CustName', 'GPSLong')
+           'ProgName', 'CustName', 'GPSLong', 'GPSLat')
 
 
 def rpg2nc(path_to_files, output_file, level):
