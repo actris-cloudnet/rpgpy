@@ -3,31 +3,46 @@ import os
 import datetime
 import numpy as np
 import numpy.ma as ma
+from numpy.testing import assert_array_equal
 import netCDF4
-from rpgpy import read_rpg
+from rpgpy import read_rpg, utils
 from rpgpy.metadata import METADATA
 from tqdm import tqdm
 
-SKIP_ME = ('AliasMsk', 'MinVel', 'HNoisePow', 'TotNoisePow', 'RefRat',
-           'CorrCoeff', 'DiffPh', 'SLDR', 'SCorrCoeff', 'KDP', 'DiffAtt',
-           'HSpec', 'ReVHSpec', 'ImVHSpec', 'WS', 'WD', 'DDVolt', 'DDTb',
-           'PowIF', 'Elev', 'Azi', 'TransPow', 'TransT')
+SKIP_ME = ('HeaderLen', 'StartTime', 'StopTime', 'RAltN', 'TAltN', 'HAltN',
+           'SequN', 'RAlts', 'TAlts', 'HAlts', 'MinVel', 'HNoisePow',
+           'TotNoisePow', 'CorrCoeff', 'DiffPh', 'SLDR', 'SCorrCoeff',
+           'DiffAtt', 'ReVHSpec', 'ImVHSpec', 'WS', 'WD', 'DDVolt',
+           'DDTb', 'PowIF', 'Elev', 'Azi', 'TransPow', 'TransT',
+           'ProgName', 'CustName', 'GPSLat', 'GPSLong')
 
 
 def rpg2nc(path_to_files, output_file, level):
     files = _get_rpg_files(path_to_files, level)
+    f = netCDF4.Dataset(output_file, 'w', format='NETCDF4_CLASSIC')
     print('Preparing file writing...')
     header, data = read_rpg(files[0])
-    f = netCDF4.Dataset(output_file, 'w', format='NETCDF4_CLASSIC')
     _create_dimensions(f, header)
     _create_global_attributes(f, header)
-    _write_initial_data(f, data)
+    _write_initial_data(f, header)
+    _write_initial_data(f, data)   
     print('Writing compressed netCDF4 file...')
     for file in tqdm(files[1:]):
         header, data = read_rpg(file)
-        _append_data(f, data)    
+        _check_header_consistency(f, header)
+        _append_data(f, data)
     f.close()
     print('..done.')
+
+
+def _check_header_consistency(f, header):
+    for key, array in header.items():
+        if key in f.variables:
+            try:
+                assert_array_equal(array, f.variables[key])
+            except AssertionError:
+                print('Warning: inconsistent header data in ' + key, array,
+                      f.variables[key][:])
 
 
 def _create_dimensions(f, header):
@@ -41,12 +56,17 @@ def _write_initial_data(f, data):
     for key, array in data.items():
         if key in SKIP_ME:
             continue
-        x = f.createVariable(key, _get_dtype(array), _get_dim(array), zlib=True, complevel=3, shuffle=False)
+        x = f.createVariable(key, _get_dtype(array), _get_dim(f, array),
+                             zlib=True, complevel=3, shuffle=False)
         x[:] = array
-        for name in ('long_name', 'units', 'comment'):
-            value = getattr(METADATA[key], name)
-            if value:
-                setattr(x, name, value) 
+        _set_attributes(x, key)
+
+
+def _set_attributes(obj, key):
+    for attr_name in ('long_name', 'units', 'comment'):
+        value = getattr(METADATA[key], attr_name)
+        if value:
+            setattr(obj, attr_name, value)
 
 
 def _append_data(f, data):
@@ -69,14 +89,6 @@ def _get_dtype(array):
     return 'f4'
 
 
-def _get_dim(array):
-    if array.ndim == 1:
-        return ('time')
-    elif array.ndim == 2:
-        return ('time', 'range')
-    return ('time', 'range', 'spectrum')
-
-
 def _create_global_attributes(f, header):
     f.Conventions = 'CF-1.7'
     
@@ -84,6 +96,24 @@ def _create_global_attributes(f, header):
 def _get_rpg_files(path_to_files, level):
     """Returns list of RPG files for one day sorted by filename."""
     files = os.listdir(path_to_files)
-    files = [f"{path_to_files}{file}" for file in files if file.endswith(str(level))]
+    files = [f"{path_to_files}{file}" for file in files
+             if file.endswith(str(level))]
     files.sort()
     return files
+
+
+def _get_dim(f, array):
+    """Finds correct dimensions for a variable."""
+    if utils.isscalar(array):
+        return ()
+    variable_size = ()
+    file_dims = f.dimensions
+    array_dims = array.shape
+    for length in array_dims:
+        try:
+            dim = [key for key in file_dims.keys()
+                   if file_dims[key].size == length][0]
+        except IndexError:
+            dim = 'time'
+        variable_size = variable_size + (dim,)
+    return variable_size

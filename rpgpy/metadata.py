@@ -237,7 +237,7 @@ METADATA = {
         long_name='covariance_spectrum_im',
         comment='imaginary part linear Ze'),
     'RefRat': Meta(
-        long_name='differential_reflectivity',
+        long_name='linear_depolarization_ratio',
         units='dB'),
     'DiffPh': Meta(
         long_name='differential_phase',
