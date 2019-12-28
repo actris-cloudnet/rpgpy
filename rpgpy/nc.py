@@ -13,7 +13,7 @@ SKIP_ME = ('HeaderLen', 'StartTime', 'StopTime', 'RAltN', 'TAltN', 'HAltN',
            'TotNoisePow', 'CorrCoeff', 'DiffPh', 'SLDR', 'SCorrCoeff',
            'DiffAtt', 'ReVHSpec', 'ImVHSpec', 'WS', 'WD', 'DDVolt',
            'DDTb', 'PowIF', 'Elev', 'Azi', 'TransPow', 'TransT',
-           'ProgName', 'CustName', 'GPSLat', 'GPSLong')
+           'ProgName', 'CustName', 'GPSLong')
 
 
 def rpg2nc(path_to_files, output_file, level):
@@ -22,9 +22,11 @@ def rpg2nc(path_to_files, output_file, level):
     Args:
         path_to_files (str): Directory containing one day of RPG binary files.
         output_file (str): Name of the output file.
-        level (int): Data level to be converterted: 0 or 1.
+        level (int): Data level to be converted: 0 or 1.
 
     """
+    if level not in (0, 1):
+        raise ValueError('Data level should be 0 or 1.')
     files = _get_rpg_files(path_to_files, level)
     f = netCDF4.Dataset(output_file, 'w', format='NETCDF4_CLASSIC')
     print('Preparing file writing...')
