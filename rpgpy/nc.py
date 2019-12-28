@@ -6,6 +6,8 @@ from tqdm import tqdm
 from rpgpy import read_rpg, utils
 from rpgpy.metadata import METADATA
 
+
+# Not yet sure how to choose the variables to be written
 SKIP_ME = ('HeaderLen', 'StartTime', 'StopTime', 'RAltN', 'TAltN', 'HAltN',
            'SequN', 'RAlts', 'TAlts', 'HAlts', 'MinVel', 'HNoisePow',
            'TotNoisePow', 'CorrCoeff', 'DiffPh', 'SLDR', 'SCorrCoeff',
@@ -113,8 +115,7 @@ def _get_dim(f, array):
         return ()
     variable_size = ()
     file_dims = f.dimensions
-    array_dims = array.shape
-    for length in array_dims:
+    for length in array.shape:
         try:
             dim = [key for key in file_dims.keys()
                    if file_dims[key].size == length][0]
