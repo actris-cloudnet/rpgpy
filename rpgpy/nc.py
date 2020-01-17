@@ -9,7 +9,8 @@ from rpgpy.metadata import METADATA
 
 
 # Not yet sure how to choose the variables to be written
-SKIP_ME = ('ProgName', 'CustName')
+SKIP_ME = ('ProgName', 'CustName', 'HAlts', 'TAlts',
+           'StartTime', 'StopTime')
 
 
 def rpg2nc(path_to_files, output_file):
@@ -24,13 +25,12 @@ def rpg2nc(path_to_files, output_file):
     """
     files = _get_rpg_files(path_to_files)
     f = netCDF4.Dataset(output_file, 'w', format='NETCDF4_CLASSIC')
-    print('Preparing file writing...')
     header, data = read_rpg(files[0])
+    print('Writing compressed netCDF4 file...')
     _create_dimensions(f, header)
     _create_global_attributes(f)
     _write_initial_data(f, header)
     _write_initial_data(f, data)
-    print('Writing compressed netCDF4 file...')
     if len(files) > 1:
         for file in tqdm(files[1:]):
             header, data = read_rpg(file)
