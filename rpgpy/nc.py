@@ -1,5 +1,6 @@
 """Module for writing netCDF file."""
 import os
+import glob
 from numpy.testing import assert_array_equal
 import netCDF4
 from tqdm import tqdm
@@ -8,26 +9,20 @@ from rpgpy.metadata import METADATA
 
 
 # Not yet sure how to choose the variables to be written
-SKIP_ME = ('HeaderLen', 'StartTime', 'StopTime', 'RAltN', 'TAltN', 'HAltN',
-           'SequN', 'RAlts', 'TAlts', 'HAlts', 'MinVel', 'HNoisePow',
-           'TotNoisePow', 'CorrCoeff', 'DiffPh', 'SLDR', 'SCorrCoeff',
-           'DiffAtt', 'ReVHSpec', 'ImVHSpec', 'WS', 'WD', 'DDVolt',
-           'DDTb', 'PowIF', 'Elev', 'Azi', 'TransPow', 'TransT',
-           'ProgName', 'CustName', 'GPSLong', 'GPSLat')
+SKIP_ME = ('ProgName', 'CustName')
 
 
-def rpg2nc(path_to_files, output_file, level):
+def rpg2nc(path_to_files, output_file):
     """Converts RPG binary files into a netCDF4 file.
 
     Args:
-        path_to_files (str): Directory containing one day of RPG binary files.
+        path_to_files (str): Directory containing RPG binary file(s) and optionally 
+            a wildcard to distinguish between different types of files. 
+            E.g. '/path/to/data/*.LV0'
         output_file (str): Name of the output file.
-        level (int): Data level to be converted: 0 or 1.
 
     """
-    if level not in (0, 1):
-        raise ValueError('Data level should be 0 or 1.')
-    files = _get_rpg_files(path_to_files, level)
+    files = _get_rpg_files(path_to_files)
     f = netCDF4.Dataset(output_file, 'w', format='NETCDF4_CLASSIC')
     print('Preparing file writing...')
     header, data = read_rpg(files[0])
@@ -36,15 +31,17 @@ def rpg2nc(path_to_files, output_file, level):
     _write_initial_data(f, header)
     _write_initial_data(f, data)
     print('Writing compressed netCDF4 file...')
-    for file in tqdm(files[1:]):
-        header, data = read_rpg(file)
-        _check_header_consistency(f, header)
-        _append_data(f, data)
+    if len(files) > 1:
+        for file in tqdm(files[1:]):
+            header, data = read_rpg(file)
+            _check_header_consistency(f, header)
+            _append_data(f, data)
     f.close()
     print('..done.')
 
 
 def _check_header_consistency(f, header):
+    """Checks if header data is identical in all converted files."""
     for key, array in header.items():
         if key in f.variables:
             try:
@@ -102,12 +99,12 @@ def _create_global_attributes(f):
     f.Conventions = 'CF-1.7'
 
 
-def _get_rpg_files(path_to_files, level):
+def _get_rpg_files(path_to_files):
     """Returns list of RPG files for one day sorted by filename."""
-    files = os.listdir(path_to_files)
-    files = [f"{path_to_files}{file}" for file in files
-             if file.endswith(str(level))]
+    files = glob.glob(path_to_files)
     files.sort()
+    if not files:
+        raise RuntimeError('No proper RPG binary files found')
     return files
 
 
