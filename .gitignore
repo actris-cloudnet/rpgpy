@@ -1,0 +1,6 @@
+data/
+venv/
+.idea/
+build/
+*egg*
+rpgpy/data.c
