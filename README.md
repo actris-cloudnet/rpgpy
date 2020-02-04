@@ -22,7 +22,7 @@ $ source venv/bin/activate
 $ pip3 install .
 ```
 
-#Usage
+# Usage
 
 ## Reading RPG binary file
 ```python
