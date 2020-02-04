@@ -1,13 +1,12 @@
 """Module for writing netCDF file."""
 import glob
-import datetime
+import uuid
 import numpy.ma as ma
 from numpy.testing import assert_array_equal
 import netCDF4
 from tqdm import tqdm
-from rpgpy import read_rpg, utils, rpg
+from rpgpy import read_rpg, utils
 from rpgpy.metadata import METADATA
-import uuid
 
 
 # Not yet sure how to choose the variables to be written
@@ -19,8 +18,8 @@ def rpg2nc(path_to_files, output_file, global_attr=None):
     """Converts RPG binary files into a netCDF4 file.
 
     Args:
-        path_to_files (str): Directory containing RPG binary file(s) and optionally 
-            a wildcard to distinguish between different types of files. 
+        path_to_files (str): Directory containing RPG binary file(s) and optionally
+            a wildcard to distinguish between different types of files.
             E.g. '/path/to/data/*.LV0'
         output_file (str): Name of the output file.
         global_attr (dic, optional): Additional global attributes.
@@ -65,10 +64,11 @@ def _write_initial_data(f, data):
     for key, array in data.items():
         if key in SKIP_ME:
             continue
-        x = f.createVariable(METADATA[key].name, _get_dtype(array), _get_dim(f, array),
-                             zlib=True, complevel=3, shuffle=False)
-        x[:] = array
-        _set_attributes(x, key)
+        var = f.createVariable(METADATA[key].name, _get_dtype(array),
+                               _get_dim(f, array), zlib=True, complevel=3,
+                               shuffle=False)
+        var[:] = array
+        _set_attributes(var, key)
 
 
 def _set_attributes(obj, key):
@@ -126,13 +126,9 @@ def _get_dim(f, array):
 
 def _create_global_attributes(f, global_attr):
     f.Conventions = 'CF-1.7'
-    f.year, f.month, f.day = rpg.get_rpg_date(ma.median(f.variables['time'][:]))
+    f.year, f.month, f.day = utils.rpg_seconds2date(ma.median(f.variables['time'][:]))
     f.uuid = uuid.uuid4().hex
-    f.history = f"Radar file created: {_get_current_time()}"
-    if global_attr and type(global_attr) == dict:
+    f.history = f"Radar file created: {utils.get_current_time()}"
+    if global_attr and isinstance(global_attr, dict):
         for key, value in global_attr.items():
             setattr(f, key, value)
-
-
-def _get_current_time():
-    return datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
