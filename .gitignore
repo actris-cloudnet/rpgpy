@@ -4,3 +4,6 @@ venv/
 build/
 *egg*
 rpgpy/data.c
+rpgpy/*cache*
+rpgpy/*.so
+bin/*.nc
