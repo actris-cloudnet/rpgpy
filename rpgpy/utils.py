@@ -1,4 +1,16 @@
 import numpy.ma as ma
+import datetime
+
+
+def get_current_time():
+    return datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+
+
+def rpg_seconds2date(time_stamp):
+    epoch = datetime.datetime(2001, 1, 1).timestamp()
+    time_stamp += epoch
+    return datetime.datetime.utcfromtimestamp(time_stamp).strftime('%Y %m %d').split()
+
 
 def get_rpg_file_type(header):
     """Find level and version of RPG cloud radar binary file.

@@ -1,0 +1,9 @@
+data/
+venv/
+.idea/
+build/
+*egg*
+rpgpy/data.c
+rpgpy/*cache*
+rpgpy/*.so
+bin/*.nc
