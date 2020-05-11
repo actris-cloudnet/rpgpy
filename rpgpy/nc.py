@@ -80,11 +80,12 @@ def _set_attributes(obj, key):
 
 
 def _append_data(f, data):
-    ind0 = len(f.variables['Time'])
+    ind0 = len(f.variables['time'])
     ind1 = ind0 + data['Time'].shape[0]
     for key, array in data.items():
         if key in SKIP_ME:
             continue
+        key = METADATA[key].name
         if array.ndim == 1:
             f.variables[key][ind0:ind1] = array
         elif array.ndim == 2:
