@@ -44,6 +44,11 @@ additional ones via a dictionary:
 >>> attr = {'attr1': 'foo', 'attr2': 42}
 >>> rpg2nc('rpg_file.LV0', 'rpg_file.nc', global_attr=attr)
 ```
+Several RPG files can be concatenated to singe netCDF file using wildcard.
+This can lead to very large netCDF file.
+```python
+>>> rpg2nc('/path/to/files/*.LV0', 'huge_file.nc')
+```
 
 Performance
 -----------
