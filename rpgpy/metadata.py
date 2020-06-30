@@ -377,4 +377,25 @@ METADATA = {
         name='kurtosis',
         long_name='Spectral Kurtosis',
         comment='vertical polarisation'),
+    'C1vel': Meta(
+        name='C1_velocity',
+        units='m/s',
+        long_name='Chirp 1 Doppler velocity bins',
+        comment='interpolated to maximum Doppler resolution'),
+    'C2vel': Meta(
+        name='C2_velocity',
+        units='m/s',
+        long_name='Chirp 2 Doppler velocity bins',
+        comment='interpolated to maximum Doppler resolution'),
+    'C3vel': Meta(
+        name='C3_velocity',
+        units='m/s',
+        long_name='Chirp 3 Doppler velocity bins',
+        comment='interpolated to maximum Doppler resolution'),
+    'C4vel': Meta(
+        name='C4_velocity',
+        units='m/s',
+        long_name='Chirp 4 Doppler velocity bins',
+        comment='interpolated to maximum Doppler resolution'),
+
 }
