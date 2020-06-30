@@ -111,6 +111,13 @@ def read_rpg_header(file_name):
             _ = np.fromfile(file, 'i4', 25)
             _ = np.fromfile(file, 'uint32', 10000)
 
+            # adding velocity vectors for each chirp
+            for c in range(n_chirp):
+                dopp_res = np.divide(2.0 * header['MaxVel'][c], header['SpecN'][c])
+                header[f'C{c+1}vel'] = np.linspace(-header['MaxVel'][c] + (0.5 * dopp_res),
+                                                   +header['MaxVel'][c] - (0.5 * dopp_res),
+                                                   np.max(header['SpecN']))
+
     file_position = file.tell()
     file.close()
 
