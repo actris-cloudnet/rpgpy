@@ -151,10 +151,9 @@ def _read_rpg_l0(file_name, header):
             if is_data[alt_ind] == 1:                
                 fseek(ptr, 4, SEEK_CUR)
                 n_bins = header["SpecN"][chirp_of_level[alt_ind]-1]
+                bins_to_shift = (n_spectra - n_bins)//2
 
                 if compression == 0:
-
-                    bins_to_shift = (n_spectra - n_bins)//2
                     n_points = n_samples_at_each_height[alt_ind]
                     fread(&TotSpec[sample, alt_ind, bins_to_shift], 4, n_points, ptr)
                     
@@ -173,7 +172,7 @@ def _read_rpg_l0(file_name, header):
 
                         ind1 = min_ind[m]
                         n_points = max_ind[m]-ind1+1
-                        fread(&TotSpec[sample, alt_ind, ind1+ (n_spectra - n_bins)//2], 4, n_points, ptr)
+                        fread(&TotSpec[sample, alt_ind, ind1+ bins_to_shift], 4, n_points, ptr)
                         
                         if polarization > 0:
                             fread(&HSpec[sample, alt_ind, ind1 + bins_to_shift], 4, n_points, ptr)
