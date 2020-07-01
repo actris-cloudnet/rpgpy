@@ -144,20 +144,23 @@ def _read_rpg_l0(file_name, header):
         fseek(ptr, n_dummy * 4, SEEK_CUR)
         fread(is_data, 1, n_levels, ptr)
 
+        chirp_of_level = np.digitize(range(n_levels), header['RngOffs'])
+
         for alt_ind in range(n_levels):
 
             if is_data[alt_ind] == 1:                
                 fseek(ptr, 4, SEEK_CUR)
+                n_bins = header["SpecN"][chirp_of_level[alt_ind]-1]
+                bins_to_shift = (n_spectra - n_bins)//2
 
                 if compression == 0:
-
                     n_points = n_samples_at_each_height[alt_ind]
-                    fread(&TotSpec[sample, alt_ind, 0], 4, n_points, ptr)
+                    fread(&TotSpec[sample, alt_ind, bins_to_shift], 4, n_points, ptr)
                     
                     if polarization > 0:
-                        fread(&HSpec[sample, alt_ind, 0], 4, n_points, ptr)
-                        fread(&ReVHSpec[sample, alt_ind, 0], 4, n_points, ptr)
-                        fread(&ImVHSpec[sample, alt_ind, 0], 4, n_points, ptr)
+                        fread(&HSpec[sample, alt_ind, bins_to_shift], 4, n_points, ptr)
+                        fread(&ReVHSpec[sample, alt_ind, bins_to_shift], 4, n_points, ptr)
+                        fread(&ImVHSpec[sample, alt_ind, bins_to_shift], 4, n_points, ptr)
 
                 else:
                     
@@ -169,22 +172,21 @@ def _read_rpg_l0(file_name, header):
 
                         ind1 = min_ind[m]
                         n_points = max_ind[m]-ind1+1
-
-                        fread(&TotSpec[sample, alt_ind, ind1], 4, n_points, ptr)
+                        fread(&TotSpec[sample, alt_ind, ind1+ bins_to_shift], 4, n_points, ptr)
                         
                         if polarization > 0:
-                            fread(&HSpec[sample, alt_ind, ind1], 4, n_points, ptr)
-                            fread(&ReVHSpec[sample, alt_ind, ind1], 4, n_points, ptr)
-                            fread(&ImVHSpec[sample, alt_ind, ind1], 4, n_points, ptr)
+                            fread(&HSpec[sample, alt_ind, ind1 + bins_to_shift], 4, n_points, ptr)
+                            fread(&ReVHSpec[sample, alt_ind, ind1 + bins_to_shift], 4, n_points, ptr)
+                            fread(&ImVHSpec[sample, alt_ind, ind1 + bins_to_shift], 4, n_points, ptr)
 
                         if compression == 2:
-                            fread(&RefRat[sample, alt_ind, ind1], 4, n_points, ptr)
-                            fread(&CorrCoeff[sample, alt_ind, ind1], 4, n_points, ptr)
-                            fread(&DiffPh[sample, alt_ind, ind1], 4, n_points, ptr)
+                            fread(&RefRat[sample, alt_ind, ind1 + bins_to_shift], 4, n_points, ptr)
+                            fread(&CorrCoeff[sample, alt_ind, ind1 + bins_to_shift], 4, n_points, ptr)
+                            fread(&DiffPh[sample, alt_ind, ind1 + bins_to_shift], 4, n_points, ptr)
 
                         if compression == 2  and polarization == 2:
-                            fread(&SLDR[sample, alt_ind, ind1], 4, n_points, ptr)
-                            fread(&SCorrCoeff[sample, alt_ind, ind1], 4, n_points, ptr)
+                            fread(&SLDR[sample, alt_ind, ind1 + bins_to_shift], 4, n_points, ptr)
+                            fread(&SCorrCoeff[sample, alt_ind, ind1 + bins_to_shift], 4, n_points, ptr)
 
                     if compression == 2 and polarization == 2:
                         fread(&KDP[sample, alt_ind], 4, 1, ptr)
