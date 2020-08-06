@@ -56,7 +56,7 @@ def _check_header_consistency(f, header):
 def _create_dimensions(f, header):
     f.createDimension('time', None)
     f.createDimension('range', header['RAltN'])
-    f.createDimension('spectrum', max(header['SpecN']))
+    f.createDimension('velocity', max(header['SpecN']))
     f.createDimension('chirp', header['SequN'])
 
 
