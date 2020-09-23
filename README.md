@@ -21,6 +21,7 @@ $ python3 -m venv venv
 $ source venv/bin/activate
 (venv) $ python3 -m pip install --upgrade pip
 (venv) $ python3 -m pip install .
+(venv) $ python3 setup.py build_ext --inplace
 ```
 
 # Usage
