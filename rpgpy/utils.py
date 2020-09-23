@@ -19,7 +19,7 @@ def get_rpg_file_type(header):
         header (dict): Header of the radar file containing *file_code* key.
 
     Returns:
-        tuple: 2-element tuple containing Level (0 or 1) and Version (2 or 3).
+        tuple: 2-element tuple containing Level (0 or 1) and Version (2, 3 or 4).
 
     Raises:
         RuntimeError: Unknown file type.
@@ -34,6 +34,8 @@ def get_rpg_file_type(header):
         return 1, 2
     elif file_code == 889347:
         return 1, 3
+    elif file_code == 889348:
+        return 1, 4
     raise RuntimeError('Unknown RPG binary file.')
 
 
