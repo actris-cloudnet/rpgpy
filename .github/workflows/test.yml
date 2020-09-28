@@ -11,7 +11,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.6]
+        python-version: [3.6, 3.7, 3.8]
 
     steps:
     - uses: actions/checkout@v2
@@ -30,3 +30,4 @@ jobs:
     - name: Run e2e tests
       run: |
         ./tests/e2e/level1/main.py
+        ./tests/e2e/level0/main.py

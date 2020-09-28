@@ -2,6 +2,8 @@
 import os
 import argparse
 from rpgpy import read_rpg
+import numpy as np
+import pytest
 
 
 def main():
@@ -11,12 +13,11 @@ def main():
             filename = os.path.join(data_path, folder, file)
             header, data = read_rpg(filename)
 
+            assert str(header['FileCode']) in folder
 
-def rm_file(fname):
-    try:
-        os.remove(fname)
-    except OSError:
-        pass
+            pytest.main(['-v', 'tests/e2e/level1/l1_tests.py',
+                         f"--time={data['Time']}",
+                         f"--positive_Ze={np.all(data['Ze'] >= 0)}"])
 
 
 if __name__ == "__main__":
