@@ -6,10 +6,23 @@ def get_current_time():
     return datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 
 
-def rpg_seconds2date(time_stamp):
-    epoch = datetime.datetime(2001, 1, 1).timestamp()
+def rpg_seconds2date(time_stamp: int, date_only: bool = False) -> list:
+    """Convert RPG timestamp to UTC date + time.
+
+    Args:
+        time_stamp (int): RPG timestamp.
+        date_only (bool): If true, return only date (no time).
+
+    Returns:
+        list: UTC date + optionally time in format ['YYYY', 'MM', 'DD', 'hh', 'min', 'sec']
+
+    """
+    epoch = datetime.datetime(2001, 1, 1, 0, 0).timestamp()
     time_stamp += epoch
-    return datetime.datetime.utcfromtimestamp(time_stamp).strftime('%Y %m %d').split()
+    date_and_time = datetime.datetime.fromtimestamp(time_stamp).strftime('%Y %m %d %H %M %S').split()
+    if date_only:
+        return date_and_time[:3]
+    return date_and_time
 
 
 def get_rpg_file_type(header):
