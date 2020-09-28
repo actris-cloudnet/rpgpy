@@ -1,4 +1,4 @@
-name: Cloudnet processing CI
+name: RpgPy CI
 
 on: [push]
 
@@ -24,11 +24,9 @@ jobs:
         python3 -m pip install --upgrade pip
         python3 -m pip install .
         python3 setup.py build_ext --inplace
-    - name: Lint with pylint
-      run: |
-        pip install pylint
-        pylint **/*.py --errors-only --ignored-modules=netCDF4
     - name: Test with pytest
       run: |
-        pip install pytest
         pytest
+    - name: Run e2e tests
+      run: |
+        ./tests/e2e/level1/main.py

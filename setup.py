@@ -30,6 +30,5 @@ setup(name='rpgPy',
           "Intended Audience :: Science/Research",
           "Topic :: Scientific/Engineering",
       ],
-      ext_modules = cythonize(extensions, language_level=3),
-
-)
+      ext_modules=cythonize(extensions, language_level=3),
+      )
