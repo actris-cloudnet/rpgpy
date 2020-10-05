@@ -138,7 +138,7 @@ def _read_string(file_id):
         if value:
             if value < 0:
                 value = 0
-            str_out += chr(value)
+            str_out += chr(value[0])
         else:
             break
     return str_out
