@@ -141,7 +141,7 @@ def _read_rpg_l0(file_name, header):
         fread(&TransT[sample], 4, 1, ptr)
         fread(&RecT[sample], 4, 1, ptr)
         fread(&PCT[sample], 4, 1, ptr)
-        fseek(ptr, n_dummy * 4, SEEK_CUR)
+        fseek(ptr, n_dummy * 4, SEEK_CUR)  # this chunck contains data (temp profile etc.)
         fread(is_data, 1, n_levels, ptr)
 
         chirp_of_level = np.digitize(range(n_levels), header['RngOffs'])
@@ -310,7 +310,7 @@ def _read_rpg_l1(file_name, header):
         fread(&TransT[sample], 4, 1, ptr)
         fread(&RecT[sample], 4, 1, ptr)
         fread(&PCT[sample], 4, 1, ptr)
-        fseek(ptr, n_dummy * 4, SEEK_CUR)
+        fseek(ptr, n_dummy * 4, SEEK_CUR)  # this chunck contains data (temp profile etc.)
         fread(is_data, 1, n_levels, ptr)
 
         for alt_ind in range(n_levels):

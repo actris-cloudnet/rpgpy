@@ -19,7 +19,7 @@ setup(name='rpgPy',
       version=version['__version__'],
       url='https://github.com/actris-cloudnet/rpgpy',
       license='MIT License',
-      install_requires=['numpy', 'cython', 'netCDF4', 'tqdm'],
+      install_requires=['numpy', 'cython', 'netCDF4', 'tqdm', 'pytest'],
       include_package_data=True,
       packages=find_packages(),
       python_requires='>=3.6',
@@ -30,6 +30,5 @@ setup(name='rpgPy',
           "Intended Audience :: Science/Research",
           "Topic :: Scientific/Engineering",
       ],
-      ext_modules = cythonize(extensions, language_level=3),
-
-)
+      ext_modules=cythonize(extensions, language_level=3),
+      )

@@ -6,7 +6,7 @@ from rpgpy import utils
 def read_rpg_header(file_name):
     """Reads header from RPG binary file.
 
-    Supports Level 0/1 and version 2/3.
+    Supports Level 0/1 and version 2/3/4.
 
     Args:
         file_name (str): name of the file.
@@ -107,11 +107,17 @@ def read_rpg_header(file_name):
              ('FFTInputRng', 'i4'),
              ('NoiseFilt', 'f4'))
 
-        if level == 0:
-            _ = np.fromfile(file, 'i4', 25)
+        if level == 1 and version > 3.5:
+            read(('InstCalPar', 'i4'))
+        elif level == 0:
+            _ = np.fromfile(file, 'i4')
+
+        if level == 0 or (level == 1 and version > 3.5):
+            _ = np.fromfile(file, 'i4', 24)
             _ = np.fromfile(file, 'uint32', 10000)
 
-            # adding velocity vectors for each chirp
+        # adding velocity vectors for each chirp
+        if level == 0:
             for c in range(n_chirp):
                 dopp_res = np.divide(2.0 * header['MaxVel'][c], header['SpecN'][c])
                 header[f'C{c+1}vel'] = np.linspace(-header['MaxVel'][c] + (0.5 * dopp_res),
@@ -132,7 +138,7 @@ def _read_string(file_id):
         if value:
             if value < 0:
                 value = 0
-            str_out += chr(value)
+            str_out += chr(value[0])
         else:
             break
     return str_out

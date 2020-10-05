@@ -6,10 +6,23 @@ def get_current_time():
     return datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 
 
-def rpg_seconds2date(time_stamp):
-    epoch = datetime.datetime(2001, 1, 1).timestamp()
+def rpg_seconds2date(time_stamp: int, date_only: bool = False) -> list:
+    """Convert RPG timestamp to UTC date + time.
+
+    Args:
+        time_stamp (int): RPG timestamp.
+        date_only (bool): If true, return only date (no time).
+
+    Returns:
+        list: UTC date + optionally time in format ['YYYY', 'MM', 'DD', 'hh', 'min', 'sec']
+
+    """
+    epoch = datetime.datetime(2001, 1, 1, 0, 0).timestamp()
     time_stamp += epoch
-    return datetime.datetime.utcfromtimestamp(time_stamp).strftime('%Y %m %d').split()
+    date_and_time = datetime.datetime.fromtimestamp(time_stamp).strftime('%Y %m %d %H %M %S').split()
+    if date_only:
+        return date_and_time[:3]
+    return date_and_time
 
 
 def get_rpg_file_type(header):
@@ -19,7 +32,7 @@ def get_rpg_file_type(header):
         header (dict): Header of the radar file containing *file_code* key.
 
     Returns:
-        tuple: 2-element tuple containing Level (0 or 1) and Version (2 or 3).
+        tuple: 2-element tuple containing Level (0 or 1) and Version (2, 3 or 4).
 
     Raises:
         RuntimeError: Unknown file type.
@@ -34,6 +47,8 @@ def get_rpg_file_type(header):
         return 1, 2
     elif file_code == 889347:
         return 1, 3
+    elif file_code == 889348:
+        return 1, 4
     raise RuntimeError('Unknown RPG binary file.')
 
 

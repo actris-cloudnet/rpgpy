@@ -1,6 +1,7 @@
 """Module for writing netCDF file."""
 import glob
 import uuid
+from typing import Tuple, List
 import numpy.ma as ma
 from numpy.testing import assert_array_equal
 import netCDF4
@@ -127,9 +128,16 @@ def _get_dim(f, array):
 
 def _create_global_attributes(f, global_attr):
     f.Conventions = 'CF-1.7'
-    f.year, f.month, f.day = utils.rpg_seconds2date(ma.median(f.variables['time'][:]))
+    f.year, f.month, f.day = _get_measurement_date(f)
     f.uuid = uuid.uuid4().hex
     f.history = f"Radar file created: {utils.get_current_time()}"
     if global_attr and isinstance(global_attr, dict):
         for key, value in global_attr.items():
             setattr(f, key, value)
+
+
+def _get_measurement_date(file: netCDF4.Dataset) -> list:
+    time = file.variables['time'][:]
+    date = utils.rpg_seconds2date(ma.min(time), date_only=True)
+    assert_array_equal(date, utils.rpg_seconds2date(ma.max(time), date_only=True))
+    return date
