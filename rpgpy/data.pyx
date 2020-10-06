@@ -47,7 +47,7 @@ def _read_rpg_l0(file_name, header):
         char* fname = filename_byte_string
         FILE *ptr
         int header_length=0, n_samples=0, sample=0, j=0, n=0, m=0
-        int alt_ind=0, n_points=0, ind1=0
+        int alt_ind=0, n_points=0, ind1=0, bins_to_shift=0
         char n_blocks
         int n_spectra = max(header['SpecN'])
         int n_levels = header['RAltN']
