@@ -6,5 +6,5 @@ build/
 rpgpy/data.c
 rpgpy/*cache*
 rpgpy/*.so
-tests/e2e/*cache*
+tests/*/**/*cache*
 bin/*.nc
