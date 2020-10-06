@@ -32,12 +32,12 @@ $ source venv/bin/activate
 >>> from rpgpy import read_rpg
 >>> header, data = read_rpg('rpg_file.LV0')
 ```
-By default, the *header* and *data* dictionary key names are taken from the RPG manual. Optionally, 
+By default, the ```header``` and ```data``` dictionary key names are taken from the RPG manual. Optionally, 
 more explicit key names can be chosen:
 ```python
 >>> header, data = read_rpg('rpg_file.LV0', rpg_names=False)
 ```
-### Converting to NetCDF4
+### Converting Level 0 to NetCDF4
 ```python
 >>> from rpgpy import rpg2nc
 >>> rpg2nc('rpg_file.LV0', 'rpg_file.nc')
@@ -54,7 +54,18 @@ This can lead to very large netCDF file.
 >>> rpg2nc('/path/to/files/*.LV0', 'huge_file.nc')
 ```
 
-Performance
------------
+## Tests
+Run unit tests:
+```
+(venv) $ pytest
+```
+
+Run end-to-end tests:
+```
+(venv) $ for f in tests/e2e/*/main.py; do $f; done
+```
+
+
+## Performance
 For reading RPG binary files, depending on the radar settings, RpgPy is roughly 20-30 times faster than equivalent native Python or Matlab implementations.
 
