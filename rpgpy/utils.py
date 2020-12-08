@@ -1,5 +1,6 @@
 import numpy.ma as ma
 import datetime
+import pytz
 
 
 def get_current_time():
@@ -17,12 +18,13 @@ def rpg_seconds2date(time_stamp: int, date_only: bool = False) -> list:
         list: UTC date + optionally time in format ['YYYY', 'MM', 'DD', 'hh', 'min', 'sec']
 
     """
-    epoch = datetime.datetime(2001, 1, 1, 0, 0).timestamp()
-    time_stamp += epoch
-    date_and_time = datetime.datetime.fromtimestamp(time_stamp).strftime('%Y %m %d %H %M %S').split()
+    epoch = (2001, 1, 1)
+    epoch_in_seconds = datetime.datetime.timestamp(datetime.datetime(*epoch, tzinfo=pytz.utc))
+    time_stamp += epoch_in_seconds
+    date_time = datetime.datetime.utcfromtimestamp(time_stamp).strftime('%Y %m %d %H %M %S').split()
     if date_only:
-        return date_and_time[:3]
-    return date_and_time
+        return date_time[:3]
+    return date_time
 
 
 def get_rpg_file_type(header):

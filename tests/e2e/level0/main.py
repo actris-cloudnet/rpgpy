@@ -3,7 +3,8 @@ import os
 import argparse
 import pytest
 from rpgpy import rpg2nc, read_rpg
-import numpy as np
+from tempfile import NamedTemporaryFile
+import pickle
 
 
 def main():
@@ -17,22 +18,21 @@ def main():
 
             assert str(header['FileCode']) in folder
 
+            data_file = NamedTemporaryFile(suffix='.pkl')
+            with open(data_file.name, 'wb') as f:
+                d = {
+                    'Time': data['Time'],
+                }
+                pickle.dump(d, f)
+
             pytest.main(['-v', 'tests/e2e/level1/l1_tests.py',
-                         f"--time={data['Time'][0::10]}",
-                         f"--positive_Ze={np.all(data['TotSpec'] >= 0)}"])
+                         '-m', 'level0',
+                         f"--data={data_file.name}"])
 
-        output_file = f'{data_path}rpg_file.nc'
-        rm_file(output_file)
-        rpg2nc(f'{os.path.join(data_path, folder)}/*.LV0', output_file, global_attr={'foo': 'bar'})
-        pytest.main(['-v', 'tests/e2e/level0/l0_tests.py', f'--filename={output_file}'])
-        rm_file(output_file)
-
-
-def rm_file(fname):
-    try:
-        os.remove(fname)
-    except OSError:
-        pass
+        output_file = NamedTemporaryFile()
+        rpg2nc(f'{os.path.join(data_path, folder)}/*.LV0', output_file.name,
+               global_attr={'foo': 'bar'})
+        pytest.main(['-v', 'tests/e2e/level0/l0_tests.py', f'--filename={output_file.name}'])
 
 
 if __name__ == "__main__":

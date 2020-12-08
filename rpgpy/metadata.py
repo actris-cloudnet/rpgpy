@@ -397,5 +397,8 @@ METADATA = {
         units='m/s',
         long_name='Chirp 4 Doppler velocity bins',
         comment='interpolated to maximum Doppler resolution'),
-
+    'InstCalPar': Meta(
+        name='Cal_period',
+        units='s',
+        long_name='Calibration period')
 }
