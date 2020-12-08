@@ -1,6 +1,6 @@
 import pytest
 
-args = ['time', 'positive_Ze', 'filename']
+args = ['time', 'positive_Ze', 'filename', 'header', 'data']
 
 
 def pytest_addoption(parser):
