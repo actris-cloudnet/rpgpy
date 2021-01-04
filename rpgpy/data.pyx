@@ -3,6 +3,7 @@ from libc.stdio cimport *
 from libc.stdlib cimport malloc, free
 from typing import Tuple
 import numpy as np
+import numpy.ma as ma
 from rpgpy import utils
 from rpgpy import header as head
 from rpgpy.metadata import METADATA
@@ -27,10 +28,18 @@ def read_rpg(file_name: str, rpg_names: bool = True) -> Tuple[dict, dict]:
     level, version = utils.get_rpg_file_type(header)
     fun = _read_rpg_l0 if level == 0 else _read_rpg_l1
     data = fun(file_name, header)
+    data = _mask_zeros(data)
     if not rpg_names:
         data = _change_keys(data)
         header = _change_keys(header)
     return header, data
+
+
+def _mask_zeros(data: dict) -> dict:
+    for key, value in data.items():
+        if value.ndim > 1:
+            data[key] = ma.masked_where(value == 0, value)
+    return data
 
 
 def _change_keys(a_dict: dict) -> dict:
@@ -76,7 +85,7 @@ def _read_rpg_l0(file_name: str, header: dict) -> dict:
         float [:, :, :] TotSpec = np.zeros((n_samples, n_levels, n_spectra), np.float32)
         float [:, :, :] HSpec, ReVHSpec, ImVHSpec, RefRat, CorrCoeff, DiffPh, SLDR, SCorrCoeff
         float [:, :] KDP, DiffAtt, TotNoisePow, HNoisePow, MinVel
-        char [:, :] AliasMsk        
+        char [:, :] AliasMsk
         int n_dummy = 3 + header['TAltN'] + 2*header['HAltN'] + 2*n_levels
 
     (RR, RelHum, EnvTemp, BaroP, WS, WD, DDVolt, DDTb, LWP, PowIF, Elev, Azi, Status,
