@@ -76,7 +76,7 @@ def _read_rpg_l0(file_name: str, header: dict) -> dict:
         float [:, :, :] TotSpec = np.zeros((n_samples, n_levels, n_spectra), np.float32)
         float [:, :, :] HSpec, ReVHSpec, ImVHSpec, RefRat, CorrCoeff, DiffPh, SLDR, SCorrCoeff
         float [:, :] KDP, DiffAtt, TotNoisePow, HNoisePow, MinVel
-        char [:, :] AliasMsk        
+        char [:, :] AliasMsk
         int n_dummy = 3 + header['TAltN'] + 2*header['HAltN'] + 2*n_levels
 
     (RR, RelHum, EnvTemp, BaroP, WS, WD, DDVolt, DDTb, LWP, PowIF, Elev, Azi, Status,
