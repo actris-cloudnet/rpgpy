@@ -25,7 +25,7 @@ def main():
                          f"--data={data_file.name}"])
 
             output_file = NamedTemporaryFile()
-            rpg2nc(f'{os.path.join(data_path, folder)}/*.LV1', output_file.name,
+            rpg2nc(f'{os.path.join(data_path, folder)}/{file}', output_file.name,
                    global_attr={'foo': 'bar'})
 
 
