@@ -328,7 +328,7 @@ def _read_rpg_l1(file_name, header):
                     fread(&DiffPh[sample, alt_ind], 4, 1, ptr)
 
                 if polarization == 2:
-                    fseek(ptr, 1, SEEK_CUR)
+                    fseek(ptr, 4, SEEK_CUR)
                     fread(&SLDR[sample, alt_ind], 4, 1, ptr)
                     fread(&SCorrCoeff[sample, alt_ind], 4, 1, ptr)
                     fread(&KDP[sample, alt_ind], 4, 1, ptr)
