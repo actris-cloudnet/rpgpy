@@ -1,6 +1,7 @@
 """RPG cloud radar binary reader in Cython."""
 from libc.stdio cimport *
 from libc.stdlib cimport malloc, free
+from typing import Tuple
 import numpy as np
 from rpgpy import utils
 from rpgpy import header as head
@@ -9,7 +10,7 @@ from rpgpy.metadata import METADATA
 DEF MAX_N_SPECTRAL_BLOCKS = 100
 
 
-def read_rpg(file_name, rpg_names=True):
+def read_rpg(file_name: str, rpg_names: bool = True) -> Tuple[dict, dict]:
     """ Reads RPG Level 1 / Level 0 binary file.
 
     Args:
@@ -32,14 +33,14 @@ def read_rpg(file_name, rpg_names=True):
     return header, data
 
 
-def _change_keys(a_dict):
+def _change_keys(a_dict: dict) -> dict:
     dict_new = {}
     for key in a_dict.keys():
         dict_new[METADATA[key].long_name] = a_dict[key]
     return dict_new
 
 
-def _read_rpg_l0(file_name, header):
+def _read_rpg_l0(file_name: str, header: dict) -> dict:
     """Reads RPG LV0 binary file."""
     
     filename_byte_string = file_name.encode("UTF-8")
@@ -141,7 +142,7 @@ def _read_rpg_l0(file_name, header):
         fread(&TransT[sample], 4, 1, ptr)
         fread(&RecT[sample], 4, 1, ptr)
         fread(&PCT[sample], 4, 1, ptr)
-        fseek(ptr, n_dummy * 4, SEEK_CUR)  # this chunck contains data (temp profile etc.)
+        fseek(ptr, n_dummy * 4, SEEK_CUR)  # this chunk contains data (temp profile etc.)
         fread(is_data, 1, n_levels, ptr)
 
         chirp_of_level = np.digitize(range(n_levels), header['RngOffs'])
@@ -213,7 +214,7 @@ def _read_rpg_l0(file_name, header):
     return {key: np.asarray(var_names[key]) for key in keys}
 
 
-def _get_n_samples(header):
+def _get_n_samples(header: dict) -> np.ndarray:
     """Finds number of spectral samples at each height."""
     array = np.ones(header['RAltN'], dtype=int)
     sub_arrays = np.split(array, header['RngOffs'][1:])
@@ -221,7 +222,7 @@ def _get_n_samples(header):
     return np.concatenate(sub_arrays)
 
 
-def _get_valid_l0_keys(header):
+def _get_valid_l0_keys(header: dict) -> list:
     """Controls which variables our provided as output."""
     
     keys = ['Time', 'MSec', 'QF', 'RR', 'RelHum', 'EnvTemp',
@@ -250,7 +251,7 @@ def _get_valid_l0_keys(header):
     return keys
 
 
-def _read_rpg_l1(file_name, header):
+def _read_rpg_l1(file_name: str, header: dict) -> dict:
     """Reads RPG LV1 binary file."""
 
     filename_byte_string = file_name.encode("UTF-8")
@@ -343,7 +344,7 @@ def _read_rpg_l1(file_name, header):
     return {key: np.asarray(var_names[key]) for key in keys}
 
 
-def _get_valid_l1_keys(header):
+def _get_valid_l1_keys(header: dict) -> list:
     """Controls which variables our provided as output."""
     
     keys = ['Time', 'MSec', 'QF', 'RR', 'RelHum', 'EnvTemp',

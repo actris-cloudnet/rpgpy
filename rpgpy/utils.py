@@ -1,9 +1,10 @@
+from typing import Tuple
 import numpy.ma as ma
 import datetime
 import pytz
 
 
-def get_current_time():
+def get_current_time() -> str:
     return datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 
 
@@ -27,7 +28,7 @@ def rpg_seconds2date(time_stamp: int, date_only: bool = False) -> list:
     return date_time
 
 
-def get_rpg_file_type(header):
+def get_rpg_file_type(header: dict) -> Tuple[int, int]:
     """Find level and version of RPG cloud radar binary file.
 
     Args:
@@ -54,7 +55,7 @@ def get_rpg_file_type(header):
     raise RuntimeError('Unknown RPG binary file.')
 
 
-def isscalar(array):
+def isscalar(array) -> bool:
     """Tests if input is scalar.
 
     By "scalar" we mean that array has a single value.
