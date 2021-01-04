@@ -37,11 +37,13 @@ more explicit key names can be chosen:
 ```python
 >>> header, data = read_rpg('rpg_file.LV0', rpg_names=False)
 ```
-### Converting Level 0 to NetCDF4
+### Converting to NetCDF4
 ```python
 >>> from rpgpy import rpg2nc
 >>> rpg2nc('rpg_file.LV0', 'rpg_file.nc')
 ```
+This works for both Level 0 and Level 1 files.
+
 In addition to the default global attributes, it is possible to provide 
 additional ones via a dictionary:
 ```python
@@ -49,7 +51,7 @@ additional ones via a dictionary:
 >>> rpg2nc('rpg_file.LV0', 'rpg_file.nc', global_attr=attr)
 ```
 Several RPG files can be concatenated to singe netCDF file using wildcard.
-This can lead to very large netCDF file.
+With Level 0 data, this can lead to a very large netCDF file.
 ```python
 >>> rpg2nc('/path/to/files/*.LV0', 'huge_file.nc')
 ```
@@ -69,3 +71,5 @@ Run end-to-end tests:
 ## Performance
 For reading RPG binary files, depending on the radar settings, RpgPy is roughly 20-30 times faster than equivalent native Python or Matlab implementations.
 
+## License
+MIT
