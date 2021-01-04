@@ -47,8 +47,8 @@ def _read_rpg_l0(file_name: str, header: dict) -> dict:
     cdef:
         char* fname = filename_byte_string
         FILE *ptr
-        int header_length=0, n_samples=0, sample=0, j=0, n=0, m=0
-        int alt_ind=0, n_points=0, ind1=0, bins_to_shift=0
+        int header_length=0, n_samples=0, sample=0, n=0, m=0
+        int alt_ind=0, n_points=0, bins_to_shift=0, spec_ind=0
         char n_blocks
         int n_spectra = max(header['SpecN'])
         int n_levels = header['RAltN']
@@ -84,7 +84,8 @@ def _read_rpg_l0(file_name: str, header: dict) -> dict:
         
     if polarization > 0:
         n_dummy += 2*n_levels
-        HSpec, ReVHSpec, ImVHSpec = [np.zeros((n_samples, n_levels, n_spectra), np.float32) for _ in range(3)]
+        HSpec, ReVHSpec, ImVHSpec = [np.zeros((n_samples, n_levels, n_spectra), np.float32)
+                                     for _ in range(3)]
     else:
         HSpec, ReVHSpec, ImVHSpec = [None]*3
 
@@ -94,7 +95,8 @@ def _read_rpg_l0(file_name: str, header: dict) -> dict:
         TotNoisePow = None
         
     if compression == 2:
-        RefRat, CorrCoeff, DiffPh = [np.zeros((n_samples, n_levels, n_spectra), np.float32) for _ in range(3)]
+        RefRat, CorrCoeff, DiffPh = [np.zeros((n_samples, n_levels, n_spectra), np.float32)
+                                     for _ in range(3)]
     else:
         RefRat, CorrCoeff, DiffPh = [None]*3
 
@@ -110,7 +112,8 @@ def _read_rpg_l0(file_name: str, header: dict) -> dict:
         HNoisePow = None
 
     if compression == 2 and polarization == 2:
-        SLDR, SCorrCoeff = [np.zeros((n_samples, n_levels, n_spectra), np.float32) for _ in range(2)]
+        SLDR, SCorrCoeff = [np.zeros((n_samples, n_levels, n_spectra), np.float32)
+                            for _ in range(2)]
         KDP, DiffAtt = [np.zeros((n_samples, n_levels), np.float32) for _ in range(2)]
     else:
         SLDR, SCorrCoeff, KDP, DiffAtt = [None]*4
@@ -120,7 +123,6 @@ def _read_rpg_l0(file_name: str, header: dict) -> dict:
             n_samples_at_each_height[i] = n
 
     for sample in range(n_samples):
-
         fread(&SampBytes[sample], 4, 1, ptr)
         fread(&Time[sample], 4, 1, ptr)
         fread(&MSec[sample], 4, 1, ptr)
@@ -151,8 +153,8 @@ def _read_rpg_l0(file_name: str, header: dict) -> dict:
 
             if is_data[alt_ind] == 1:                
                 fseek(ptr, 4, SEEK_CUR)
-                n_bins = header["SpecN"][chirp_of_level[alt_ind]-1]
-                bins_to_shift = (n_spectra - n_bins)//2
+                n_bins = header['SpecN'][chirp_of_level[alt_ind] - 1]
+                bins_to_shift = (n_spectra - n_bins) // 2
 
                 if compression == 0:
                     n_points = n_samples_at_each_height[alt_ind]
@@ -164,30 +166,29 @@ def _read_rpg_l0(file_name: str, header: dict) -> dict:
                         fread(&ImVHSpec[sample, alt_ind, bins_to_shift], 4, n_points, ptr)
 
                 else:
-                    
                     fread(&n_blocks, 1, 1, ptr)
                     fread(&min_ind[0], 2, n_blocks, ptr)
                     fread(&max_ind[0], 2, n_blocks, ptr)
                     
                     for m in range(n_blocks):
+                        n_points = max_ind[m] - min_ind[m] + 1
+                        spec_ind = min_ind[m] + bins_to_shift
 
-                        ind1 = min_ind[m]
-                        n_points = max_ind[m]-ind1+1
-                        fread(&TotSpec[sample, alt_ind, ind1+ bins_to_shift], 4, n_points, ptr)
+                        fread(&TotSpec[sample, alt_ind, spec_ind], 4, n_points, ptr)
                         
                         if polarization > 0:
-                            fread(&HSpec[sample, alt_ind, ind1 + bins_to_shift], 4, n_points, ptr)
-                            fread(&ReVHSpec[sample, alt_ind, ind1 + bins_to_shift], 4, n_points, ptr)
-                            fread(&ImVHSpec[sample, alt_ind, ind1 + bins_to_shift], 4, n_points, ptr)
+                            fread(&HSpec[sample, alt_ind, spec_ind], 4, n_points, ptr)
+                            fread(&ReVHSpec[sample, alt_ind, spec_ind], 4, n_points, ptr)
+                            fread(&ImVHSpec[sample, alt_ind, spec_ind], 4, n_points, ptr)
 
                         if compression == 2:
-                            fread(&RefRat[sample, alt_ind, ind1 + bins_to_shift], 4, n_points, ptr)
-                            fread(&CorrCoeff[sample, alt_ind, ind1 + bins_to_shift], 4, n_points, ptr)
-                            fread(&DiffPh[sample, alt_ind, ind1 + bins_to_shift], 4, n_points, ptr)
+                            fread(&RefRat[sample, alt_ind, spec_ind], 4, n_points, ptr)
+                            fread(&CorrCoeff[sample, alt_ind, spec_ind], 4, n_points, ptr)
+                            fread(&DiffPh[sample, alt_ind, spec_ind], 4, n_points, ptr)
 
                         if compression == 2  and polarization == 2:
-                            fread(&SLDR[sample, alt_ind, ind1 + bins_to_shift], 4, n_points, ptr)
-                            fread(&SCorrCoeff[sample, alt_ind, ind1 + bins_to_shift], 4, n_points, ptr)
+                            fread(&SLDR[sample, alt_ind, spec_ind], 4, n_points, ptr)
+                            fread(&SCorrCoeff[sample, alt_ind, spec_ind], 4, n_points, ptr)
 
                     if compression == 2 and polarization == 2:
                         fread(&KDP[sample, alt_ind], 4, 1, ptr)
@@ -276,7 +277,8 @@ def _read_rpg_l1(file_name: str, header: dict) -> dict:
         char [:] QF = np.empty(n_samples, np.int8)
         float [:] RR, RelHum, EnvTemp, BaroP, WS, WD, DDVolt, DDTb, LWP, PowIF
         float [:] Elev, Azi, Status, TransPow, TransT, RecT, PCT
-        float [:, :] Ze, MeanVel, SpecWidth, Skewn, Kurt, RefRat, CorrCoeff, DiffPh, SLDR, SCorrCoeff, KDP, DiffAtt
+        float [:, :] Ze, MeanVel, SpecWidth, Skewn, Kurt, RefRat, CorrCoeff, DiffPh, SLDR
+        float [:, :] SCorrCoeff, KDP, DiffAtt
         int n_dummy = 3 + header['TAltN'] + 2*header['HAltN'] + n_levels
 
     (RR, RelHum, EnvTemp, BaroP, WS, WD, DDVolt, DDTb, LWP, PowIF, Elev, Azi, Status,
