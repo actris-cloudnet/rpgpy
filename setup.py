@@ -11,9 +11,13 @@ version = {}
 with open("rpgpy/version.py") as f:
     exec(f.read(), version)
 
+with open('README.md') as f:
+    readme = f.read()
 
 setup(name='rpgPy',
       description='Cython code for reading binary files from RPG cloud radar.',
+      long_description=readme,
+      long_description_content_type='text/markdown',
       author='Simo Tukiainen',
       author_email='simo.tukiainen@fmi.fi',
       version=version['__version__'],
