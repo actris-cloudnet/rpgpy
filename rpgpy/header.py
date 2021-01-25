@@ -113,10 +113,15 @@ def read_rpg_header(file_name):
 
             velocity_vectors = []
             for c in range(n_chirp):
-                dopp_res = np.divide(2.0 * header['MaxVel'][c], header['SpecN'][c])
-                velocity_vectors.append(np.linspace(-header['MaxVel'][c] + (0.5 * dopp_res),
-                                                   +header['MaxVel'][c] - (0.5 * dopp_res),
-                                                   np.max(header['SpecN'])))
+                n_bins = header['SpecN'][c]
+                n_bins_max = np.max(header['SpecN'])
+                bins_to_shift = (n_bins_max - n_bins)//2
+                dopp_res = np.divide(2.0 * header['MaxVel'][c], n_bins)
+                velocity_vectors.append(np.hstack((np.repeat(-999., bins_to_shift),
+                                                   np.linspace(-header['MaxVel'][c] + (0.5 * dopp_res),
+                                                               +header['MaxVel'][c] - (0.5 * dopp_res),
+                                                               n_bins),
+                                                   np.repeat(-999., bins_to_shift))))
             header['velocity_vectors'] = np.array(velocity_vectors)
 
     file_position = file.tell()
