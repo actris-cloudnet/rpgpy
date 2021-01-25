@@ -1,12 +1,13 @@
 """Module for reading RPG 94 GHz radar header."""
 import numpy as np
 from rpgpy import utils
+from typing import Tuple, Iterator
 
 
-def read_rpg_header(file_name):
+def read_rpg_header(file_name: str) -> Tuple[dict, int]:
     """Reads header from RPG binary file.
 
-    Supports Level 0/1 and version 2/3.
+    Supports Level 0/1 and version 2/3/4.
 
     Args:
         file_name (str): name of the file.
@@ -107,10 +108,17 @@ def read_rpg_header(file_name):
              ('FFTInputRng', 'i4'),
              ('NoiseFilt', 'f4'))
 
-        if level == 0:
-            _ = np.fromfile(file, 'i4', 25)
+        if level == 1 and version > 3.5:
+            read(('InstCalPar', 'i4'))
+        elif level == 0:
+            _ = np.fromfile(file, 'i4')
+
+        if level == 0 or (level == 1 and version > 3.5):
+            _ = np.fromfile(file, 'i4', 24)
             _ = np.fromfile(file, 'uint32', 10000)
 
+        if level == 0:
+            # adding velocity vectors for each chirp
             velocity_vectors = []
             for c in range(n_chirp):
                 n_bins = header['SpecN'][c]
@@ -130,7 +138,7 @@ def read_rpg_header(file_name):
     return header, file_position
 
 
-def _read_string(file_id):
+def _read_string(file_id) -> str:
     """Read characters from binary data until whitespace."""
     str_out = ''
     while True:
@@ -138,22 +146,22 @@ def _read_string(file_id):
         if value:
             if value < 0:
                 value = 0
-            str_out += chr(value)
+            str_out += chr(value[0])
         else:
             break
     return str_out
 
 
-def _get_number_of_levels(header):
+def _get_number_of_levels(header: dict) -> Iterator[int]:
     for name in ('RAltN', 'TAltN', 'HAltN', 'SequN'):
         yield int(header[name])
 
 
-def _dim(length, dtype='f'):
+def _dim(length: int, dtype: str = 'f') -> str:
     return f"({length},){dtype}"
 
 
-def _get_dtype(array):
+def _get_dtype(array: np.ndarray) -> type:
     if array.dtype in (np.int8, np.int32, np.uint32):
         return int
     return float

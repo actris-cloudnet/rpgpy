@@ -1,25 +1,41 @@
+from typing import Tuple
 import numpy.ma as ma
 import datetime
+import pytz
 
 
-def get_current_time():
+def get_current_time() -> str:
     return datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 
 
-def rpg_seconds2date(time_stamp):
-    epoch = datetime.datetime(2001, 1, 1).timestamp()
-    time_stamp += epoch
-    return datetime.datetime.utcfromtimestamp(time_stamp).strftime('%Y %m %d').split()
+def rpg_seconds2date(time_stamp: int, date_only: bool = False) -> list:
+    """Convert RPG timestamp to UTC date + time.
+
+    Args:
+        time_stamp (int): RPG timestamp.
+        date_only (bool): If true, return only date (no time).
+
+    Returns:
+        list: UTC date + optionally time in format ['YYYY', 'MM', 'DD', 'hh', 'min', 'sec']
+
+    """
+    epoch = (2001, 1, 1)
+    epoch_in_seconds = datetime.datetime.timestamp(datetime.datetime(*epoch, tzinfo=pytz.utc))
+    time_stamp += epoch_in_seconds
+    date_time = datetime.datetime.utcfromtimestamp(time_stamp).strftime('%Y %m %d %H %M %S').split()
+    if date_only:
+        return date_time[:3]
+    return date_time
 
 
-def get_rpg_file_type(header):
+def get_rpg_file_type(header: dict) -> Tuple[int, int]:
     """Find level and version of RPG cloud radar binary file.
 
     Args:
         header (dict): Header of the radar file containing *file_code* key.
 
     Returns:
-        tuple: 2-element tuple containing Level (0 or 1) and Version (2 or 3).
+        tuple: 2-element tuple containing Level (0 or 1) and Version (2, 3 or 4).
 
     Raises:
         RuntimeError: Unknown file type.
@@ -34,10 +50,12 @@ def get_rpg_file_type(header):
         return 1, 2
     elif file_code == 889347:
         return 1, 3
+    elif file_code == 889348:
+        return 1, 4
     raise RuntimeError('Unknown RPG binary file.')
 
 
-def isscalar(array):
+def isscalar(array) -> bool:
     """Tests if input is scalar.
 
     By "scalar" we mean that array has a single value.

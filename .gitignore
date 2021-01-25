@@ -1,4 +1,4 @@
-data/
+dist/
 venv/
 .idea/
 build/
@@ -6,4 +6,5 @@ build/
 rpgpy/data.c
 rpgpy/*cache*
 rpgpy/*.so
+tests/*/**/*cache*
 bin/*.nc
