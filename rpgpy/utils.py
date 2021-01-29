@@ -1,5 +1,6 @@
 from typing import Tuple
 import numpy.ma as ma
+import numpy as np
 import datetime
 import pytz
 
@@ -75,3 +76,30 @@ def isscalar(array) -> bool:
     if not hasattr(arr, '__len__') or arr.shape == () or len(arr) == 1:
         return True
     return False
+
+
+def create_velocity_vectors(n_chirp: int, header: dict) -> list:
+    """Find level and version of RPG cloud radar binary file.
+
+    Args:
+        n_chirps (int): number of chirps
+        header (dict): Header of the radar file containing *file_code* key.
+
+    Returns:
+       list: Doppler velocity vector of each chirp
+
+    Raises:
+
+    """
+    velocity_vectors = []
+    for c in range(n_chirp):
+        n_bins = header['SpecN'][c]
+        n_bins_max = np.max(header['SpecN'])
+        bins_to_shift = (n_bins_max - n_bins)//2
+        dopp_res = np.divide(2.0 * header['MaxVel'][c], n_bins)
+        velocity_vectors.append(np.hstack((np.repeat(-999., bins_to_shift),
+                                           np.linspace(-header['MaxVel'][c] + (0.5 * dopp_res),
+                                                       +header['MaxVel'][c] - (0.5 * dopp_res),
+                                                       n_bins),
+                                           np.repeat(-999., bins_to_shift))))
+    return velocity_vectors
