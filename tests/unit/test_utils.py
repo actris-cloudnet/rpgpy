@@ -19,3 +19,10 @@ def test_rpg_seconds2date():
 ])
 def test_seconds2date(input, result):
     assert utils.rpg_seconds2date(input) == result
+
+
+def test_create_velocity_vectors():
+    inp = {'SpecN': [20], 'MaxVel': [10]}
+    res = [([-9.5, -8.5, -7.5, -6.5, -5.5, -4.5, -3.5, -2.5, -1.5, -0.5,  0.5, 1.5,  2.5,  3.5,  4.5,  5.5,  6.5,  7.5,
+             8.5,  9.5])]
+    assert_array_equal(utils.create_velocity_vectors(1, inp), res)

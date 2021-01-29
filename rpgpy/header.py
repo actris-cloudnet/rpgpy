@@ -117,13 +117,10 @@ def read_rpg_header(file_name: str) -> Tuple[dict, int]:
             _ = np.fromfile(file, 'i4', 24)
             _ = np.fromfile(file, 'uint32', 10000)
 
-        # adding velocity vectors for each chirp
         if level == 0:
-            for c in range(n_chirp):
-                dopp_res = np.divide(2.0 * header['MaxVel'][c], header['SpecN'][c])
-                header[f'C{c+1}vel'] = np.linspace(-header['MaxVel'][c] + (0.5 * dopp_res),
-                                                   +header['MaxVel'][c] - (0.5 * dopp_res),
-                                                   np.max(header['SpecN']))
+            # adding velocity vectors for each chirp
+            velocity_vectors = utils.create_velocity_vectors(n_chirp, header)
+            header['velocity_vectors'] = np.array(velocity_vectors)
 
     file_position = file.tell()
     file.close()

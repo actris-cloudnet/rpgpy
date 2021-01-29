@@ -67,7 +67,7 @@ def _write_initial_data(f: netCDF4.Dataset, data: dict) -> None:
     for key, array in data.items():
         if key in SKIP_ME:
             continue
-        fill_value = 0 if array.ndim > 1 else None
+        fill_value = 0 if array.ndim > 1 else -999.
         var = f.createVariable(METADATA[key].name, _get_dtype(array),
                                _get_dim(f, array), zlib=True, complevel=3,
                                shuffle=False, fill_value=fill_value)
