@@ -78,7 +78,7 @@ def isscalar(array) -> bool:
     return False
 
 
-def create_velocity_vectors(header: dict) -> np.maskedArray:
+def create_velocity_vectors(header: dict) -> ma.masked_array:
     """Create Doppler velocity vector for each chirp.
 
     Args:
