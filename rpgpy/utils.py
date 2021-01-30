@@ -78,28 +78,25 @@ def isscalar(array) -> bool:
     return False
 
 
-def create_velocity_vectors(n_chirp: int, header: dict) -> list:
-    """Find level and version of RPG cloud radar binary file.
+def create_velocity_vectors(header: dict) -> np.maskedArray:
+    """Create Doppler velocity vector for each chirp.
 
     Args:
-        n_chirps (int): number of chirps
-        header (dict): Header of the radar file containing *file_code* key.
+        header (dict): Header of the radar file.
 
     Returns:
-       list: Doppler velocity vector of each chirp
-
-    Raises:
+       maskedArray: Doppler velocity vector for each chirp. These are equally long
+           vectors (max number of bins) where the padded values are masked.
 
     """
-    velocity_vectors = []
-    for c in range(n_chirp):
-        n_bins = header['SpecN'][c]
-        n_bins_max = np.max(header['SpecN'])
-        bins_to_shift = (n_bins_max - n_bins)//2
-        dopp_res = np.divide(2.0 * header['MaxVel'][c], n_bins)
-        velocity_vectors.append(np.hstack((np.repeat(-999., bins_to_shift),
-                                           np.linspace(-header['MaxVel'][c] + (0.5 * dopp_res),
-                                                       +header['MaxVel'][c] - (0.5 * dopp_res),
-                                                       n_bins),
-                                           np.repeat(-999., bins_to_shift))))
+    n_chirps = header['SequN']
+    n_bins_max = np.max(header['SpecN'])
+    velocity_vectors = ma.masked_all((n_chirps, n_bins_max))
+    for ind, (n_bins, chirp_max_vel) in enumerate(zip(header['SpecN'], header['MaxVel'])):
+        bins_to_shift = (n_bins_max - n_bins) // 2
+        dopp_res = chirp_max_vel / n_bins
+        velocity = np.linspace(-chirp_max_vel + dopp_res,
+                               +chirp_max_vel - dopp_res,
+                               n_bins)
+        velocity_vectors[ind, bins_to_shift:bins_to_shift+len(velocity)] = velocity
     return velocity_vectors

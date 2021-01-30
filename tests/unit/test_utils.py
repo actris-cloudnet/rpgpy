@@ -22,7 +22,15 @@ def test_seconds2date(input, result):
 
 
 def test_create_velocity_vectors():
-    inp = {'SpecN': [20], 'MaxVel': [10]}
-    res = [([-9.5, -8.5, -7.5, -6.5, -5.5, -4.5, -3.5, -2.5, -1.5, -0.5,  0.5, 1.5,  2.5,  3.5,  4.5,  5.5,  6.5,  7.5,
-             8.5,  9.5])]
-    assert_array_equal(utils.create_velocity_vectors(1, inp), res)
+    inp = {'SpecN': [20], 'MaxVel': [10], 'SequN': 1}
+    res = [[-9.5, -8.5, -7.5, -6.5, -5.5, -4.5, -3.5, -2.5, -1.5, -0.5,  0.5,
+            1.5,  2.5,  3.5, 4.5,  5.5,  6.5,  7.5, 8.5,  9.5]]
+    assert_array_equal(utils.create_velocity_vectors(inp), res)
+
+    inp = {'SpecN': [4, 10], 'MaxVel': [8, 5], 'SequN': 2}
+    res = [[0, 0, 0, -6, -2, 2, 6, 0, 0, 0],
+           [-4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 4.5]]
+    mask = [[1, 1, 1, 0, 0, 0, 0, 1, 1, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+    assert_array_equal(utils.create_velocity_vectors(inp), res)
+    assert_array_equal(utils.create_velocity_vectors(inp).mask, mask)

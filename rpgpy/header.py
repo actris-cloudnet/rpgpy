@@ -118,9 +118,7 @@ def read_rpg_header(file_name: str) -> Tuple[dict, int]:
             _ = np.fromfile(file, 'uint32', 10000)
 
         if level == 0:
-            # adding velocity vectors for each chirp
-            velocity_vectors = utils.create_velocity_vectors(n_chirp, header)
-            header['velocity_vectors'] = np.array(velocity_vectors)
+            header['velocity_vectors'] = utils.create_velocity_vectors(header)
 
     file_position = file.tell()
     file.close()
