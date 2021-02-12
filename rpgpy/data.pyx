@@ -42,13 +42,13 @@ def _change_keys(a_dict: dict) -> dict:
 
 def _read_rpg_l0(file_name: str, header: dict) -> dict:
     """Reads RPG LV0 binary file."""
-    
+
     filename_byte_string = file_name.encode("UTF-8")
     cdef:
         char* fname = filename_byte_string
         FILE *ptr
         int header_length=0, n_samples=0, sample=0, n=0, m=0
-        int alt_ind=0, n_points=0, bins_to_shift=0, spec_ind=0
+        int alt_ind=0, n_points=0, bins_to_shift=0
         char n_blocks
         int n_spectra = max(header['SpecN'])
         int n_levels = header['RAltN']
@@ -57,6 +57,8 @@ def _read_rpg_l0(file_name: str, header: dict) -> dict:
         int anti_alias = header['AntiAlias']
         short int min_ind[MAX_N_SPECTRAL_BLOCKS]
         short int max_ind[MAX_N_SPECTRAL_BLOCKS]
+        short int n_block_points[MAX_N_SPECTRAL_BLOCKS]
+        short int spec_ind[MAX_N_SPECTRAL_BLOCKS]
         char *is_data = <char *> malloc(n_levels * sizeof(char))
         int *n_samples_at_each_height = <int *> malloc(n_levels * sizeof(int))
 
@@ -81,7 +83,7 @@ def _read_rpg_l0(file_name: str, header: dict) -> dict:
 
     (RR, RelHum, EnvTemp, BaroP, WS, WD, DDVolt, DDTb, LWP, PowIF, Elev, Azi, Status,
      TransPow, TransT, RecT, PCT) = [np.empty(n_samples, np.float32) for _ in range(17)]
-        
+
     if polarization > 0:
         n_dummy += 2*n_levels
         HSpec, ReVHSpec, ImVHSpec = [np.zeros((n_samples, n_levels, n_spectra), np.float32)
@@ -93,7 +95,7 @@ def _read_rpg_l0(file_name: str, header: dict) -> dict:
         TotNoisePow = np.zeros((n_samples, n_levels), np.float32)
     else:
         TotNoisePow = None
-        
+
     if compression == 2:
         RefRat, CorrCoeff, DiffPh = [np.zeros((n_samples, n_levels, n_spectra), np.float32)
                                      for _ in range(3)]
@@ -117,10 +119,12 @@ def _read_rpg_l0(file_name: str, header: dict) -> dict:
         KDP, DiffAtt = [np.zeros((n_samples, n_levels), np.float32) for _ in range(2)]
     else:
         SLDR, SCorrCoeff, KDP, DiffAtt = [None]*4
-    
+
     if compression == 0:
         for i, n in enumerate(_get_n_samples(header)):
             n_samples_at_each_height[i] = n
+
+    chirp_of_level = np.digitize(range(n_levels), header['RngOffs'])
 
     for sample in range(n_samples):
         fread(&SampBytes[sample], 4, 1, ptr)
@@ -147,11 +151,10 @@ def _read_rpg_l0(file_name: str, header: dict) -> dict:
         fseek(ptr, n_dummy * 4, SEEK_CUR)  # this chunk contains data (temp profile etc.)
         fread(is_data, 1, n_levels, ptr)
 
-        chirp_of_level = np.digitize(range(n_levels), header['RngOffs'])
-
         for alt_ind in range(n_levels):
 
-            if is_data[alt_ind] == 1:                
+            if is_data[alt_ind] == 1:
+
                 fseek(ptr, 4, SEEK_CUR)
                 n_bins = header['SpecN'][chirp_of_level[alt_ind] - 1]
                 bins_to_shift = (n_spectra - n_bins) // 2
@@ -159,38 +162,44 @@ def _read_rpg_l0(file_name: str, header: dict) -> dict:
                 if compression == 0:
                     n_points = n_samples_at_each_height[alt_ind]
                     fread(&TotSpec[sample, alt_ind, bins_to_shift], 4, n_points, ptr)
-                    
+
                     if polarization > 0:
                         fread(&HSpec[sample, alt_ind, bins_to_shift], 4, n_points, ptr)
                         fread(&ReVHSpec[sample, alt_ind, bins_to_shift], 4, n_points, ptr)
                         fread(&ImVHSpec[sample, alt_ind, bins_to_shift], 4, n_points, ptr)
 
                 else:
+
                     fread(&n_blocks, 1, 1, ptr)
                     fread(&min_ind[0], 2, n_blocks, ptr)
                     fread(&max_ind[0], 2, n_blocks, ptr)
-                    
+
                     for m in range(n_blocks):
-                        n_points = max_ind[m] - min_ind[m] + 1
-                        spec_ind = min_ind[m] + bins_to_shift
+                        n_block_points[m] = max_ind[m] - min_ind[m] + 1
+                        spec_ind[m] = min_ind[m] + bins_to_shift
+                        fread(&TotSpec[sample, alt_ind, spec_ind[m]], 4, n_block_points[m], ptr)
 
-                        fread(&TotSpec[sample, alt_ind, spec_ind], 4, n_points, ptr)
-                        
-                        if polarization > 0:
-                            fread(&HSpec[sample, alt_ind, spec_ind], 4, n_points, ptr)
-                            fread(&ReVHSpec[sample, alt_ind, spec_ind], 4, n_points, ptr)
-                            fread(&ImVHSpec[sample, alt_ind, spec_ind], 4, n_points, ptr)
+                    if polarization > 0:
+                        for m in range(n_blocks):
+                            fread(&HSpec[sample, alt_ind, spec_ind[m]], 4, n_block_points[m], ptr)
+                        for m in range(n_blocks):
+                            fread(&ReVHSpec[sample, alt_ind, spec_ind[m]], 4, n_block_points[m], ptr)
+                        for m in range(n_blocks):
+                            fread(&ImVHSpec[sample, alt_ind, spec_ind[m]], 4, n_block_points[m], ptr)
 
-                        if compression == 2:
-                            fread(&RefRat[sample, alt_ind, spec_ind], 4, n_points, ptr)
-                            fread(&CorrCoeff[sample, alt_ind, spec_ind], 4, n_points, ptr)
-                            fread(&DiffPh[sample, alt_ind, spec_ind], 4, n_points, ptr)
+                    if compression == 2:
+                        for m in range(n_blocks):
+                            fread(&RefRat[sample, alt_ind, spec_ind[m]], 4, n_block_points[m], ptr)
+                        for m in range(n_blocks):
+                            fread(&CorrCoeff[sample, alt_ind, spec_ind[m]], 4, n_block_points[m], ptr)
+                        for m in range(n_blocks):
+                            fread(&DiffPh[sample, alt_ind, spec_ind[m]], 4, n_block_points[m], ptr)
 
-                        if compression == 2  and polarization == 2:
-                            fread(&SLDR[sample, alt_ind, spec_ind], 4, n_points, ptr)
-                            fread(&SCorrCoeff[sample, alt_ind, spec_ind], 4, n_points, ptr)
-
-                    if compression == 2 and polarization == 2:
+                    if compression == 2  and polarization == 2:
+                        for m in range(n_blocks):
+                            fread(&SLDR[sample, alt_ind, spec_ind[m]], 4, n_block_points[m], ptr)
+                        for m in range(n_blocks):
+                            fread(&SCorrCoeff[sample, alt_ind, spec_ind[m]], 4, n_block_points[m], ptr)
                         fread(&KDP[sample, alt_ind], 4, 1, ptr)
                         fread(&DiffAtt[sample, alt_ind], 4, 1, ptr)
 
@@ -198,7 +207,7 @@ def _read_rpg_l0(file_name: str, header: dict) -> dict:
 
                     if polarization > 0:
                         fread(&HNoisePow[sample, alt_ind], 4, 1, ptr)
-                        
+
                     if anti_alias == 1:
                         fread(&AliasMsk[sample, alt_ind], 1, 1, ptr)
                         fread(&MinVel[sample, alt_ind], 4, 1, ptr)
@@ -225,12 +234,12 @@ def _get_n_samples(header: dict) -> np.ndarray:
 
 def _get_valid_l0_keys(header: dict) -> list:
     """Controls which variables our provided as output."""
-    
+
     keys = ['Time', 'MSec', 'QF', 'RR', 'RelHum', 'EnvTemp',
             'BaroP', 'WS', 'WD', 'DDVolt', 'DDTb', 'LWP',
             'PowIF', 'Elev', 'Azi', 'Status', 'TransPow',
             'TransT', 'RecT', 'PCT', 'TotSpec']
-    
+
     if header['CompEna'] > 0:
         keys += ['TotNoisePow']
 
@@ -283,10 +292,10 @@ def _read_rpg_l1(file_name: str, header: dict) -> dict:
 
     (RR, RelHum, EnvTemp, BaroP, WS, WD, DDVolt, DDTb, LWP, PowIF, Elev, Azi, Status,
      TransPow, TransT, RecT, PCT) = [np.empty(n_samples, np.float32) for _ in range(17)]
-        
+
     (Ze, MeanVel, SpecWidth, Skewn, Kurt, RefRat, CorrCoeff, DiffPh, SLDR, SCorrCoeff,
      KDP, DiffAtt) = [np.zeros((n_samples, n_levels), np.float32) for _ in range(12)]
-        
+
     if polarization > 0:
         n_dummy += n_levels
 
@@ -348,7 +357,7 @@ def _read_rpg_l1(file_name: str, header: dict) -> dict:
 
 def _get_valid_l1_keys(header: dict) -> list:
     """Controls which variables our provided as output."""
-    
+
     keys = ['Time', 'MSec', 'QF', 'RR', 'RelHum', 'EnvTemp',
             'BaroP', 'WS', 'WD', 'DDVolt', 'DDTb', 'LWP',
             'PowIF', 'Elev', 'Azi', 'Status', 'TransPow',
