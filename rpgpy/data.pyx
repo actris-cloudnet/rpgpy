@@ -77,19 +77,22 @@ def _read_rpg_l0(file_name: str, header: dict) -> dict:
         float [:] Elev, Azi, Status, TransPow, TransT, RecT, PCT
         float [:, :, :] TotSpec = np.zeros((n_samples, n_levels, n_spectra), np.float32)
         float [:, :, :] HSpec, ReVHSpec, ImVHSpec, RefRat, CorrCoeff, DiffPh, SLDR, SCorrCoeff
-        float [:, :] KDP, DiffAtt, TotNoisePow, HNoisePow, MinVel
+        float [:, :] KDP, DiffAtt, TotNoisePow, HNoisePow, MinVel, SLh, SLv
         char [:, :] AliasMsk
-        int n_dummy = 3 + header['TAltN'] + 2*header['HAltN'] + 2*n_levels
+        int n_dummy = 3 + header['TAltN'] + 2*header['HAltN'] + n_levels
 
     (RR, RelHum, EnvTemp, BaroP, WS, WD, DDVolt, DDTb, LWP, PowIF, Elev, Azi, Status,
      TransPow, TransT, RecT, PCT) = [np.empty(n_samples, np.float32) for _ in range(17)]
 
+    SLv = np.zeros((n_samples, n_levels), np.float32)
+
     if polarization > 0:
-        n_dummy += 2*n_levels
+        n_dummy += n_levels
         HSpec, ReVHSpec, ImVHSpec = [np.zeros((n_samples, n_levels, n_spectra), np.float32)
                                      for _ in range(3)]
+        SLh = np.zeros((n_samples, n_levels), np.float32)
     else:
-        HSpec, ReVHSpec, ImVHSpec = [None]*3
+        HSpec, ReVHSpec, ImVHSpec, SLh = [None]*4
 
     if compression > 0:
         TotNoisePow = np.zeros((n_samples, n_levels), np.float32)
@@ -149,6 +152,11 @@ def _read_rpg_l0(file_name: str, header: dict) -> dict:
         fread(&RecT[sample], 4, 1, ptr)
         fread(&PCT[sample], 4, 1, ptr)
         fseek(ptr, n_dummy * 4, SEEK_CUR)  # this chunk contains data (temp profile etc.)
+        fread(&SLv[sample, 0], 4, n_levels, ptr)
+
+        if polarization > 0:
+            fread(&SLh[sample, 0], 4, n_levels, ptr)
+
         fread(is_data, 1, n_levels, ptr)
 
         for alt_ind in range(n_levels):
@@ -238,7 +246,7 @@ def _get_valid_l0_keys(header: dict) -> list:
     keys = ['Time', 'MSec', 'QF', 'RR', 'RelHum', 'EnvTemp',
             'BaroP', 'WS', 'WD', 'DDVolt', 'DDTb', 'LWP',
             'PowIF', 'Elev', 'Azi', 'Status', 'TransPow',
-            'TransT', 'RecT', 'PCT', 'TotSpec']
+            'TransT', 'RecT', 'PCT', 'TotSpec', 'SLv']
 
     if header['CompEna'] > 0:
         keys += ['TotNoisePow']
@@ -247,7 +255,7 @@ def _get_valid_l0_keys(header: dict) -> list:
         keys += ['RefRat', 'CorrCoeff', 'DiffPh']
 
     if header['DualPol'] > 0:
-        keys += ['HSpec', 'ReVHSpec', 'ImVHSpec']
+        keys += ['HSpec', 'ReVHSpec', 'ImVHSpec', 'SLh']
 
     if header['CompEna'] > 0 and header['DualPol'] > 0:
         keys += ['HNoisePow']
