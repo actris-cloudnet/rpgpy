@@ -331,6 +331,14 @@ METADATA = {
         name='differential_phase_shift',
         long_name='Differential Phase Shift',
         units='rad/km'),
+    'SLv': Meta(
+        name='sensitivity_limit_v',
+        long_name='Sensitivity limit for vertical polarization',
+        units='linear units'),
+    'SLh': Meta(
+        name='sensitivity_limit_h',
+        long_name='Sensitivity limit for horizontal polarization',
+        comment='linear units'),
     'DiffAtt': Meta(
         name='differential_attenuation',
         long_name='Differential Attenuation',
