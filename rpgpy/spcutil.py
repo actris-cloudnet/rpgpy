@@ -21,8 +21,8 @@ def spectra2moments(LV0data: Dict, LV0meta: Dict, spec_var: Optional[str] = 'Tot
 
     """
     # initialize variables:
-    n_ts, n_rg, _ = LV0data[spec_var].shape
-    moments = np.full((n_ts, n_rg, 5), np.nan)
+    n_time, n_range, _ = LV0data[spec_var].shape
+    moments = np.full((n_time, n_range, 5), np.nan)
 
     spec_lin = LV0data[spec_var].copy()
     mask = spec_lin <= 0.0
@@ -36,7 +36,7 @@ def spectra2moments(LV0data: Dict, LV0meta: Dict, spec_var: Optional[str] = 'Tot
         Dopp_res = np.mean(np.diff(LV0meta['velocity_vectors'][ichirp]))
 
         for irange in range(ranges[ichirp], ranges[ichirp + 1]):
-            for itime in range(n_ts):
+            for itime in range(n_time):
                 if mask2D[itime, irange]:
                     continue
                 edge_left, edge_right = find_peak_edges(spec_lin[itime, irange, :])
@@ -49,7 +49,7 @@ def spectra2moments(LV0data: Dict, LV0meta: Dict, spec_var: Optional[str] = 'Tot
         moments[:, ranges[ichirp]:ranges[ichirp + 1], 1] -= Dopp_res / 2.0
 
     # create the mask where invalid values have been encountered
-    invalid_mask = np.full((n_ts, n_rg), True)
+    invalid_mask = np.full((n_time, n_range), True)
     invalid_mask[moments[:, :, 0] > 0.0] = False
 
     moments = {var: moments[:, :, i] for i, var in enumerate(['Ze', 'MeanVel', 'SpecWidth', 'Skewn', 'Kurt'])}
@@ -153,12 +153,12 @@ def replace_fill_value(data: np.array, newfill: np.array) -> np.array:
         Unit test
     """
 
-    n_ts, n_rg, _ = data.shape
+    n_time, n_range, _ = data.shape
     var = data.copy()
     masked = np.all(data <= 0.0, axis=2)
 
-    for itime in range(n_ts):
-        for irange in range(n_rg):
+    for itime in range(n_time):
+        for irange in range(n_range):
             if masked[itime, irange]:
                 var[itime, irange, :] = newfill[itime, irange]
             else:
