@@ -1,5 +1,4 @@
 from typing import Dict, Tuple, Optional
-
 import numpy as np
 from numba import jit
 
@@ -25,28 +24,28 @@ def spectra2moments(LV0data: Dict, LV0meta: Dict, spec_var: Optional[str] = 'Tot
     moments = np.full((n_time, n_range, 5), np.nan)
 
     spec_lin = LV0data[spec_var].copy()
-    mask = spec_lin <= 0.0
+    mask = ~(spec_lin > 0)
     spec_lin[mask] = 0.0
 
     # combine the mask for "contains signal" with "signal has more than 1 spectral line"
-    mask2D = np.all(mask, axis=2)
+    no_signal = np.all(mask, axis=2)
     ranges = np.append(LV0meta['RngOffs'], LV0meta['RAltN'])
 
-    for ichirp in range(LV0meta['SequN']):
-        Dopp_res = np.mean(np.diff(LV0meta['velocity_vectors'][ichirp]))
+    for ind_chirp in range(LV0meta['SequN']):
+        Dopp_res = np.mean(np.diff(LV0meta['velocity_vectors'][ind_chirp]))
 
-        for irange in range(ranges[ichirp], ranges[ichirp + 1]):
-            for itime in range(n_time):
-                if mask2D[itime, irange]:
+        for ind_range in range(ranges[ind_chirp], ranges[ind_chirp + 1]):
+            for ind_time in range(n_time):
+                if no_signal[ind_time, ind_range]:
                     continue
-                edge_left, edge_right = find_peak_edges(spec_lin[itime, irange, :])
-                moments[itime, irange, :] = radar_moment_calculation(
-                    spec_lin[itime, irange, edge_left:edge_right],
-                    LV0meta['velocity_vectors'][ichirp][edge_left:edge_right]
+                edge_left, edge_right = find_peak_edges(spec_lin[ind_time, ind_range, :])
+                moments[ind_time, ind_range, :] = radar_moment_calculation(
+                    spec_lin[ind_time, ind_range, edge_left:edge_right],
+                    LV0meta['velocity_vectors'][ind_chirp][edge_left:edge_right]
                 )
 
         # shift mean Doppler velocity by half a bin
-        moments[:, ranges[ichirp]:ranges[ichirp + 1], 1] -= Dopp_res / 2.0
+        moments[:, ranges[ind_chirp]:ranges[ind_chirp + 1], 1] -= Dopp_res / 2.0
 
     # create the mask where invalid values have been encountered
     invalid_mask = np.full((n_time, n_range), True)
@@ -75,7 +74,7 @@ def radar_moment_calculation(signal: np.array, vel_bins: np.array) -> np.array:
         - vel_bins: extracted velocity bins of the signal (same length as signal)
 
     Returns:
-        dict containing
+        array containing
 
             - Ze_lin: reflectivity (0.Mom) over range of velocity bins [mm6/m3]
             - VEL: mean velocity (1.Mom) over range of velocity bins [m/s]
@@ -103,13 +102,11 @@ def radar_moment_calculation(signal: np.array, vel_bins: np.array) -> np.array:
 
 
 @jit(nopython=True, fastmath=True)
-def find_peak_edges(signal: np.array, threshold: Optional[float] = -1, imax: Optional[int] = -1) -> Tuple[int, int]:
+def find_peak_edges(signal: np.array) -> Tuple[int, int]:
     """Returns the indices of left and right edge of the main signal peak in a Doppler spectra.
 
     Args:
         signal: 1D array Doppler spectra
-        threshold (optional): noise threshold
-        imax (optional): index of signal maximum
 
     Returns:
         edge_left, edge_right: indices of minimum/maximum velocity of the main peak
@@ -119,10 +116,8 @@ def find_peak_edges(signal: np.array, threshold: Optional[float] = -1, imax: Opt
     """
     len_sig = len(signal)
     edge_left, edge_right = 0, len_sig
-    if threshold < 0:
-        threshold = np.min(signal)
-    if imax < 0:
-        imax = np.argmax(signal)
+    threshold = np.min(signal)
+    imax = np.argmax(signal)
 
     for ispec in range(imax, len_sig):
         if signal[ispec] > threshold:
@@ -137,31 +132,4 @@ def find_peak_edges(signal: np.array, threshold: Optional[float] = -1, imax: Opt
         break
 
     return edge_left, edge_right
-
-
-
-def replace_fill_value(data: np.array, newfill: np.array) -> np.array:
-    """Replaces the fill value of an spectrum by another value.
-    Args:
-        data: 3D spectrum array (time, range, velocity)
-        newfill: 2D new fill values for 3rd dimension (velocity)
-
-    Return:
-        var: spectrum with new fill values
-
-    TODO:
-        Unit test
-    """
-
-    n_time, n_range, _ = data.shape
-    var = data.copy()
-    masked = np.all(data <= 0.0, axis=2)
-
-    for itime in range(n_time):
-        for irange in range(n_range):
-            if masked[itime, irange]:
-                var[itime, irange, :] = newfill[itime, irange]
-            else:
-                var[itime, irange, var[itime, irange, :] <= 0.0] = newfill[itime, irange]
-    return var
 
