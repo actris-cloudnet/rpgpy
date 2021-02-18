@@ -111,8 +111,6 @@ def find_peak_edges(signal: np.array) -> Tuple[int, int]:
     Returns:
         edge_left, edge_right: indices of minimum/maximum velocity of the main peak
 
-    TODO:
-        Unit test
     """
     len_sig = len(signal)
     edge_left, edge_right = 0, len_sig
