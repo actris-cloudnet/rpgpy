@@ -1,4 +1,5 @@
-from rpgpy import utils
+from rpgpy import utils, spcutil
+import numpy as np
 from numpy.testing import assert_array_equal
 import pytest
 
@@ -34,3 +35,13 @@ def test_create_velocity_vectors():
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
     assert_array_equal(utils.create_velocity_vectors(inp), res)
     assert_array_equal(utils.create_velocity_vectors(inp).mask, mask)
+
+
+def test_find_peak_edges():
+    inp = np.array([0, 0, 0, 0, 0.01, 0.04, 0.09, 0.1, 0.05, 0.01, 0, 0, 0, 0, 0])
+    res = (4, 10)
+    assert_array_equal(spcutil.find_peak_edges(inp), res)
+
+    inp = np.array([0.09, 0.1, 0.05, 0.01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.01, 0.04])
+    res = (0, 4)
+    assert_array_equal(spcutil.find_peak_edges(inp), res)
