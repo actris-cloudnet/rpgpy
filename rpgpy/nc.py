@@ -8,7 +8,17 @@ import netCDF4
 from tqdm import tqdm
 from rpgpy import read_rpg, utils
 from rpgpy.metadata import METADATA
+import os
+import logging
+from time import time
 
+
+cwd = os.getcwd()
+
+# logger to report information
+# TODO: add default logging file and write on it.
+logger = logging.getLogger(__name__)
+logger.setLevel("INFO")
 
 # Not yet sure how to choose the variables to be written
 SKIP_ME = ('ProgName', 'CustName', 'HAlts', 'TAlts',
@@ -29,7 +39,7 @@ def rpg2nc(path_to_files: str, output_file: str, global_attr: dict = None) -> No
     files, level = _get_rpg_files(path_to_files)
     f = netCDF4.Dataset(output_file, 'w', format='NETCDF4_CLASSIC')
     header, data = read_rpg(files[0])
-    print('Writing compressed netCDF4 file...')
+    logger.info('Writing compressed netCDF4 file...')
     _create_dimensions(f, header, level)
     _write_initial_data(f, header)
     _write_initial_data(f, data)
@@ -41,7 +51,33 @@ def rpg2nc(path_to_files: str, output_file: str, global_attr: dict = None) -> No
 
     _create_global_attributes(f, global_attr, level)
     f.close()
-    print('..done.')
+    logger.info('..done.')
+
+def rpg2nc_multi(dir: str = cwd) -> None:
+    """Converts all files with extension ['.LV0', '.LV1', '.lv0', 'lv1']
+    contained in all the subdirectories of the speficied folder.
+    By default, it will write the new files with the same name of the original ones,
+    just adding the extension 'nc' within directory where the program is executed.
+
+    Args:
+        dir (str, default: current directory): Root directory from which the function will
+            start looking for files to convert.
+    
+    """
+    global gen
+    gen = _generator_files(dir)
+
+    while True:
+        try:
+            filepath = next(gen)
+            logger.info(f'Converting file: {filepath}')
+            rpg2nc(filepath, _new_filename(filepath))
+            logger.info("Success!")
+        except (IndexError):
+            logger.warning(f'############### File {filepath} has not been converted due to an IndexError')
+        except (StopIteration):
+            logger.warning('-----> Files should be finished!')
+            break
 
 
 def _check_header_consistency(f: netCDF4.Dataset, header: dict) -> None:
@@ -152,3 +188,21 @@ def _get_measurement_date(file: netCDF4.Dataset) -> list:
     date = utils.rpg_seconds2date(ma.min(time), date_only=True)
     assert_array_equal(date, utils.rpg_seconds2date(ma.max(time), date_only=True))
     return date
+
+def _generator_files(dir: str = cwd):
+    """"Function that creates a generator with filepaths
+    of leve0 and level1 files.
+
+    """
+
+    includes = ('.LV0', '.LV1', '.lv0', 'lv1')
+    
+    for subdir, dirs, files in sorted(os.walk(dir)):
+        for file in files:
+            if file.endswith(includes):
+                yield os.path.join(subdir, file)
+
+def _new_filename(filepath):
+    filename = filepath.split('/')[-1] + '.nc'
+
+    return filename
