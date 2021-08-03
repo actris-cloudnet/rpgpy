@@ -203,6 +203,6 @@ def _generator_files(dir: str = cwd):
                 yield os.path.join(subdir, file)
 
 def _new_filename(filepath):
-    filename = filepath.split('/')[-1] + '.nc'
+    filename = os.path.split(filepath)[-1] + '.nc'
 
     return filename
