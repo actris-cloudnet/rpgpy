@@ -37,7 +37,7 @@ more explicit key names can be chosen:
 ```python
 >>> header, data = read_rpg('rpg_file.LV0', rpg_names=False)
 ```
-### Converting to NetCDF4
+### Converting a single file to NetCDF4
 ```python
 >>> from rpgpy import rpg2nc
 >>> rpg2nc('rpg_file.LV0', 'rpg_file.nc')
@@ -55,6 +55,17 @@ With Level 0 data, this can lead to a very large netCDF file.
 ```python
 >>> rpg2nc('/path/to/files/*.LV0', 'huge_file.nc')
 ```
+
+### Converting multiple files to NetCDF4
+It is possible to convert multiple lv0 or lv1 files with the following function.
+Every file with extension .LV0, .lv0, .LV1 or .lv1 in every subdirectory of the specified path will be included in the convertion.  
+Optionally, the user can exclude level 0 files by switching to `False` the argument `include_lv0`; by default it will include them.
+```python
+>>> from rpgpy import rpg2nc_multi
+>>> rpg2nc_multi('/path/to/myfiles', include_lv0=True)
+```
+If no path is made explicit, the function will by default take as argument the current directory
+and write the converted file in it.
 
 ## Tests
 Run unit tests:
