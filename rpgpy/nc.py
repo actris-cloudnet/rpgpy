@@ -1,7 +1,7 @@
 """Module for writing netCDF file."""
 import glob
 import uuid
-from typing import Tuple
+from typing import Tuple, Optional
 import numpy.ma as ma
 from numpy.testing import assert_array_equal
 import netCDF4
@@ -20,7 +20,7 @@ SKIP_ME = ('ProgName', 'CustName', 'HAlts', 'TAlts',
            'StartTime', 'StopTime')
 
 
-def rpg2nc(path_to_files: str, output_file: str, global_attr: dict = None) -> None:
+def rpg2nc(path_to_files: str, output_file: str, global_attr: Optional[dict] = None) -> None:
     """Converts RPG binary files into a netCDF4 file.
 
     Args:
@@ -48,7 +48,10 @@ def rpg2nc(path_to_files: str, output_file: str, global_attr: dict = None) -> No
     f.close()
     logging.info('..done.')
 
-def rpg2nc_multi(dir_: str = CWD, include_lv0: bool = True) -> None:
+def rpg2nc_multi(file_directory: str = CWD,
+                 base_name: Optional[str] = None,
+                 include_lv0: Optional[bool] = True,
+                 global_attr: Optional[dict] = None) -> None:
     """Converts all files with extension ['.LV0', '.LV1', '.lv0', 'lv1']
     if include_lv0 is set to True (default); otherwise, it does it just for
     ['.LV1','.lv1'] contained in all the subdirectories of the speficied folder.
@@ -56,15 +59,19 @@ def rpg2nc_multi(dir_: str = CWD, include_lv0: bool = True) -> None:
     just adding the extension 'nc' within directory where the program is executed.
 
     Args:
-        dir_ (str, default: current directory): Root directory from which the function will
+        file_directory (str, default: current directory): Root directory from which the function will
             start looking for files to convert.
         include_lv0 (bool, default: True): option to include Level 0 files or not.
+        global_attr (dict, optional): Additional global attributes.
     """
 
-    for filepath in _generator_files(dir_, include_lv0):
+    for filepath in _generator_files(file_directory, include_lv0):
         logging.info(f'Converting file: {filepath}')
         try:
-            rpg2nc(filepath, _new_filename(filepath))
+            if base_name:
+                rpg2nc(filepath, base_name + '_' + _new_filename(filepath), global_attr)
+            else:
+                rpg2nc(filepath, _new_filename(filepath), global_attr)
         except IndexError as err:
             logging.warning(f'############### File {filepath} has not been converted: {err}')
         logging.info("Success!")
@@ -187,9 +194,9 @@ def _generator_files(dir_: str = CWD, include_lv0: bool = True):
     """
 
     if include_lv0:
-        includes = ('.LV0', '.LV1', '.lv0', 'lv1')
+        includes = ('.LV0', '.LV1', '.lv0', '.lv1')
     else:
-        includes = ('.LV1', 'lv1')
+        includes = ('.LV1', '.lv1')
     
     for subdir, dirs, files in sorted(os.walk(dir_)):
         for file in files:
