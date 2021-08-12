@@ -48,6 +48,7 @@ def rpg2nc(path_to_files: str, output_file: str, global_attr: Optional[dict] = N
     f.close()
     logging.info('..done.')
 
+
 def rpg2nc_multi(file_directory: str = CWD,
                  base_name: Optional[str] = None,
                  include_lv0: Optional[bool] = True,
@@ -63,6 +64,7 @@ def rpg2nc_multi(file_directory: str = CWD,
             start looking for files to convert.
         include_lv0 (bool, default: True): option to include Level 0 files or not.
         global_attr (dict, optional): Additional global attributes.
+        base_name (str, optional): Base name for new filenames.
     """
 
     for filepath in _generator_files(file_directory, include_lv0):
@@ -187,6 +189,7 @@ def _get_measurement_date(file: netCDF4.Dataset) -> list:
     assert_array_equal(date, utils.rpg_seconds2date(ma.max(time), date_only=True))
     return date
 
+
 def _generator_files(dir_: str = CWD, include_lv0: bool = True):
     """"Internal function that creates a generator with filepaths
     of level0 (if 'include_lv0' switch is True) and level1 files.
@@ -197,11 +200,12 @@ def _generator_files(dir_: str = CWD, include_lv0: bool = True):
         includes = ('.LV0', '.LV1', '.lv0', '.lv1')
     else:
         includes = ('.LV1', '.lv1')
-    
+
     for subdir, dirs, files in sorted(os.walk(dir_)):
         for file in files:
             if file.endswith(includes):
                 yield os.path.join(subdir, file)
+
 
 def _new_filename(filepath):
     filename = os.path.split(filepath)[-1] + '.nc'

@@ -62,10 +62,11 @@ Every file with extension .LV0, .lv0, .LV1 or .lv1 in every subdirectory of the 
 Optionally, the user can exclude level 0 files by switching to `False` the argument `include_lv0`; by default it will include them.
 ```python
 >>> from rpgpy import rpg2nc_multi
->>> rpg2nc_multi('/path/to/myfiles', include_lv0=True)
+>>> rpg2nc_multi('/path/to/myfiles', include_lv0=True, base_name"foo")
 ```
 If no path is made explicit, the function will by default take as argument the current directory
-and write the converted file in it.
+and write the converted file in it.  
+If the parameter `base_name` is specified, the function will rename the new files as `basename_oldname`.
 
 ## Tests
 Run unit tests:
