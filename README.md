@@ -3,7 +3,7 @@
 ![](https://github.com/actris-cloudnet/rpgpy/workflows/RpgPy%20CI/badge.svg)
 [![PyPI version](https://badge.fury.io/py/rpgPy.svg)](https://badge.fury.io/py/rpgPy)
 
-RpgPy is a Python / Cython software for reading [RPG cloud radar](https://www.radiometer-physics.de/products/microwave-remote-sensing-instruments/94-ghz-fmcw-doppler-cloud-radar/) Level 0 and Level 1 binary files.
+RpgPy is a Python / Cython software for reading [RPG cloud radar](https://www.radiometer-physics.de/products/microwave-remote-sensing-instruments/94-ghz-fmcw-doppler-cloud-radar/) Level 0 and Level 1 binary files and converting to netCDF4.
 
 # Installation
 
@@ -37,7 +37,7 @@ more explicit key names can be chosen:
 ```python
 >>> header, data = read_rpg('rpg_file.LV0', rpg_names=False)
 ```
-### Converting a single file to NetCDF4
+### Converting single file to single netCDF4
 ```python
 >>> from rpgpy import rpg2nc
 >>> rpg2nc('rpg_file.LV0', 'rpg_file.nc')
@@ -50,22 +50,24 @@ additional ones via a dictionary:
 >>> attr = {'attr1': 'foo', 'attr2': 42}
 >>> rpg2nc('rpg_file.LV0', 'rpg_file.nc', global_attr=attr)
 ```
+
+### Converting multiple files to single netCDF4
 Several RPG files can be concatenated to singe netCDF file using wildcard.
 With Level 0 data, this can lead to a very large netCDF file.
 ```python
 >>> rpg2nc('/path/to/files/*.LV0', 'huge_file.nc')
 ```
 
-### Converting multiple files to NetCDF4
-It is possible to convert multiple lv0 or lv1 files with the following function.
-Every file with extension .LV0, .lv0, .LV1 or .lv1 in every subdirectory of the specified path will be included in the convertion.  
-Optionally, the user can exclude level 0 files by switching to `False` the argument `include_lv0`; by default it will include them.
+### Converting multiple files to corresponding netCDF4 files
+Several RPG files can be converted to corresponding individual netCDF4 files using `rpg2nc_multi` function.
+Every file with extension `.LV0`, `.lv0`, `.LV1` or `.lv1` in every subdirectory of the specified path will be converted.  
+Optionally, the user can exclude Level 0 files by switching the argument of `include_lv0` parameter to `False`.
 ```python
 >>> from rpgpy import rpg2nc_multi
 >>> rpg2nc_multi('/path/to/myfiles', include_lv0=True, base_name"foo")
 ```
 If no path is made explicit, the function will by default take as argument the current directory
-and write the converted file in it.  
+and write the converted files in it.  
 If the parameter `base_name` is specified, the function will rename the new files as `basename_oldname`.
 
 ## Tests
