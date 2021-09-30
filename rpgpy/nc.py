@@ -7,7 +7,7 @@ from numpy.testing import assert_array_equal
 import netCDF4
 from tqdm import tqdm
 from rpgpy import read_rpg, utils
-from rpgpy.metadata import METADATA
+import rpgpy.metadata
 import os
 import logging
 
@@ -34,15 +34,17 @@ def rpg2nc(path_to_files: str, output_file: str, global_attr: Optional[dict] = N
     files, level = _get_rpg_files(path_to_files)
     f = netCDF4.Dataset(output_file, 'w', format='NETCDF4_CLASSIC')
     header, data = read_rpg(files[0])
+    metadata = rpgpy.metadata.METADATA
+    metadata = _fix_metadata(metadata, header)
     logging.info('Writing compressed netCDF4 file...')
     _create_dimensions(f, header, level)
-    _write_initial_data(f, header)
-    _write_initial_data(f, data)
+    _write_initial_data(f, header, metadata)
+    _write_initial_data(f, data, metadata)
     if len(files) > 1:
         for file in tqdm(files[1:]):
             header, data = read_rpg(file)
             _check_header_consistency(f, header)
-            _append_data(f, data)
+            _append_data(f, data, metadata)
 
     _create_global_attributes(f, global_attr, level)
     f.close()
@@ -99,33 +101,33 @@ def _create_dimensions(f: netCDF4.Dataset, header: dict, level: int) -> None:
         f.createDimension('chirp', header['SequN'])
 
 
-def _write_initial_data(f: netCDF4.Dataset, data: dict) -> None:
+def _write_initial_data(f: netCDF4.Dataset, data: dict, metadata: dict) -> None:
     for key, array in data.items():
         if key in SKIP_ME:
             continue
         fill_value = 0 if array.ndim > 1 and not ma.isMaskedArray(array) else None
-        var = f.createVariable(METADATA[key].name, _get_dtype(array),
+        var = f.createVariable(metadata[key].name, _get_dtype(array),
                                _get_dim(f, array), zlib=True, complevel=3,
                                shuffle=False, fill_value=fill_value)
         var[:] = array
-        _set_attributes(var, key)
+        _set_attributes(var, key, metadata)
 
 
-def _set_attributes(obj, key: str) -> None:
+def _set_attributes(obj, key: str, metadata: dict) -> None:
     for attr_name in ('long_name', 'units', 'comment'):
-        value = getattr(METADATA[key], attr_name)
+        value = getattr(metadata[key], attr_name)
         if value:
             setattr(obj, attr_name, value)
     obj.rpg_manual_name = key
 
 
-def _append_data(f: netCDF4.Dataset, data: dict) -> None:
+def _append_data(f: netCDF4.Dataset, data: dict, metadata: dict) -> None:
     ind0 = len(f.variables['time'])
     ind1 = ind0 + data['Time'].shape[0]
     for key, array in data.items():
         if key in SKIP_ME:
             continue
-        key = METADATA[key].name
+        key = metadata[key].name
         if array.ndim == 1:
             f.variables[key][ind0:ind1] = array
         elif array.ndim == 2:
@@ -208,6 +210,14 @@ def _generator_files(dir_: str = CWD, include_lv0: bool = True):
 
 
 def _new_filename(filepath):
-    filename = os.path.split(filepath)[-1] + '.nc'
+    return os.path.split(filepath)[-1] + '.nc'
 
-    return filename
+
+def _fix_metadata(metadata: dict, header: dict) -> dict:
+    fixed_metadata = metadata.copy()
+    if header['DualPol'] == 2:
+        fixed_metadata['RefRat'] = rpgpy.metadata.Meta(
+            name='zdr',
+            long_name='Differential Reflectivity Ratio'
+        )
+    return fixed_metadata
