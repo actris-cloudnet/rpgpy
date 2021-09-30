@@ -51,31 +51,29 @@ def rpg2nc(path_to_files: str, output_file: str, global_attr: Optional[dict] = N
     logging.info('..done.')
 
 
-def rpg2nc_multi(file_directory: str = CWD,
+def rpg2nc_multi(file_directory: Optional[str] = CWD,
                  base_name: Optional[str] = None,
                  include_lv0: Optional[bool] = True,
                  global_attr: Optional[dict] = None) -> None:
     """Converts all files with extension ['.LV0', '.LV1', '.lv0', 'lv1']
     if include_lv0 is set to True (default); otherwise, it does it just for
-    ['.LV1','.lv1'] contained in all the subdirectories of the speficied folder.
+    ['.LV1','.lv1'] contained in all the subdirectories of the specified folder.
     By default, it will write the new files with the same name of the original ones,
     just adding the extension 'nc' within directory where the program is executed.
 
     Args:
-        file_directory (str, default: current directory): Root directory from which the function will
-            start looking for files to convert.
+        file_directory (str, default: current directory): Root directory from which the function
+            will start looking for files to convert.
         include_lv0 (bool, default: True): option to include Level 0 files or not.
         global_attr (dict, optional): Additional global attributes.
         base_name (str, optional): Base name for new filenames.
     """
-
     for filepath in _generator_files(file_directory, include_lv0):
         logging.info(f'Converting file: {filepath}')
         try:
-            if base_name:
-                rpg2nc(filepath, base_name + '_' + _new_filename(filepath), global_attr)
-            else:
-                rpg2nc(filepath, _new_filename(filepath), global_attr)
+            prefix = f'{base_name}_' if base_name is not None else ''
+            new_filename = f'{prefix}{_new_filename(filepath)}'
+            rpg2nc(filepath, new_filename, global_attr)
         except IndexError as err:
             logging.warning(f'############### File {filepath} has not been converted: {err}')
         logging.info("Success!")
@@ -89,8 +87,7 @@ def _check_header_consistency(f: netCDF4.Dataset, header: dict) -> None:
             try:
                 assert_array_equal(array, f.variables[key])
             except AssertionError:
-                print('Warning: inconsistent header data in ' + key, array,
-                      f.variables[key][:])
+                print('Warning: inconsistent header data in ' + key, array, f.variables[key][:])
 
 
 def _create_dimensions(f: netCDF4.Dataset, header: dict, level: int) -> None:
@@ -192,25 +189,19 @@ def _get_measurement_date(file: netCDF4.Dataset) -> list:
     return date
 
 
-def _generator_files(dir_: str = CWD, include_lv0: bool = True):
-    """"Internal function that creates a generator with filepaths
+def _generator_files(dir_name: str, include_lv0: bool):
+    """"Internal function that creates a generator with file paths
     of level0 (if 'include_lv0' switch is True) and level1 files.
-
     """
-
-    if include_lv0:
-        includes = ('.LV0', '.LV1', '.lv0', '.lv1')
-    else:
-        includes = ('.LV1', '.lv1')
-
-    for subdir, dirs, files in sorted(os.walk(dir_)):
+    includes = ('.lv1',) if include_lv0 is False else ('.lv0', 'lv1')
+    for subdir, dirs, files in sorted(os.walk(dir_name)):
         for file in files:
-            if file.endswith(includes):
+            if file.lower().endswith(includes):
                 yield os.path.join(subdir, file)
 
 
 def _new_filename(filepath):
-    return os.path.split(filepath)[-1] + '.nc'
+    return f'{os.path.split(filepath)[-1]}.nc'
 
 
 def _fix_metadata(metadata: dict, header: dict) -> dict:
