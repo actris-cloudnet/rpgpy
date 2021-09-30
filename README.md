@@ -60,15 +60,15 @@ With Level 0 data, this can lead to a very large netCDF file.
 
 ### Converting multiple files to corresponding netCDF4 files
 Several RPG files can be converted to corresponding individual netCDF4 files using `rpg2nc_multi` function.
-Every file with extension `.LV0`, `.lv0`, `.LV1` or `.lv1` in every subdirectory of the specified path will be converted.  
+Every file with an extension `.LV0`, `.lv0`, `.LV1` or `.lv1` in every subdirectory of the specified path will be converted.  
 Optionally, the user can exclude Level 0 files by switching the argument of `include_lv0` parameter to `False`.
 ```python
 >>> from rpgpy import rpg2nc_multi
->>> rpg2nc_multi('/path/to/myfiles', include_lv0=True, base_name"foo")
+>>> rpg2nc_multi('/path/to/myfiles', include_lv0=True, base_name="foo")
 ```
-If no path is made explicit, the function will by default take as argument the current directory
-and write the converted files in it.  
-If the parameter `base_name` is specified, the function will rename the new files as `basename_oldname`.
+The converted files are written in the current working directory, which is also the default argument for the path,
+and `.nc` suffix is added to each converted file. If the parameter `base_name` is specified, e.g., `base_name="foo"`,
+also a prefix `foo_` is added to each file.
 
 ## Tests
 Run unit tests:
