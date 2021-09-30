@@ -150,7 +150,7 @@ def _dim(length: int, dtype: str = 'f') -> str:
     return f"({length},){dtype}"
 
 
-def _get_dtype(array: np.ndarray) -> type:
+def _get_dtype(array: np.array) -> type:
     if array.dtype in (np.int8, np.int32, np.uint32):
         return int
     return float
