@@ -62,6 +62,5 @@ class TestMoments:
     def test_that_moments_contain_no_nans(self):
         for key, data in self.moments.items():
             assert bool(np.isnan(data).any()) is False
-
     def test_that_works_with_hspec(self):
         moments = spectra2moments(self.data, self.header, spec_var='HSpec')
