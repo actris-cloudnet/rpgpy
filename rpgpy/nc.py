@@ -13,11 +13,8 @@ import logging
 
 CWD = os.getcwd()
 
-logging.basicConfig(level="INFO", format='%(levelname)s:%(message)s')
-
 # Not yet sure how to choose the variables to be written
-SKIP_ME = ('ProgName', 'CustName', 'HAlts', 'TAlts',
-           'StartTime', 'StopTime')
+SKIP_ME = ('ProgName', 'CustName', 'HAlts', 'TAlts', 'StartTime', 'StopTime')
 
 
 def rpg2nc(path_to_files: str, output_file: str, global_attr: Optional[dict] = None) -> None:
