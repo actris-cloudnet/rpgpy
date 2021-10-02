@@ -11,9 +11,6 @@ import rpgpy.metadata
 import os
 import logging
 
-CWD = os.getcwd()
-
-# Not yet sure how to choose the variables to be written
 SKIP_ME = ('ProgName', 'CustName', 'HAlts', 'TAlts', 'StartTime', 'StopTime')
 
 
@@ -48,23 +45,24 @@ def rpg2nc(path_to_files: str, output_file: str, global_attr: Optional[dict] = N
     logging.info('..done.')
 
 
-def rpg2nc_multi(file_directory: Optional[str] = CWD,
-                 base_name: Optional[str] = None,
+def rpg2nc_multi(file_directory: Optional[str] = None,
                  include_lv0: Optional[bool] = True,
+                 base_name: Optional[str] = None,
                  global_attr: Optional[dict] = None) -> None:
     """Converts all files with extension ['.LV0', '.LV1', '.lv0', 'lv1']
     if include_lv0 is set to True (default); otherwise, it does it just for
     ['.LV1','.lv1'] contained in all the subdirectories of the specified folder.
     By default, it will write the new files with the same name of the original ones,
-    just adding the extension 'nc' within directory where the program is executed.
+    just adding the extension '.nc' within directory where the program is executed.
 
     Args:
-        file_directory (str, default: current directory): Root directory from which the function
-            will start looking for files to convert.
-        include_lv0 (bool, default: True): option to include Level 0 files or not.
-        global_attr (dict, optional): Additional global attributes.
+        file_directory (str, optional): Root directory from which the function
+            will start looking for files to convert. Default is the current working directory.
+        include_lv0 (bool, optional): option to include Level 0 files or not. Default is True.
         base_name (str, optional): Base name for new filenames.
+        global_attr (dict, optional): Additional global attributes.
     """
+    file_directory = file_directory or os.getcwd()
     for filepath in _generator_files(file_directory, include_lv0):
         logging.info(f'Converting file: {filepath}')
         try:

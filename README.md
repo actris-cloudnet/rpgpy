@@ -122,12 +122,12 @@ rpg2nc_multi(file_directory: str = cwd, include_lv0: bool = True, base_name: str
 
 Arguments:
 
-|  Name         | Type        | Default            | Description                                    
-| :---          | :------     | :---               | :---                                           
-| `file_directory`    | `str` | current working directory  | Path to files to be searched recursively.     
-| `include_lv0` | `bool`      | `True`             | If `False`, exclude Level 0 files.             
-| `base_name`   | `str`       | `None`             | Optional prefix for the converted files.       
-| `global_attr` | `dict`      | `None`             | Additional global attributes.
+|  Name             | Type        | Default                    | Description                                    
+| :---              | :------     | :---                       | :---                                           
+| `file_directory`  | `str`       | current working directory  | Root path to be searched recursively.     
+| `include_lv0`     | `bool`      | `True`                     | If `False`, exclude Level 0 files.             
+| `base_name`       | `str`       | `None`                     | Optional prefix for the converted files.       
+| `global_attr`     | `dict`      | `None`                     | Additional global attributes.
 
 ##
 ### `spectra2moments()`
