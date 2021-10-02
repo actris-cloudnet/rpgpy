@@ -45,25 +45,25 @@ This works for both Level 0 and Level 1 files.
 This will write a compressed netCDF4 file.
 
 ### Converting multiple files to single netCDF4
-Several RPG files can be concatenated to singe netCDF file using wildcard.
+Several RPG files can be concatenated into singe netCDF file using wildcard.
 With Level 0 data, this can lead to a very large netCDF file.
 ```python
 >>> rpg2nc('/path/to/files/*.LV0', 'huge_file.nc')
 ```
 
 ### Converting multiple files to corresponding netCDF4 files
-Several RPG files can be converted to corresponding individual netCDF4 files using `rpg2nc_multi` function.
+Multiple RPG files can be converted into corresponding individual netCDF4 files using the `rpg2nc_multi` function.
 Every file with an extension `.LV0`, `.lv0`, `.LV1` or `.lv1` in every subdirectory of the specified path will be converted.
-Optionally, the user can exclude Level 0 files by switching `include_lv0` to `False`:
+Optionally, Level 0 files can be excluded by switching `include_lv0` to `False`:
 ```python
 >>> from rpgpy import rpg2nc_multi
->>> rpg2nc_multi('/path/to/myfiles', include_lv0=False)
+>>> rpg2nc_multi('/path/to/files', include_lv0=False)
 ```
-The converted files are written in the current working directory with a `.nc` suffix. 
+The converted files are written to the current working directory with a `.nc` suffix. 
 
 ### Calculating spectral moments
-`rpgpy` can estimate spectral moments from Level 0 data. The estimation is always based on the most prominent 
-peak in each time / range point.
+`rpgpy` can estimate spectral moments from Level 0 data. The estimation is based on the most 
+prominent peak of each time / range point.
 ```python
 >>> from rpgpy import read_rpg, spectra2moments
 >>> header, data = read_rpg('my-file.LV0')
@@ -85,7 +85,7 @@ Arguments:
 | Name        | Type     | Default | Description                                | 
 | :---        | :------  | :---    | :---                                       |
 | `filename`  | `str`    |         | Filename of RPG cloud radar Level 1 or Level 0 binary file. |
-| `rpg_names` | `bool`   | `True`  | If `True`, uses RPG manual names in the result dictionary, else more human-readable names.|
+| `rpg_names` | `bool`   | `True`  | If `True`, uses RPG manual names in the returned dictionary, else uses more human-readable names.|
 
 Returns:
 
@@ -114,7 +114,7 @@ Arguments:
 ### `rpg2nc_multi()`
 
 Convert RPG cloud radar files into several corresponding netCDF files. Input files are searched 
-recursively and the output files written in the current working directory.
+recursively and the output files are written in the current working directory.
 
 ```python
 rpg2nc_multi(file_directory: str = cwd, include_lv0: bool = True, base_name: str = None, global_attr: dict = None)
@@ -168,7 +168,8 @@ Run end-to-end tests:
 
 
 ## Performance
-For reading RPG binary files, depending on the radar settings, RpgPy is roughly 20-30 times faster than equivalent native Python or Matlab implementations.
+For reading RPG binary files, depending on the radar settings, RpgPy is roughly 20-30 times faster
+than equivalent native Python or Matlab implementations.
 
 ## License
 MIT
