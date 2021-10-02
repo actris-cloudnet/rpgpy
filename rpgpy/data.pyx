@@ -234,7 +234,7 @@ def _read_rpg_l0(file_name: str, header: dict) -> dict:
     return {key: np.asarray(var_names[key]) for key in keys}
 
 
-def _get_n_samples(header: dict) -> np.ndarray:
+def _get_n_samples(header: dict) -> np.array:
     """Finds number of spectral samples at each height."""
     array = np.ones(header['RAltN'], dtype=int)
     sub_arrays = np.split(array, header['RngOffs'][1:])
