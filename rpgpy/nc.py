@@ -7,6 +7,7 @@ from numpy.testing import assert_array_equal, assert_array_almost_equal
 import netCDF4
 from tqdm import tqdm
 from rpgpy import read_rpg, utils
+from rpgpy.spcutil import spectra2moments
 import rpgpy.metadata
 import os
 import logging
@@ -14,7 +15,7 @@ import logging
 SKIP_ME = ('ProgName', 'CustName', 'HAlts', 'TAlts', 'StartTime', 'StopTime')
 
 
-def rpg2nc(path_to_files: str, output_file: str, global_attr: Optional[dict] = None) -> None:
+def rpg2nc(path_to_files: str, output_file: str, **params) -> None:
     """Converts RPG binary files into a netCDF4 file.
 
     Args:
@@ -22,33 +23,41 @@ def rpg2nc(path_to_files: str, output_file: str, global_attr: Optional[dict] = N
             a wildcard to distinguish between different types of files.
             E.g. '/path/to/data/*.LV0'
         output_file (str): Name of the output file.
-        global_attr (dict, optional): Additional global attributes.
+        **params: Standard keyword arguments:
+            - 'n_points_min' (dict): Default 4
+            - 'calc_moments' (bool): Default False
+            - 'global_attr' (dict): Default {}
 
     """
     files, level = _get_rpg_files(path_to_files)
+    add_moments = params.get('calc_moments', False) is True and level == 0
     f = netCDF4.Dataset(output_file, 'w', format='NETCDF4_CLASSIC')
     header, data = read_rpg(files[0])
+    n_points_min = params.get('n_points_min', 4)
+    if add_moments is True:
+        data = _add_moments(data, header, n_points_min)
     metadata = rpgpy.metadata.METADATA
     metadata = _fix_metadata(metadata, header)
-    logging.info('Writing compressed netCDF4 file...')
+    logging.info('Writing compressed netCDF4 file')
     _create_dimensions(f, header, level)
     _write_initial_data(f, header, metadata)
     _write_initial_data(f, data, metadata)
     if len(files) > 1:
         for file in tqdm(files[1:]):
             header, data = read_rpg(file)
+            if add_moments is True:
+                data = _add_moments(data, header, n_points_min)
             _check_header_consistency(f, header)
             _append_data(f, data, metadata)
 
-    _create_global_attributes(f, global_attr, level)
+    _create_global_attributes(f, params.get('global_attr', None), level)
     f.close()
-    logging.info('..done.')
 
 
 def rpg2nc_multi(file_directory: Optional[str] = None,
                  include_lv0: Optional[bool] = True,
                  base_name: Optional[str] = None,
-                 global_attr: Optional[dict] = None) -> None:
+                 **params) -> None:
     """Converts all files with extension ['.LV0', '.LV1', '.lv0', 'lv1']
     if include_lv0 is set to True (default); otherwise, it does it just for
     ['.LV1','.lv1'] contained in all the subdirectories of the specified folder.
@@ -60,7 +69,8 @@ def rpg2nc_multi(file_directory: Optional[str] = None,
             will start looking for files to convert. Default is the current working directory.
         include_lv0 (bool, optional): option to include Level 0 files or not. Default is True.
         base_name (str, optional): Base name for new filenames.
-        global_attr (dict, optional): Additional global attributes.
+        **params: Standard `rpg2nc` keyword arguments.
+
     """
     file_directory = file_directory or os.getcwd()
     for filepath in _generator_files(file_directory, include_lv0):
@@ -68,7 +78,7 @@ def rpg2nc_multi(file_directory: Optional[str] = None,
         try:
             prefix = f'{base_name}_' if base_name is not None else ''
             new_filename = f'{prefix}{_new_filename(filepath)}'
-            rpg2nc(filepath, new_filename, global_attr)
+            rpg2nc(filepath, new_filename, **params)
         except IndexError as err:
             logging.warning(f'############### File {filepath} has not been converted: {err}')
         logging.info("Success!")
@@ -207,3 +217,10 @@ def _fix_metadata(metadata: dict, header: dict) -> dict:
             long_name='Differential Reflectivity Ratio'
         )
     return fixed_metadata
+
+
+def _add_moments(data: dict, header: dict, n_points_min: int) -> dict:
+    logging.info('Calculating moments')
+    moments = spectra2moments(data, header, fill_value=0, n_points_min=n_points_min)
+    data = {**data, **moments}
+    return data

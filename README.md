@@ -72,43 +72,30 @@ prominent peak of each time / range point.
 
 ## API reference
 
-### `read_rpg()`
-
-Read RPG cloud radar binary file.
-
-```python
-header, data = read_rpg(filename: str, rpg_names: bool = True)
-```
-
-Arguments:
-
-| Name        | Type     | Default | Description                                | 
-| :---        | :------  | :---    | :---                                       |
-| `filename`  | `str`    |         | Filename of RPG cloud radar Level 1 or Level 0 binary file. |
-| `rpg_names` | `bool`   | `True`  | If `True`, uses RPG manual names in the returned dictionary, else uses more human-readable names.|
-
-Returns:
-
-| Type        | Description                                                | 
-| :---------- | :---                                                       |
-| `tuple`     | 2-element tuple containing `header` and `data` dictionary. |
-
-##
 ### `rpg2nc()`
 
 Convert RPG cloud radar file(s) into single netCDF file.
 
 ```python
-rpg2nc(input: str, output: str, global_attr: dict = None)
+rpg2nc(input: str, output: str, **kwargs)
 ```
 
-Arguments:
+Positional arguments:
 
-|  Name         | Type         | Default  | Description                
-| :---          | :----------  | :---     | :---                         
-| `input`       | `str`        |          | Filename of single file, or multiple files identified using a wildcard, e.g., `/foo/bar/*.LV0`.   
-| `output`      | `str`        |          | Output file name. 
-| `global_attr` | `dict`       | `None`   | Additional global attributes. 
+|  Name         | Type         | Description                
+| :---          | :----------  | :---
+| `input`       | `str`        | Filename of single file, or multiple files identified using a wildcard, e.g., `/foo/bar/*.LV0`.   
+| `output`      | `str`        | Output file name.
+
+
+Keyword arguments:
+
+|  Name         | Type         | Default value  | Description
+| :---          | :----------  | :---           | :---
+| `global_attr` | `dict`       | `{}`           | Additional global attributes. 
+| `calc_moments` | `bool`      | `False`        | If `True`, calculates spectral moments from Level 0 data. Has no effect with Level 1 data.
+| `n_points_min` | `int`       | 4              | Minimum number of points in a proper spectral line. Has no effect with Level 1 data or if `calc_moments = False`.
+
 
 ##
 ### `rpg2nc_multi()`
@@ -117,17 +104,43 @@ Convert RPG cloud radar files into several corresponding netCDF files. Input fil
 recursively and the output files are written in the current working directory.
 
 ```python
-rpg2nc_multi(file_directory: str = cwd, include_lv0: bool = True, base_name: str = None, global_attr: dict = None)
+rpg2nc_multi(**kwargs)
 ```
+In addition to the same keyword arguments than `rpg2nc`, this function also accepts the following keyword arguments:
 
-Arguments:
-
-|  Name             | Type        | Default                    | Description                                    
+|  Name             | Type        | Default value              | Description                                    
 | :---              | :------     | :---                       | :---                                           
 | `file_directory`  | `str`       | current working directory  | Root path to be searched recursively.     
 | `include_lv0`     | `bool`      | `True`                     | If `False`, exclude Level 0 files.             
 | `base_name`       | `str`       | `None`                     | Optional prefix for the converted files.       
-| `global_attr`     | `dict`      | `None`                     | Additional global attributes.
+
+##
+### `read_rpg()`
+
+Read RPG cloud radar binary file.
+
+```python
+header, data = read_rpg(filename: str, rpg_names: bool = True)
+```
+
+Positional arguments:
+
+| Name        | Type     | Description                                | 
+| :---        | :------  | :---                                       |
+| `filename`  | `str`    | Filename of RPG cloud radar Level 1 or Level 0 binary file. |
+
+Keyword arguments:
+
+|  Name       | Type     | Default value | Description
+| :---        | :------  | :---          | :---                                       |
+| `rpg_names` | `bool`   | `True`        | If `True`, uses RPG manual names in the returned dictionary, else uses more human-readable names.|
+
+Returns:
+
+| Type        | Description                                                | 
+| :---------- | :---                                                       |
+| `tuple`     | 2-element tuple containing `header` and `data` dictionary. |
+
 
 ##
 ### `spectra2moments()`
@@ -135,18 +148,24 @@ Arguments:
 Calculate spectral moments from Level 0 spectral data. A call to `read_rpg()` is required before using this function.
 
 ```python
-moments = spectra2moments(data: dict, header: dict, spec_var: str = 'Totspec', fill_value: float = -999.0, n_points_min: int = 4)
+moments = spectra2moments(data: dict, header: dict, **kwargs)
 ```
 
-Arguments:
+Positional arguments:
 
-|  Name          | Type       | Default       | Description                                    
+|  Name          | Type       | Description                                    
+| :---           | :--------  | :---                                           
+| `data`         | `dict`     | Level 0 data dictionary from `read_rpg()`.      
+| `header`       | `dict`     | Level 0 header dictionary from `read_rpg()`.    
+
+Keyword arguments:
+
+|  Name          | Type       | Default value | Description                                    
 | :---           | :--------  | :---          | :---                                           
-| `data`         | `dict`     |               | Level 0 data dictionary from `read_rpg()`.      
-| `header`       | `dict`     |               | Level 0 header dictionary from `read_rpg()`.    
 | `spec_var`     | `str`      | `"TotSpec"`   | Spectral variable to be analyzed: `"TotSpec"` or `"HSpec"`.
 | `fill_value`   | `float`    | -999.0        | Value for the clear sky data points.
 | `n_points_min` | `int`      | 4             | Minimum number of points in a proper spectral line.
+
 
 Returns:
 
