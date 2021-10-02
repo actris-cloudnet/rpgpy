@@ -125,6 +125,14 @@ class TestRpg2ncMulti:
             nc.close()
             os.remove(expected_filename)
 
+    def test_output_dir(self):
+        output_dir = f'{FILE_PATH}/../data/level0/v3-889346/'
+        rpg2nc_multi(self.input_file_path, output_directory=output_dir)
+        for file in self.input_files:
+            expected_filename = f'{output_dir}/{os.path.basename(file)}.nc'
+            assert os.path.exists(expected_filename)
+            os.remove(expected_filename)
+
 
 class TestGeneratorFiles:
 

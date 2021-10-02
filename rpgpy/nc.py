@@ -57,6 +57,7 @@ def rpg2nc(path_to_files: str, output_file: str, **params) -> None:
 def rpg2nc_multi(file_directory: Optional[str] = None,
                  include_lv0: Optional[bool] = True,
                  base_name: Optional[str] = None,
+                 output_directory: Optional[str] = None,
                  **params) -> None:
     """Converts all files with extension ['.LV0', '.LV1', '.lv0', 'lv1']
     if include_lv0 is set to True (default); otherwise, it does it just for
@@ -69,15 +70,19 @@ def rpg2nc_multi(file_directory: Optional[str] = None,
             will start looking for files to convert. Default is the current working directory.
         include_lv0 (bool, optional): option to include Level 0 files or not. Default is True.
         base_name (str, optional): Base name for new filenames.
+        output_directory (str, optional): Directory name where files are written instead
+            of current working dir.
         **params: Standard `rpg2nc` keyword arguments.
 
     """
-    file_directory = file_directory or os.getcwd()
+    cwd = os.getcwd()
+    file_directory = file_directory or cwd
+    output_directory = output_directory or cwd
     for filepath in _generator_files(file_directory, include_lv0):
         logging.info(f'Converting file: {filepath}')
         try:
             prefix = f'{base_name}_' if base_name is not None else ''
-            new_filename = f'{prefix}{_new_filename(filepath)}'
+            new_filename = f'{output_directory}/{prefix}{_new_filename(filepath)}'
             rpg2nc(filepath, new_filename, **params)
         except IndexError as err:
             logging.warning(f'############### File {filepath} has not been converted: {err}')

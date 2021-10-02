@@ -108,11 +108,12 @@ rpg2nc_multi(**kwargs)
 ```
 In addition to the same keyword arguments than `rpg2nc`, this function also accepts the following keyword arguments:
 
-|  Name             | Type        | Default value              | Description                                    
-| :---              | :------     | :---                       | :---                                           
-| `file_directory`  | `str`       | current working directory  | Root path to be searched recursively.     
-| `include_lv0`     | `bool`      | `True`                     | If `False`, exclude Level 0 files.             
-| `base_name`       | `str`       | `None`                     | Optional prefix for the converted files.       
+|  Name              | Type        | Default value              | Description                                    
+| :---               | :------     | :---                       | :---                                           
+| `file_directory`   | `str`       | current working directory  | Root path to be searched recursively.  
+| `include_lv0`      | `bool`      | `True`                     | If `False`, exclude Level 0 files.
+| `base_name`        | `str`       | `None`                     | Optional prefix for the converted files.
+| `output_directory` | `str`       | current working directory  | Path name where the files are written.
 
 ##
 ### `read_rpg()`
