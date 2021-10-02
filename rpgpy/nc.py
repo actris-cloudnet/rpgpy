@@ -3,7 +3,7 @@ import glob
 import uuid
 from typing import Tuple, Optional
 import numpy.ma as ma
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_equal, assert_array_almost_equal
 import netCDF4
 from tqdm import tqdm
 from rpgpy import read_rpg, utils
@@ -80,7 +80,7 @@ def _check_header_consistency(f: netCDF4.Dataset, header: dict) -> None:
     for key, array in header.items():
         if key in f.variables:
             try:
-                assert_array_equal(array, f.variables[key])
+                assert_array_almost_equal(array, f.variables[key])
             except AssertionError:
                 print('Warning: inconsistent header data in ' + key, array, f.variables[key][:])
 
