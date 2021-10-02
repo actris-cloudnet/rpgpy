@@ -112,6 +112,19 @@ class TestRpg2ncMulti:
             os.remove(expected_filename)
         assert glob.glob(f'{cwd}/*.nc') == []
 
+    def test_with_moment_calculation(self):
+        l0_path = f'{FILE_PATH}/../data/level0/v3-889346/'
+        files = glob.glob(f'{l0_path}*LV0')
+        rpg2nc_multi(l0_path, calc_moments=True)
+        for file in files:
+            expected_filename = f'{os.getcwd()}/{os.path.basename(file)}.nc'
+            assert os.path.exists(expected_filename)
+            nc = netCDF4.Dataset(expected_filename)
+            for key in ('Ze', 'v', 'width', 'skewness', 'kurtosis'):
+                assert key in nc.variables
+            nc.close()
+            os.remove(expected_filename)
+
 
 class TestGeneratorFiles:
 
