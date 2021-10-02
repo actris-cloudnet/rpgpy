@@ -81,14 +81,14 @@ class TestStationNameReading:
 
 class TestRpg2ncMulti:
 
-    CWD = os.getcwd()
+    cwd = os.getcwd()
     input_file_path = f'{FILE_PATH}/../data/misc/'
     input_files = glob.glob(f'{input_file_path}/*')
 
     def test_with_explicit_path(self):
         rpg2nc_multi(self.input_file_path)
         for file in self.input_files:
-            expected_filename = f'{self.CWD}/{os.path.basename(file)}.nc'
+            expected_filename = f'{self.cwd}/{os.path.basename(file)}.nc'
             assert os.path.exists(expected_filename)
             nc = netCDF4.Dataset(expected_filename)
             nc.close()
@@ -98,9 +98,19 @@ class TestRpg2ncMulti:
         basename = 'foo'
         rpg2nc_multi(self.input_file_path, base_name=basename)
         for file in self.input_files:
-            expected_filename = f'{self.CWD}/{basename}_{os.path.basename(file)}.nc'
+            expected_filename = f'{self.cwd}/{basename}_{os.path.basename(file)}.nc'
             assert os.path.exists(expected_filename)
             os.remove(expected_filename)
+
+    def test_default_directory(self):
+        os.chdir(f'{FILE_PATH}/../data/misc/')
+        cwd = os.getcwd()
+        rpg2nc_multi()
+        for file in self.input_files:
+            expected_filename = f'{cwd}/{os.path.basename(file)}.nc'
+            assert os.path.exists(expected_filename)
+            os.remove(expected_filename)
+        assert glob.glob(f'{cwd}/*.nc') == []
 
 
 class TestGeneratorFiles:
@@ -122,7 +132,6 @@ class TestGeneratorFiles:
         files = rpgpy.nc._generator_files(self.dir_name, True)
         files = [file for file in files]
         for file in files:
-            print(file)
             assert file.endswith(self.lv1 + self.lv0)
             assert os.path.exists(file)
         assert len(files) >= 7
