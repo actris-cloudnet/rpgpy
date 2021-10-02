@@ -37,29 +37,33 @@ $ source venv/bin/activate
 ```
 This works for both Level 0 and Level 1 files.
 
-### Converting single file to single netCDF4
+[API reference of `read_rpg`](#read_rpg)
+
+### Converting file(s) to single netCDF4 file
 ```python
 >>> from rpgpy import rpg2nc
 >>> rpg2nc('rpg_file.LV0', 'rpg_file.nc')
 ```
-This will write a compressed netCDF4 file.
+This will write a compressed netCDF4 file. 
 
-### Converting multiple files to single netCDF4
 Several RPG files can be concatenated into singe netCDF file using wildcard.
 With Level 0 data, this can lead to a very large netCDF file.
 ```python
 >>> rpg2nc('/path/to/files/*.LV0', 'huge_file.nc')
 ```
 
-### Converting multiple files to corresponding netCDF4 files
-Multiple RPG files can be converted into corresponding individual netCDF4 files using the `rpg2nc_multi` function.
-Every file with an extension `.LV0`, `.lv0`, `.LV1` or `.lv1` in every subdirectory of the specified path will be converted.
-Optionally, Level 0 files can be excluded by switching `include_lv0` to `False`:
+[API reference of `rpg2nc`](#rpg2nc)
+
+### Converting files(s) to multiple netCDF4 files
+Multiple RPG files can be converted into corresponding individual netCDF4 files using `rpg2nc_multi`.
 ```python
 >>> from rpgpy import rpg2nc_multi
->>> rpg2nc_multi('/path/to/files', include_lv0=False)
+>>> filenames = rpg2nc_multi('/path/to/files')
 ```
-The converted files are written to the current working directory with a `.nc` suffix. 
+Default functionality is that every file with an extension `.LV0`, `.lv0`, `.LV1` or `.lv1` 
+in every subdirectory of the specified path will be converted.
+
+[API reference of `rpg2nc_multi`](#rpg2nc_multi)
 
 ### Calculating spectral moments
 `rpgpy` can estimate spectral moments from Level 0 data. The estimation is based on the most 
@@ -70,9 +74,18 @@ prominent peak of each time / range point.
 >>> moments = spectra2moments(data, header)
 ```
 
+[API reference of `spectra2moments`](#spectra2moments)
+
 ## API reference
 
-### `rpg2nc()`
+### Index
+* [rpg2nc](#rpg2nc)
+* [rpg2nc_multi](#rpg2nc_multi)
+* [read_rpg](#read_rpg)
+* [spectra2moments](#spectra2moments)
+
+##
+### `rpg2nc`
 
 Convert RPG cloud radar file(s) into single netCDF file.
 
@@ -98,25 +111,34 @@ Keyword arguments:
 
 
 ##
-### `rpg2nc_multi()`
-
-Convert RPG cloud radar files into several corresponding netCDF files. Input files are searched 
-recursively and the output files are written in the current working directory.
-
+### `rpg2nc_multi`
+Convert RPG cloud radar files into several corresponding netCDF files.
 ```python
-rpg2nc_multi(**kwargs)
+filenames = rpg2nc_multi(**kwargs)
 ```
+Default functionality:
+* Input files are searched recursively starting from the current working directory
+* Files with the suffix `.LV0`, `.lv0`, `.LV1` or `.lv1` suffix are converted
+* netCDF4 files are written to the current working directory
+
 In addition to the same keyword arguments than `rpg2nc`, this function also accepts the following keyword arguments:
 
 |  Name              | Type        | Default value              | Description                                    
 | :---               | :------     | :---                       | :---                                           
-| `file_directory`   | `str`       | current working directory  | Root path to be searched recursively.  
-| `include_lv0`      | `bool`      | `True`                     | If `False`, exclude Level 0 files.
-| `base_name`        | `str`       | `None`                     | Optional prefix for the converted files.
+| `file_directory`   | `str`       | current working directory  | Root path of the search.
+| `include_lv0`      | `bool`      | `True`                     | If `False`, excludes Level 0 files.
+| `base_name`        | `str`       | `None`                     | Optional filename prefix for the converted files.
 | `output_directory` | `str`       | current working directory  | Path name where the files are written.
+| `recursive`        | `bool`      | `True`                     | If `False`, does not search input files recursively.
+
+Returns:
+
+| Type        | Description                                                | 
+| :---------- | :---                                                       |
+| `list`      | Full paths of the successfully created netCDF files. |
 
 ##
-### `read_rpg()`
+### `read_rpg`
 
 Read RPG cloud radar binary file.
 
@@ -144,7 +166,7 @@ Returns:
 
 
 ##
-### `spectra2moments()`
+### `spectra2moments`
 
 Calculate spectral moments from Level 0 spectral data. A call to `read_rpg()` is required before using this function.
 

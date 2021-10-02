@@ -58,7 +58,8 @@ def rpg2nc_multi(file_directory: Optional[str] = None,
                  include_lv0: Optional[bool] = True,
                  base_name: Optional[str] = None,
                  output_directory: Optional[str] = None,
-                 **params) -> None:
+                 recursive: Optional[bool] = True,
+                 **params) -> list:
     """Converts all files with extension ['.LV0', '.LV1', '.lv0', 'lv1']
     if include_lv0 is set to True (default); otherwise, it does it just for
     ['.LV1','.lv1'] contained in all the subdirectories of the specified folder.
@@ -72,22 +73,29 @@ def rpg2nc_multi(file_directory: Optional[str] = None,
         base_name (str, optional): Base name for new filenames.
         output_directory (str, optional): Directory name where files are written instead
             of current working dir.
+        recursive (bool, optional): If False, does not search recursively. Default is True.
         **params: Standard `rpg2nc` keyword arguments.
 
+    Returns:
+        list: filenames of the netCDF files.
+
     """
+    new_files = []
     cwd = os.getcwd()
     file_directory = file_directory or cwd
     output_directory = output_directory or cwd
-    for filepath in _generator_files(file_directory, include_lv0):
+    for filepath in _generator_files(file_directory, include_lv0, recursive):
         logging.info(f'Converting file: {filepath}')
         try:
             prefix = f'{base_name}_' if base_name is not None else ''
             new_filename = f'{output_directory}/{prefix}{_new_filename(filepath)}'
             rpg2nc(filepath, new_filename, **params)
+            new_files.append(new_filename)
         except IndexError as err:
             logging.warning(f'############### File {filepath} has not been converted: {err}')
         logging.info("Success!")
-    logging.info('-----> Files should be finished!')
+    logging.info(f'Converted {len(new_files)} files')
+    return new_files
 
 
 def _check_header_consistency(f: netCDF4.Dataset, header: dict) -> None:
@@ -199,15 +207,17 @@ def _get_measurement_date(file: netCDF4.Dataset) -> list:
     return date
 
 
-def _generator_files(dir_name: str, include_lv0: bool):
-    """"Internal function that creates a generator with file paths
-    of level0 (if 'include_lv0' switch is True) and level1 files.
-    """
+def _generator_files(dir_name: str, include_lv0: bool, recursive: bool):
     includes = ('.lv1',) if include_lv0 is False else ('.lv0', 'lv1')
-    for subdir, dirs, files in sorted(os.walk(dir_name)):
-        for file in files:
+    if recursive is False:
+        for file in os.listdir(dir_name):
             if file.lower().endswith(includes):
-                yield os.path.join(subdir, file)
+                yield os.path.join(dir_name, file)
+    else:
+        for subdir, dirs, files in sorted(os.walk(dir_name)):
+            for file in files:
+                if file.lower().endswith(includes):
+                    yield os.path.join(subdir, file)
 
 
 def _new_filename(filepath):

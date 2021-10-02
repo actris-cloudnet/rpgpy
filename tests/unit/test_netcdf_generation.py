@@ -94,6 +94,13 @@ class TestRpg2ncMulti:
             nc.close()
             os.remove(expected_filename)
 
+    def test_return_value(self):
+        filenames = rpg2nc_multi(self.input_file_path)
+        assert len(filenames) == len(self.input_files)
+        for file in filenames:
+            assert os.path.exists(file)
+            os.remove(file)
+
     def test_basename(self):
         basename = 'foo'
         rpg2nc_multi(self.input_file_path, base_name=basename)
@@ -133,6 +140,17 @@ class TestRpg2ncMulti:
             assert os.path.exists(expected_filename)
             os.remove(expected_filename)
 
+    def test_recursive(self):
+        input_dir = f'{FILE_PATH}/../data/'
+        output_dir = f'{FILE_PATH}/../data/level0/v3-889346/'
+        files = rpg2nc_multi(file_directory=input_dir, output_directory=output_dir, recursive=False)
+        assert len(files) == 0
+        input_dir = f'{FILE_PATH}/../data/misc/'
+        files = rpg2nc_multi(file_directory=input_dir, output_directory=input_dir, recursive=False)
+        assert len(files) == 3
+        for file in files:
+            os.remove(file)
+
 
 class TestGeneratorFiles:
 
@@ -141,7 +159,7 @@ class TestGeneratorFiles:
     lv0 = ('.lv0', '.LV0')
 
     def test_lv1(self):
-        files = rpgpy.nc._generator_files(self.dir_name, False)
+        files = rpgpy.nc._generator_files(self.dir_name, False, True)
         files = [file for file in files]
         for file in files:
             assert not file.endswith(self.lv0)
@@ -150,7 +168,7 @@ class TestGeneratorFiles:
         assert len(files) >= 6
 
     def test_lv1_and_lv0(self):
-        files = rpgpy.nc._generator_files(self.dir_name, True)
+        files = rpgpy.nc._generator_files(self.dir_name, True, True)
         files = [file for file in files]
         for file in files:
             assert file.endswith(self.lv1 + self.lv0)
