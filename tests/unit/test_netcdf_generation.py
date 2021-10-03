@@ -1,5 +1,5 @@
 import os
-from rpgpy import read_rpg, rpg2nc, rpg2nc_multi
+from rpgpy import read_rpg, rpg2nc, rpg2nc_multi, spectra2nc
 import rpgpy.nc
 import pytest
 import netCDF4
@@ -66,6 +66,24 @@ class TestLDRMode:
         nc.close()
 
 
+class TestSpectra2Nc:
+
+    input_file = f'{FILE_PATH}/../data/level0/v3-889346/200704_000002_P10_ZEN.LV0'
+
+    def test_netcdf_creation(self):
+        output_file = f'{FILE_PATH}/../data/level0/v3-889346/output.nc'
+        spectra2nc(self.input_file, output_file, global_attr={'location': 'Hyytiala'})
+        nc = netCDF4.Dataset(output_file)
+        expected_shape = (len(nc.variables['time']), len(nc.variables['range_layers']))
+        for key in ('Ze', 'v', 'width', 'kurtosis', 'skewness'):
+            assert key in nc.variables
+            assert nc.variables[key].shape == expected_shape
+        assert 'time' in nc.variables
+        assert nc.location == 'Hyytiala'
+        nc.close()
+        os.remove(output_file)
+
+
 class TestStationNameReading:
 
     def test_valid_customer_name(self):
@@ -118,19 +136,6 @@ class TestRpg2ncMulti:
             assert os.path.exists(expected_filename)
             os.remove(expected_filename)
         assert glob.glob(f'{cwd}/*.nc') == []
-
-    def test_with_moment_calculation(self):
-        l0_path = f'{FILE_PATH}/../data/level0/v3-889346/'
-        files = glob.glob(f'{l0_path}*LV0')
-        rpg2nc_multi(l0_path, calc_moments=True)
-        for file in files:
-            expected_filename = f'{os.getcwd()}/{os.path.basename(file)}.nc'
-            assert os.path.exists(expected_filename)
-            nc = netCDF4.Dataset(expected_filename)
-            for key in ('Ze', 'v', 'width', 'skewness', 'kurtosis'):
-                assert key in nc.variables
-            nc.close()
-            os.remove(expected_filename)
 
     def test_output_dir(self):
         output_dir = f'{FILE_PATH}/../data/level0/v3-889346/'

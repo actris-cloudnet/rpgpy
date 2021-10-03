@@ -5,8 +5,9 @@
 
 RpgPy is a Python / Cython software for 
 * Reading [RPG cloud radar](https://www.radiometer-physics.de/products/microwave-remote-sensing-instruments/94-ghz-fmcw-doppler-cloud-radar/) Level 0 and Level 1 binary files
-* Converting RPG binary data to [netCDF4](https://www.unidata.ucar.edu/software/netcdf/) format
 * Calculating spectral moments from RPG Level 0 data
+* Converting RPG binary data to [netCDF4](https://www.unidata.ucar.edu/software/netcdf/) format
+
 
 # Installation
 
@@ -30,31 +31,22 @@ $ source venv/bin/activate
 
 # Quickstart
 
-### Reading RPG binary file
-```python
->>> from rpgpy import read_rpg
->>> header, data = read_rpg('rpg_file.LV0')
-```
-This works for both Level 0 and Level 1 files.
-
-[API reference of `read_rpg`](#read_rpg)
-
-### Converting file(s) to single netCDF4 file
+### Converting RPG binary files into netCDF4
 ```python
 >>> from rpgpy import rpg2nc
->>> rpg2nc('rpg_file.LV0', 'rpg_file.nc')
+>>> rpg2nc('rpg-data.LV1', 'rpg-file.nc')
 ```
-This will write a compressed netCDF4 file. 
+This writes a compressed netCDF4 file and works with both Level 0 and Level 1 data.
 
 Several RPG files can be concatenated into singe netCDF file using wildcard.
-With Level 0 data, this can lead to a very large netCDF file.
+With Level 0 data, this can lead to a very large file.
 ```python
->>> rpg2nc('/path/to/files/*.LV0', 'huge_file.nc')
+>>> rpg2nc('/path/to/files/*.LV0', 'huge-file.nc')
 ```
 
 [API reference of `rpg2nc`](#rpg2nc)
 
-### Converting files(s) to multiple netCDF4 files
+### Converting multiple files individually
 Multiple RPG files can be converted into corresponding individual netCDF4 files using `rpg2nc_multi`.
 ```python
 >>> from rpgpy import rpg2nc_multi
@@ -65,14 +57,33 @@ in every subdirectory of the specified path will be converted.
 
 [API reference of `rpg2nc_multi`](#rpg2nc_multi)
 
-### Calculating spectral moments
+### Creating custom Level 1 netCDF4 file
 `rpgpy` can estimate spectral moments from Level 0 data. The estimation is based on the most 
 prominent peak of each time / range point.
 ```python
+>>> from rpgpy import spectra2nc
+>>> spectra2nc('rpg-data.LV0', 'level1.nc')
+```
+This calculates spectral moments from Level 0 data and writes the results in a netCDF4 file.
+
+[API reference of `spectra2nc`](#spectra2nc)
+
+### Reading RPG binary file
+If you don't need the netCDF4 file:
+```python
+>>> from rpgpy import read_rpg
+>>> header, data = read_rpg('rpg-data.LV1')
+```
+
+[API reference of `read_rpg`](#read_rpg)
+
+### Calculating spectral moments
+```python
 >>> from rpgpy import read_rpg, spectra2moments
->>> header, data = read_rpg('my-file.LV0')
+>>> header, data = read_rpg('rpg-data.LV0')
 >>> moments = spectra2moments(data, header)
 ```
+This works only with Level 0 data.
 
 [API reference of `spectra2moments`](#spectra2moments)
 
@@ -81,6 +92,7 @@ prominent peak of each time / range point.
 ### Index
 * [rpg2nc](#rpg2nc)
 * [rpg2nc_multi](#rpg2nc_multi)
+* [spectra2nc](#spectra2nc)
 * [read_rpg](#read_rpg)
 * [spectra2moments](#spectra2moments)
 
@@ -95,19 +107,17 @@ rpg2nc(input: str, output: str, **kwargs)
 
 Positional arguments:
 
-|  Name         | Type         | Description                
-| :---          | :----------  | :---
-| `input`       | `str`        | Filename of single file, or multiple files identified using a wildcard, e.g., `/foo/bar/*.LV0`.   
-| `output`      | `str`        | Output file name.
+|  Name          | Type         | Description                
+| :---           | :----------  | :---
+| `input`        | `str`        | Filename of single file, or multiple files identified using a wildcard, e.g., `/foo/bar/*.LV0`.   
+| `output_file`  | `str`        | Output file name.
 
 
 Keyword arguments:
 
 |  Name         | Type         | Default value  | Description
 | :---          | :----------  | :---           | :---
-| `global_attr` | `dict`       | `{}`           | Additional global attributes. 
-| `calc_moments` | `bool`      | `False`        | If `True`, calculates spectral moments from Level 0 data. Has no effect with Level 1 data.
-| `n_points_min` | `int`       | 4              | Minimum number of points in a proper spectral line. Has no effect with Level 1 data or if `calc_moments = False`.
+| `global_attr` | `dict`       | `None`         | Additional global attributes. 
 
 
 ##
@@ -121,15 +131,16 @@ Default functionality:
 * Files with the suffix `.LV0`, `.lv0`, `.LV1` or `.lv1` suffix are converted
 * netCDF4 files are written to the current working directory
 
-In addition to the same keyword arguments than `rpg2nc`, this function also accepts the following keyword arguments:
+Keyword arguments:
 
 |  Name              | Type        | Default value              | Description                                    
 | :---               | :------     | :---                       | :---                                           
 | `file_directory`   | `str`       | current working directory  | Root path of the search.
-| `include_lv0`      | `bool`      | `True`                     | If `False`, excludes Level 0 files.
-| `base_name`        | `str`       | `None`                     | Optional filename prefix for the converted files.
 | `output_directory` | `str`       | current working directory  | Path name where the files are written.
+| `include_lv0`      | `bool`      | `True`                     | If `False`, excludes Level 0 files.
 | `recursive`        | `bool`      | `True`                     | If `False`, does not search input files recursively.
+| `base_name`        | `str`       | `None`                     | Optional filename prefix for the converted files.
+| `global_attr`      | `dict`      | `None`                     | Additional global attributes.
 
 Returns:
 
@@ -138,12 +149,35 @@ Returns:
 | `list`      | Full paths of the successfully created netCDF files. |
 
 ##
+### spectra2nc
+Calculate moments from RPG Level 0 spectra and write a netCDF4 file. 
+```python
+spectra2nc(input_file: str, output_file: str, **kwargs)
+```
+
+Positional arguments:
+
+|  Name              | Type         | Description                
+| :---               | :----------  | :---
+| `input_file`       | `str`        | Filename of RGP Level 0 file.   
+| `output_file`      | `str`        | Output file name.
+
+
+Keyword arguments:
+
+|  Name         | Type        | Default value  | Description
+| :---          | :---------  | :---           | :---
+| `global_attr` | `dict`      | `None`         | Additional global attributes.
+| `n_points_min` | `int`      | 4              | Minimum number of points in a proper spectral line.
+
+
+##
 ### `read_rpg`
 
 Read RPG cloud radar binary file.
 
 ```python
-header, data = read_rpg(filename: str, rpg_names: bool = True)
+header, data = read_rpg(filename: str, **kwargs)
 ```
 
 Positional arguments:
@@ -168,7 +202,8 @@ Returns:
 ##
 ### `spectra2moments`
 
-Calculate spectral moments from Level 0 spectral data. A call to `read_rpg()` is required before using this function.
+Calculate spectral moments from Level 0 spectral data. A call to [`read_rpg`](#read_rpg)
+is required before using this function.
 
 ```python
 moments = spectra2moments(data: dict, header: dict, **kwargs)
@@ -178,8 +213,8 @@ Positional arguments:
 
 |  Name          | Type       | Description                                    
 | :---           | :--------  | :---                                           
-| `data`         | `dict`     | Level 0 data dictionary from `read_rpg()`.      
-| `header`       | `dict`     | Level 0 header dictionary from `read_rpg()`.    
+| `data`         | `dict`     | Level 0 data dictionary from [`read_rpg`](#read_rpg).      
+| `header`       | `dict`     | Level 0 header dictionary from [`read_rpg`](#read_rpg).    
 
 Keyword arguments:
 

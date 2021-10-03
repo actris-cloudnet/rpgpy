@@ -15,7 +15,35 @@ import logging
 SKIP_ME = ('ProgName', 'CustName', 'HAlts', 'TAlts', 'StartTime', 'StopTime')
 
 
-def rpg2nc(path_to_files: str, output_file: str, **params) -> None:
+def spectra2nc(input_file: str,
+               output_file: str,
+               n_points_min: Optional[int] = 4,
+               global_attr: Optional[dict] = None) -> None:
+    """Calculates moments from a RPG Level 0 file and writes a netCDF4 file.
+
+    Args:
+        input_file (str): Level 0 filename.
+        output_file (str): Name of the output file.
+        n_points_min (int): Number of points in a valid spectral line. Default is 4.
+        global_attr (dict): Additional global attributes.
+
+    """
+    level = 0
+    f = netCDF4.Dataset(output_file, 'w', format='NETCDF4_CLASSIC')
+    header, data = read_rpg(input_file)
+    moments = spectra2moments(data, header, fill_value=0, n_points_min=n_points_min)
+    data = {key: data[key] for key, array in data.items() if array.ndim == 1}
+    data = {**data, **moments}
+    metadata = rpgpy.metadata.METADATA
+    logging.info('Writing compressed netCDF4 file')
+    _create_dimensions(f, header, level)
+    _write_initial_data(f, header, metadata)
+    _write_initial_data(f, data, metadata)
+    _create_global_attributes(f, global_attr, level)
+    f.close()
+
+
+def rpg2nc(path_to_files: str, output_file: str, global_attr: Optional[dict] = None) -> None:
     """Converts RPG binary files into a netCDF4 file.
 
     Args:
@@ -23,19 +51,12 @@ def rpg2nc(path_to_files: str, output_file: str, **params) -> None:
             a wildcard to distinguish between different types of files.
             E.g. '/path/to/data/*.LV0'
         output_file (str): Name of the output file.
-        **params: Standard keyword arguments:
-            - 'n_points_min' (dict): Default 4
-            - 'calc_moments' (bool): Default False
-            - 'global_attr' (dict): Default {}
+        global_attr (dict): Additional global attributes.
 
     """
     files, level = _get_rpg_files(path_to_files)
-    add_moments = params.get('calc_moments', False) is True and level == 0
     f = netCDF4.Dataset(output_file, 'w', format='NETCDF4_CLASSIC')
     header, data = read_rpg(files[0])
-    n_points_min = params.get('n_points_min', 4)
-    if add_moments is True:
-        data = _add_moments(data, header, n_points_min)
     metadata = rpgpy.metadata.METADATA
     metadata = _fix_metadata(metadata, header)
     logging.info('Writing compressed netCDF4 file')
@@ -45,12 +66,9 @@ def rpg2nc(path_to_files: str, output_file: str, **params) -> None:
     if len(files) > 1:
         for file in tqdm(files[1:]):
             header, data = read_rpg(file)
-            if add_moments is True:
-                data = _add_moments(data, header, n_points_min)
             _check_header_consistency(f, header)
             _append_data(f, data, metadata)
-
-    _create_global_attributes(f, params.get('global_attr', None), level)
+    _create_global_attributes(f, global_attr, level)
     f.close()
 
 
@@ -59,7 +77,7 @@ def rpg2nc_multi(file_directory: Optional[str] = None,
                  base_name: Optional[str] = None,
                  output_directory: Optional[str] = None,
                  recursive: Optional[bool] = True,
-                 **params) -> list:
+                 global_attr: Optional[dict] = None) -> list:
     """Converts all files with extension ['.LV0', '.LV1', '.lv0', 'lv1']
     if include_lv0 is set to True (default); otherwise, it does it just for
     ['.LV1','.lv1'] contained in all the subdirectories of the specified folder.
@@ -74,7 +92,7 @@ def rpg2nc_multi(file_directory: Optional[str] = None,
         output_directory (str, optional): Directory name where files are written instead
             of current working dir.
         recursive (bool, optional): If False, does not search recursively. Default is True.
-        **params: Standard `rpg2nc` keyword arguments.
+        global_attr (dict): Additional global attributes.
 
     Returns:
         list: filenames of the netCDF files.
@@ -89,7 +107,7 @@ def rpg2nc_multi(file_directory: Optional[str] = None,
         try:
             prefix = f'{base_name}_' if base_name is not None else ''
             new_filename = f'{output_directory}/{prefix}{_new_filename(filepath)}'
-            rpg2nc(filepath, new_filename, **params)
+            rpg2nc(filepath, new_filename, global_attr)
             new_files.append(new_filename)
         except IndexError as err:
             logging.warning(f'############### File {filepath} has not been converted: {err}')
@@ -232,10 +250,3 @@ def _fix_metadata(metadata: dict, header: dict) -> dict:
             long_name='Differential Reflectivity Ratio'
         )
     return fixed_metadata
-
-
-def _add_moments(data: dict, header: dict, n_points_min: int) -> dict:
-    logging.info('Calculating moments')
-    moments = spectra2moments(data, header, fill_value=0, n_points_min=n_points_min)
-    data = {**data, **moments}
-    return data
