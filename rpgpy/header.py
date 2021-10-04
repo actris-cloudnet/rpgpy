@@ -132,9 +132,10 @@ def _read_string(file_id) -> str:
     while True:
         value = np.fromfile(file_id, np.int8, 1)
         if value:
-            if value < 0:
-                value = 0
-            str_out += chr(value[0])
+            try:
+                str_out += chr(value[0])
+            except ValueError:
+                str_out += '%'
         else:
             break
     return str_out

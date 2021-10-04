@@ -30,6 +30,8 @@ def read_rpg(file_name: str, rpg_names: bool = True) -> Tuple[dict, dict]:
     if not rpg_names:
         data = _change_keys(data)
         header = _change_keys(header)
+        if header['Dual Polarisation'] == 2:
+            data['Differential Reflectivity Ratio'] = data.pop('Linear Depolarisation Ratio')
     return header, data
 
 
