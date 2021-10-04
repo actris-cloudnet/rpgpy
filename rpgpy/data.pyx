@@ -1,6 +1,7 @@
 """RPG cloud radar binary reader in Cython."""
 from libc.stdio cimport *
 from libc.stdlib cimport malloc, free
+import logging
 from typing import Tuple
 import numpy as np
 from rpgpy import utils
@@ -23,6 +24,7 @@ def read_rpg(file_name: str, rpg_names: bool = True) -> Tuple[dict, dict]:
         tuple: 2-element tuple containing header (dict) and data (dict).
 
     """
+    logging.debug(f'Reading {file_name}')
     header, _ = head.read_rpg_header(file_name)
     level, version = utils.get_rpg_file_type(header)
     fun = _read_rpg_l0 if level == 0 else _read_rpg_l1
@@ -234,7 +236,7 @@ def _read_rpg_l0(file_name: str, header: dict) -> dict:
     return {key: np.asarray(var_names[key]) for key in keys}
 
 
-def _get_n_samples(header: dict) -> np.ndarray:
+def _get_n_samples(header: dict) -> np.array:
     """Finds number of spectral samples at each height."""
     array = np.ones(header['RAltN'], dtype=int)
     sub_arrays = np.split(array, header['RngOffs'][1:])

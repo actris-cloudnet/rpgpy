@@ -3,21 +3,44 @@ import glob
 import uuid
 from typing import Tuple, Optional
 import numpy.ma as ma
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_equal, assert_array_almost_equal
 import netCDF4
 from tqdm import tqdm
 from rpgpy import read_rpg, utils
+from rpgpy.spcutil import spectra2moments
 import rpgpy.metadata
 import os
 import logging
 
-CWD = os.getcwd()
+SKIP_ME = ('ProgName', 'CustName', 'HAlts', 'TAlts', 'StartTime', 'StopTime')
 
-logging.basicConfig(level="INFO", format='%(levelname)s:%(message)s')
 
-# Not yet sure how to choose the variables to be written
-SKIP_ME = ('ProgName', 'CustName', 'HAlts', 'TAlts',
-           'StartTime', 'StopTime')
+def spectra2nc(input_file: str,
+               output_file: str,
+               n_points_min: Optional[int] = 4,
+               global_attr: Optional[dict] = None) -> None:
+    """Calculates moments from a RPG Level 0 file and writes a netCDF4 file.
+
+    Args:
+        input_file (str): Level 0 filename.
+        output_file (str): Name of the output file.
+        n_points_min (int): Number of points in a valid spectral line. Default is 4.
+        global_attr (dict): Additional global attributes.
+
+    """
+    level = 0
+    f = netCDF4.Dataset(output_file, 'w', format='NETCDF4_CLASSIC')
+    header, data = read_rpg(input_file)
+    moments = spectra2moments(data, header, fill_value=0, n_points_min=n_points_min)
+    data = {key: data[key] for key, array in data.items() if array.ndim == 1}
+    data = {**data, **moments}
+    metadata = rpgpy.metadata.METADATA
+    logging.info('Writing compressed netCDF4 file')
+    _create_dimensions(f, header, level)
+    _write_initial_data(f, header, metadata)
+    _write_initial_data(f, data, metadata)
+    _create_global_attributes(f, global_attr, level)
+    f.close()
 
 
 def rpg2nc(path_to_files: str, output_file: str, global_attr: Optional[dict] = None) -> None:
@@ -28,7 +51,7 @@ def rpg2nc(path_to_files: str, output_file: str, global_attr: Optional[dict] = N
             a wildcard to distinguish between different types of files.
             E.g. '/path/to/data/*.LV0'
         output_file (str): Name of the output file.
-        global_attr (dict, optional): Additional global attributes.
+        global_attr (dict, optional): Additional global attributes. Default is None.
 
     """
     files, level = _get_rpg_files(path_to_files)
@@ -36,7 +59,7 @@ def rpg2nc(path_to_files: str, output_file: str, global_attr: Optional[dict] = N
     header, data = read_rpg(files[0])
     metadata = rpgpy.metadata.METADATA
     metadata = _fix_metadata(metadata, header)
-    logging.info('Writing compressed netCDF4 file...')
+    logging.info('Writing compressed netCDF4 file')
     _create_dimensions(f, header, level)
     _write_initial_data(f, header, metadata)
     _write_initial_data(f, data, metadata)
@@ -45,39 +68,52 @@ def rpg2nc(path_to_files: str, output_file: str, global_attr: Optional[dict] = N
             header, data = read_rpg(file)
             _check_header_consistency(f, header)
             _append_data(f, data, metadata)
-
     _create_global_attributes(f, global_attr, level)
     f.close()
-    logging.info('..done.')
+    logging.info(f'Created new file: {output_file}')
 
 
-def rpg2nc_multi(file_directory: Optional[str] = CWD,
-                 base_name: Optional[str] = None,
+def rpg2nc_multi(file_directory: Optional[str] = None,
+                 output_directory: Optional[str] = None,
                  include_lv0: Optional[bool] = True,
-                 global_attr: Optional[dict] = None) -> None:
+                 recursive: Optional[bool] = True,
+                 base_name: Optional[str] = None,
+                 global_attr: Optional[dict] = None) -> list:
     """Converts all files with extension ['.LV0', '.LV1', '.lv0', 'lv1']
     if include_lv0 is set to True (default); otherwise, it does it just for
     ['.LV1','.lv1'] contained in all the subdirectories of the specified folder.
     By default, it will write the new files with the same name of the original ones,
-    just adding the extension 'nc' within directory where the program is executed.
+    just adding the extension '.nc' within directory where the program is executed.
 
     Args:
-        file_directory (str, default: current directory): Root directory from which the function
-            will start looking for files to convert.
-        include_lv0 (bool, default: True): option to include Level 0 files or not.
-        global_attr (dict, optional): Additional global attributes.
-        base_name (str, optional): Base name for new filenames.
+        file_directory (str, optional): Root directory from which the function
+            will start looking for files to convert. Default is the current working directory.
+        output_directory (str, optional): Directory name where files are written. Default is
+            the current working directory.
+        include_lv0 (bool, optional): option to include Level 0 files or not. Default is True.
+        recursive (bool, optional): If False, does not search recursively. Default is True.
+        base_name (str, optional): Base name for new filenames. Default is None.
+        global_attr (dict, optional): Additional global attributes. Default is None.
+
+    Returns:
+        list: full paths of the created netCDF files.
+
     """
-    for filepath in _generator_files(file_directory, include_lv0):
-        logging.info(f'Converting file: {filepath}')
+    new_files = []
+    cwd = os.getcwd()
+    file_directory = file_directory or cwd
+    output_directory = output_directory or cwd
+    for filepath in _generator_files(file_directory, include_lv0, recursive):
+        logging.info(f'Converting {filepath}')
         try:
             prefix = f'{base_name}_' if base_name is not None else ''
-            new_filename = f'{prefix}{_new_filename(filepath)}'
+            new_filename = f'{output_directory}/{prefix}{_new_filename(filepath)}'
             rpg2nc(filepath, new_filename, global_attr)
+            new_files.append(new_filename)
         except IndexError as err:
             logging.warning(f'############### File {filepath} has not been converted: {err}')
-        logging.info("Success!")
-    logging.info('-----> Files should be finished!')
+    logging.info(f'Converted {len(new_files)} files')
+    return new_files
 
 
 def _check_header_consistency(f: netCDF4.Dataset, header: dict) -> None:
@@ -85,7 +121,7 @@ def _check_header_consistency(f: netCDF4.Dataset, header: dict) -> None:
     for key, array in header.items():
         if key in f.variables:
             try:
-                assert_array_equal(array, f.variables[key])
+                assert_array_almost_equal(array, f.variables[key])
             except AssertionError:
                 print('Warning: inconsistent header data in ' + key, array, f.variables[key][:])
 
@@ -189,15 +225,17 @@ def _get_measurement_date(file: netCDF4.Dataset) -> list:
     return date
 
 
-def _generator_files(dir_name: str, include_lv0: bool):
-    """"Internal function that creates a generator with file paths
-    of level0 (if 'include_lv0' switch is True) and level1 files.
-    """
+def _generator_files(dir_name: str, include_lv0: bool, recursive: bool):
     includes = ('.lv1',) if include_lv0 is False else ('.lv0', 'lv1')
-    for subdir, dirs, files in sorted(os.walk(dir_name)):
-        for file in files:
+    if recursive is False:
+        for file in os.listdir(dir_name):
             if file.lower().endswith(includes):
-                yield os.path.join(subdir, file)
+                yield os.path.join(dir_name, file)
+    else:
+        for subdir, dirs, files in sorted(os.walk(dir_name)):
+            for file in files:
+                if file.lower().endswith(includes):
+                    yield os.path.join(subdir, file)
 
 
 def _new_filename(filepath):
