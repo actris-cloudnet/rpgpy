@@ -70,6 +70,7 @@ def rpg2nc(path_to_files: str, output_file: str, global_attr: Optional[dict] = N
             _append_data(f, data, metadata)
     _create_global_attributes(f, global_attr, level)
     f.close()
+    logging.info(f'Created new file: {output_file}')
 
 
 def rpg2nc_multi(file_directory: Optional[str] = None,
@@ -103,7 +104,7 @@ def rpg2nc_multi(file_directory: Optional[str] = None,
     file_directory = file_directory or cwd
     output_directory = output_directory or cwd
     for filepath in _generator_files(file_directory, include_lv0, recursive):
-        logging.info(f'Converting file: {filepath}')
+        logging.info(f'Converting {filepath}')
         try:
             prefix = f'{base_name}_' if base_name is not None else ''
             new_filename = f'{output_directory}/{prefix}{_new_filename(filepath)}'
@@ -111,7 +112,6 @@ def rpg2nc_multi(file_directory: Optional[str] = None,
             new_files.append(new_filename)
         except IndexError as err:
             logging.warning(f'############### File {filepath} has not been converted: {err}')
-        logging.info("Success!")
     logging.info(f'Converted {len(new_files)} files')
     return new_files
 
