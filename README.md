@@ -50,7 +50,7 @@ With Level 0 data, this can lead to a very large file.
 Multiple RPG files can be converted into corresponding individual netCDF4 files using `rpg2nc_multi`.
 ```python
 >>> from rpgpy import rpg2nc_multi
->>> filenames = rpg2nc_multi('/path/to/files')
+>>> filenames = rpg2nc_multi(file_directory='/path/to/files')
 ```
 Default functionality is that every file with an extension `.LV0`, `.lv0`, `.LV1` or `.lv1` 
 in every subdirectory of the specified path will be converted.
@@ -102,15 +102,15 @@ This works only with Level 0 data.
 Convert RPG cloud radar file(s) into single netCDF file.
 
 ```python
-rpg2nc(input: str, output: str, **kwargs)
+rpg2nc(path_to_files: str, output_file: str, **kwargs)
 ```
 
 Positional arguments:
 
-|  Name          | Type         | Description                
-| :---           | :----------  | :---
-| `input`        | `str`        | Filename of single file, or multiple files identified using a wildcard, e.g., `/foo/bar/*.LV0`.   
-| `output_file`  | `str`        | Output file name.
+|  Name           | Type         | Description                
+| :---            | :----------  | :---
+| `path_to_files` | `str`        | Filename of single file, or multiple files identified using a wildcard, e.g., `/foo/bar/*.LV0`.   
+| `output_file`   | `str`        | Output file name.
 
 
 Keyword arguments:
@@ -136,7 +136,7 @@ Keyword arguments:
 |  Name              | Type        | Default value              | Description                                    
 | :---               | :------     | :---                       | :---                                           
 | `file_directory`   | `str`       | current working directory  | Root path of the search.
-| `output_directory` | `str`       | current working directory  | Path name where the files are written.
+| `output_directory` | `str`       | current working directory  | Path name where the netCDF4 files are written.
 | `include_lv0`      | `bool`      | `True`                     | If `False`, excludes Level 0 files.
 | `recursive`        | `bool`      | `True`                     | If `False`, does not search input files recursively.
 | `base_name`        | `str`       | `None`                     | Optional filename prefix for the converted files.

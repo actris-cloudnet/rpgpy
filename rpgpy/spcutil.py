@@ -78,11 +78,11 @@ def radar_moment_calculation(signal: np.array, vel_bins: np.array) -> np.array:
     Returns:
         array containing:
 
-            - ze_lin: reflectivity (0.Mom) over range of velocity bins [mm6/m3]
-            - vel: mean velocity (1.Mom) over range of velocity bins [m/s]
-            - sw: spectrum width (2.Mom) over range of velocity bins [m/s]
-            - skew: skewness (3.Mom) over range of velocity bins
-            - kurt: kurtosis (4.Mom) over range of velocity bins
+            - reflectivity (0th moment) over range of velocity bins [mm6/m3]
+            - mean velocity (1st moment) over range of velocity bins [m/s]
+            - spectrum width (2nd moment) over range of velocity bins [m/s]
+            - skewness (3rd moment) over range of velocity bins
+            - kurtosis (4th moment) over range of velocity bins
 
     """
 
@@ -104,10 +104,10 @@ def find_peak_edges(signal: np.array) -> Tuple[int, int]:
     """Returns the indices of left and right edge of the main signal peak in a Doppler spectra.
 
     Args:
-        signal: 1D array Doppler spectra
+        signal (np.array): 1D array Doppler spectra
 
     Returns:
-        edge_left, edge_right: indices of minimum/maximum velocity of the main peak
+        tuple: 2-element tuple containing the left / right indices of the main peak edges
 
     """
     len_sig = len(signal)

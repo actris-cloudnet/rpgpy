@@ -104,7 +104,7 @@ class TestRpg2ncMulti:
     input_files = glob.glob(f'{input_file_path}/*')
 
     def test_with_explicit_path(self):
-        rpg2nc_multi(self.input_file_path)
+        rpg2nc_multi(file_directory=self.input_file_path)
         for file in self.input_files:
             expected_filename = f'{self.cwd}/{os.path.basename(file)}.nc'
             assert os.path.exists(expected_filename)
@@ -113,7 +113,7 @@ class TestRpg2ncMulti:
             os.remove(expected_filename)
 
     def test_return_value(self):
-        filenames = rpg2nc_multi(self.input_file_path)
+        filenames = rpg2nc_multi(file_directory=self.input_file_path)
         assert len(filenames) == len(self.input_files)
         for file in filenames:
             assert os.path.exists(file)
@@ -121,7 +121,7 @@ class TestRpg2ncMulti:
 
     def test_basename(self):
         basename = 'foo'
-        rpg2nc_multi(self.input_file_path, base_name=basename)
+        rpg2nc_multi(file_directory=self.input_file_path, base_name=basename)
         for file in self.input_files:
             expected_filename = f'{self.cwd}/{basename}_{os.path.basename(file)}.nc'
             assert os.path.exists(expected_filename)
@@ -139,7 +139,7 @@ class TestRpg2ncMulti:
 
     def test_output_dir(self):
         output_dir = f'{FILE_PATH}/../data/level0/v3-889346/'
-        rpg2nc_multi(self.input_file_path, output_directory=output_dir)
+        rpg2nc_multi(file_directory=self.input_file_path, output_directory=output_dir)
         for file in self.input_files:
             expected_filename = f'{output_dir}/{os.path.basename(file)}.nc'
             assert os.path.exists(expected_filename)

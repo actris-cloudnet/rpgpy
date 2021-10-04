@@ -51,7 +51,7 @@ def rpg2nc(path_to_files: str, output_file: str, global_attr: Optional[dict] = N
             a wildcard to distinguish between different types of files.
             E.g. '/path/to/data/*.LV0'
         output_file (str): Name of the output file.
-        global_attr (dict): Additional global attributes.
+        global_attr (dict, optional): Additional global attributes. Default is None.
 
     """
     files, level = _get_rpg_files(path_to_files)
@@ -73,10 +73,10 @@ def rpg2nc(path_to_files: str, output_file: str, global_attr: Optional[dict] = N
 
 
 def rpg2nc_multi(file_directory: Optional[str] = None,
-                 include_lv0: Optional[bool] = True,
-                 base_name: Optional[str] = None,
                  output_directory: Optional[str] = None,
+                 include_lv0: Optional[bool] = True,
                  recursive: Optional[bool] = True,
+                 base_name: Optional[str] = None,
                  global_attr: Optional[dict] = None) -> list:
     """Converts all files with extension ['.LV0', '.LV1', '.lv0', 'lv1']
     if include_lv0 is set to True (default); otherwise, it does it just for
@@ -87,15 +87,15 @@ def rpg2nc_multi(file_directory: Optional[str] = None,
     Args:
         file_directory (str, optional): Root directory from which the function
             will start looking for files to convert. Default is the current working directory.
+        output_directory (str, optional): Directory name where files are written. Default is
+            the current working directory.
         include_lv0 (bool, optional): option to include Level 0 files or not. Default is True.
-        base_name (str, optional): Base name for new filenames.
-        output_directory (str, optional): Directory name where files are written instead
-            of current working dir.
         recursive (bool, optional): If False, does not search recursively. Default is True.
-        global_attr (dict): Additional global attributes.
+        base_name (str, optional): Base name for new filenames. Default is None.
+        global_attr (dict, optional): Additional global attributes. Default is None.
 
     Returns:
-        list: filenames of the netCDF files.
+        list: full paths of the created netCDF files.
 
     """
     new_files = []
