@@ -105,7 +105,8 @@ def read_rpg_header(file_name: str) -> Tuple[dict, int]:
              ('PhaseCorr', 'i1'),
              ('RelPowCorr', 'i1'),
              ('FFTWindow', 'i1'),
-             ('FFTInputRng', 'i4'),
+             ('FFTInputRng', 'uint16'),
+             ('SWVersion', 'uint16'),
              ('NoiseFilt', 'f4'))
 
         if level == 1 and version > 3.5:
