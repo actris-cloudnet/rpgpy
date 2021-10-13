@@ -392,5 +392,9 @@ METADATA = {
     'InstCalPar': Meta(
         name='Cal_period',
         units='s',
-        long_name='Calibration period')
+        long_name='Calibration period'),
+    'SWVersion': Meta(
+        name='software_version',
+        long_name='Software version',
+        comment='Multiplied by 100')
 }
