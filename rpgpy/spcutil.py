@@ -129,3 +129,45 @@ def find_peak_edges(signal: np.array) -> Tuple[int, int]:
 
     return edge_left, edge_right
 
+
+def spectral_LDR_Galetti(TotSpec: np.array, HSpec: np.array, ReVHSpec:np.array, ImVHSpec: np.array,
+                         TotNoisePow: np.array, HNoisePow: np.array, SpecN: np.array, RAltN: int, RngOffs: np.array,
+                         version: int
+                         ) -> np.array:
+    """
+    Compute spectral (S)LDR for vertically pointing radar according to the method by Galetti et al. (2012)
+    Based on code by Alexander Myagkov (RPG).
+    For RPG radars software version > 5.40, the combined spectrum is normalized by 4 (previously 2)
+    Args:
+        TotSpec: V+H power spectra
+        HSpec: only horizontal channel power spectra
+        ReVHSpec: covariance spectrum Re
+        ImVHSpec: covariance spectrum imaginary part
+        TotNoisePow: noise power V+H
+        HNoisePow: noise power only H channel
+        SpecN: number of FFT points
+        RAltN: number of range layers
+        RngOffs: range offsets
+        version: software version of RPG radar
+
+    Returns:
+        np.array: SLDR computed accordring to the Galetti method
+
+    """
+    if version < 5.40:
+        VSpec = 2 * TotSpec - HSpec - 2 * ReVHSpec
+    else:
+        VSpec = 4 * TotSpec - HSpec - 2 * ReVHSpec
+    bins_per_chirp = np.diff(np.hstack((RngOffs, RAltN)))
+    noise_h_per_bin = (HNoisePow/np.repeat(SpecN, bins_per_chirp))[:, :, np.newaxis]
+    noise_v_per_bin = (TotNoisePow/np.repeat(SpecN, bins_per_chirp))[:, :, np.newaxis]
+    SNRv = VSpec/noise_v_per_bin
+    SNRh = HSpec/noise_h_per_bin
+    k = ((SNRv < 1000) | (SNRh < 1000))
+
+    rhv = np.abs(ReVHSpec+complex(imag=1) * ImVHSpec) / np.sqrt(
+        (VSpec + noise_v_per_bin) * (HSpec + noise_h_per_bin))
+    sldr = 10*np.log10((1-rhv)/(1+rhv))
+    k = (k | (TotSpec == 0.))
+    sldr[k] = -999
+    return sldr
