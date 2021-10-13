@@ -305,6 +305,10 @@ METADATA = {
         name='covariance_spectrum_re',
         long_name='Covariance Spectrum Re',
         comment='real part, linear Ze'),
+    'LDRSpec': Meta(
+        name='LDR spectrum',
+        long_name='linear depolarisation ratio Doppler spectra',
+        comment='in dB'),
     'ImVHSpec': Meta(
         name='covariance_spectrum_im',
         long_name='Covariance Spectrum Im',
