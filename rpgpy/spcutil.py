@@ -130,45 +130,49 @@ def find_peak_edges(signal: np.array) -> Tuple[int, int]:
     return edge_left, edge_right
 
 
-def spectral_LDR_Galetti(spec_HV: np.array, spec_H: np.array, spec_VH_Re:np.array, spec_VH_Im: np.array,
-                         noise_HV: np.array, noise_H: np.array, num_FFT: np.array, num_rangebins: int,
-                         range_offsets: np.array, version: int) -> np.array:
+def calc_spectral_LDR(header, data) -> np.array:
     """
     Compute spectral (S)LDR for vertically pointing radar according to the method by Galetti et al. (2012);
     Based on code by Alexander Myagkov (RPG).
     For RPG radars software version > 5.40, the combined spectrum is normalized by 4 (previously 2)
     Args:
-        spec_HV: H+V channel reflectivity spectra
-        spec_H: only horizontal channel power spectra
-        spec_VH_Re: covariance spectrum Re
-        spec_VH_Im: covariance spectrum imaginary part
-        noise_V: noise power V channel
-        noise_HV: noise power H+V channel
-        num_FFT: number of FFT points
-        num_rangebins: number of range layers
-        range_offsets: range offsets
-        version: software version of RPG radar
+        header (dict): lv0 nD variables.
+        data (dict): lv0 nD metadata.
 
     Returns:
-        np.array: SLDR array in dB units
+        array containing SLDR in dB units
 
     """
-    if version < 5.40:
-        spec_V = 2 * spec_HV - spec_H - 2 * spec_VH_Re
-    else:
-        spec_V = 4 * spec_HV - spec_H - 2 * spec_VH_Re
-    noise_V = noise_HV/2.  # TBD: how to obtain noise power in vertical channel?
+    spec_tot = scale_spectra(data['TotSpec'], header['SWVersion'])
+    spec_V = spec_tot - data['HSpec'] - 2 * data['ReVHSpec']
+    noise_V = data['TotNoisePow']/2.  # TBD: how to obtain noise power in vertical channel?
 
-    bins_per_chirp = np.diff(np.hstack((range_offsets, num_rangebins)))
-    noise_h_per_bin = (noise_H/np.repeat(num_FFT, bins_per_chirp))[:, :, np.newaxis]
-    noise_v_per_bin = (noise_V/np.repeat(num_FFT, bins_per_chirp))[:, :, np.newaxis]
+    bins_per_chirp = np.diff(np.hstack((header['RngOffs'], header['RAltN'])))
+    noise_h_per_bin = (data['HNoisePow']/np.repeat(header['SpecN'], bins_per_chirp))[:, :, np.newaxis]
+    noise_v_per_bin = (noise_V/np.repeat(header['SpecN'], bins_per_chirp))[:, :, np.newaxis]
     SNRv = spec_V/noise_v_per_bin
-    SNRh = spec_H/noise_h_per_bin
-    k = ((SNRv < 1000) | (SNRh < 1000))
+    SNRh = data['HSpec']/noise_h_per_bin
+    snr_mask = ((SNRv < 1000) | (SNRh < 1000))
 
-    rhv = np.abs(spec_VH_Re+complex(imag=1) * spec_VH_Im) / np.sqrt(
-        (spec_V + noise_v_per_bin) * (spec_H + noise_h_per_bin))
+    rhv = np.abs(data['ReVHSpec']+complex(imag=1) * data['ImVHSpec']) / np.sqrt(
+        (spec_V + noise_v_per_bin) * (data['HSpec'] + noise_h_per_bin))
     sldr = 10*np.log10((1-rhv)/(1+rhv))
-    k = (k | (spec_HV == 0.))
-    sldr[k] = -999
+    snr_mask = (snr_mask | (data['TotSpec'] == 0.))
+    sldr[snr_mask] = -999
     return sldr
+
+
+def scale_spectra(signal, software_version):
+    """
+    Starting from software version 5.40, the combined spectrum is normalized by 4. For previous versions, the combined
+    spectrum was normalized by 2.
+    Only for STSR mode radar (TBD)
+    Args:
+        signal (np.array): combined spectrum (TotSpec)
+        software_version (float): 10 * radar software version number
+
+    Returns:
+        array containing the scaled spectra
+    """
+    scale = 2 if software_version < 540 else 4
+    return scale * signal

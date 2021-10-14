@@ -56,6 +56,9 @@ class TestMoments:
         assert self.header['SWVersion'] == 525
         assert self.header['FileCode'] == 889346
 
+    def test_run_sldr_spec(self):
+        sldr = spcutil.calc_spectral_LDR(self.header, self.data)
+
     def test_that_does_not_alter_input_data(self):
         assert_array_almost_equal(self.source_data_mean, np.mean(self.data['TotSpec']))
 

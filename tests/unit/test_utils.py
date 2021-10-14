@@ -45,3 +45,8 @@ def test_find_peak_edges():
     inp = np.array([0.09, 0.1, 0.05, 0.01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.01, 0.04])
     res = (0, 4)
     assert_array_equal(spcutil.find_peak_edges(inp), res)
+
+
+def test_scale_spectra():
+    assert spcutil.scale_spectra(1, 540) == 4
+    assert spcutil.scale_spectra(1, 539) == 2
