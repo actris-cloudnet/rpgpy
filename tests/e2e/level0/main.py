@@ -26,13 +26,12 @@ def main():
                 }
                 pickle.dump(d, f)
 
-            pytest.main(['-v', 'tests/e2e/level1/l1_tests.py',
-                         '-m', 'level0',
+            pytest.main(['-v', 'tests/e2e/level1/l1_tests.py', '-m', 'level0',
                          f"--data={data_file.name}"])
-        global_attr = {'foo': 'bar'}
 
+        global_attr = {'foo': 'bar'}
         output_file = NamedTemporaryFile()
-        rpg2nc(f'{os.path.join(data_path, folder)}/*.LV0', output_file.name,
+        rpg2nc(f'{os.path.join(data_path, folder)}/2*.LV0', output_file.name,
                global_attr=global_attr)
         pytest.main(['-v', 'tests/e2e/level0/l0_tests.py', f'--filename={output_file.name}'])
 
