@@ -56,9 +56,6 @@ class TestMoments:
         assert self.header['SWVersion'] == 525
         assert self.header['FileCode'] == 889346
 
-    def test_run_sldr_spec(self):
-        sldr = spcutil.calc_spectral_LDR(self.header, self.data)
-
     def test_that_does_not_alter_input_data(self):
         assert_array_almost_equal(self.source_data_mean, np.mean(self.data['TotSpec']))
 
@@ -72,3 +69,11 @@ class TestMoments:
 
     def test_that_works_with_hspec(self):
         moments = spectra2moments(self.data, self.header, spec_var='HSpec')
+
+
+class TestSLDR:
+    input_file = f'{FILE_PATH}/../data/level0/v3-889346/190912_060003_P05_ZEN.LV0'
+    header, data = read_rpg(input_file)
+
+    def test_spectral_LDR(self):
+        sldr = spcutil.calc_spectral_LDR(self.header, self.data)

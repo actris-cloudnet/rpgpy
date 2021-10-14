@@ -132,9 +132,8 @@ def find_peak_edges(signal: np.array) -> Tuple[int, int]:
 
 def calc_spectral_LDR(header, data) -> np.array:
     """
-    Compute spectral (S)LDR for vertically pointing radar according to the method by Galetti et al. (2012);
+    Compute spectral (S)LDR for vertically pointing STSR radar according to the method by Galetti et al. (2012);
     Based on code by Alexander Myagkov (RPG).
-    For RPG radars software version > 5.40, the combined spectrum is normalized by 4 (previously 2)
     Args:
         header (dict): lv0 nD variables.
         data (dict): lv0 nD metadata.
