@@ -8,21 +8,21 @@ def spectra2moments(data: dict,
                     spec_var: Optional[str] = 'TotSpec',
                     fill_value: Optional[float] = -999.0,
                     n_points_min: Optional[int] = 4) -> dict:
-    """
-    This routine calculates the radar moments: reflectivity, mean Doppler velocity, spectrum width,
-    skewness and kurtosis from compressed level 0 spectrum files (NoiseFactor > 0)
+    """Calculates radar moments from the main peak.
+
+    This routine calculates the radar moments: reflectivity, mean Doppler velocity, spectrum
+    width, skewness and kurtosis from compressed level 0 spectrum files (NoiseFactor > 0)
     of the 94 GHz RPG cloud radar. Considering only the largest peak.
 
     Args:
-        data (dict): lv0 nD variables.
-        header (dict): lv0 meta data.
-        spec_var (str, optional): name of spectrum variable. Possible names are 'TotSpec', 'VSpec',
-            and 'HSpec'. Default is 'TotSpec'.
-        fill_value (float, optional): clear sky fill value. Default is -999.0.
-        n_points_min (int, optional): Minimum number of points in spectral line. Default is 4.
+        data: Level 0 nD variables.
+        header: Level 0 meta data.
+        spec_var: Name of the spectral variable. Possible names are 'TotSpec', 'VSpec', and 'HSpec'.
+        fill_value: Clear sky fill value.
+        n_points_min: Minimum number of points in a valid spectral line.
 
     Returns:
-        dict: dictionary with keys: 'Ze', 'MeanVel', 'SpecWidth', 'Skewn', 'Kurt'.
+        A dict with keys: 'Ze', 'MeanVel', 'SpecWidth', 'Skewn', 'Kurt'.
 
     Examples:
         >>> from rpgpy import read_rpg, spectra2moments
@@ -62,32 +62,29 @@ def spectra2moments(data: dict,
 
 
 @jit(nopython=True, fastmath=True)
-def radar_moment_calculation(signal: np.array, vel_bins: np.array) -> np.array:
-    """
-    Calculation of radar moments: reflectivity, mean Doppler velocity, spectral width,
-        skewness, and kurtosis of one Doppler spectrum. Optimized for the use of Numba.
+def radar_moment_calculation(signal: np.ndarray, vel_bins: np.ndarray) -> np.ndarray:
+    """Calculates radar moments from one a single spectral line.
 
-    Note:
-        Divide the signal_sum by 2 because vertical and horizontal channel are added.
-        Subtract half of of the Doppler resolution from mean Doppler velocity, because
+    Calculation reflectivity, mean Doppler velocity, spectral width,
+    skewness, and kurtosis of one Doppler spectrum. Optimized for the use of Numba.
 
     Args:
-        signal (np.array): detected signal from a Doppler spectrum
-        vel_bins (np.array): extracted velocity bins of the signal (same length as signal)
+        signal: Detected signal from a Doppler spectrum.
+        vel_bins: Extracted velocity bins of the signal (same length as signal).
 
     Returns:
         array containing:
 
-            - reflectivity (0th moment) over range of velocity bins [mm6/m3]
-            - mean velocity (1st moment) over range of velocity bins [m/s]
-            - spectrum width (2nd moment) over range of velocity bins [m/s]
-            - skewness (3rd moment) over range of velocity bins
-            - kurtosis (4th moment) over range of velocity bins
+            - Reflectivity (0th moment) over range of velocity bins [mm6/m3]
+            - Mean velocity (1st moment) over range of velocity bins [m/s]
+            - Spectrum width (2nd moment) over range of velocity bins [m/s]
+            - Skewness (3rd moment) over range of velocity bins
+            - Kurtosis (4th moment) over range of velocity bins
 
     """
 
     signal_sum = np.sum(signal)  # linear full spectrum Ze [mm^6/m^3], scalar
-    ze_lin = signal_sum / 2.0
+    ze_lin = signal_sum / 2.0    # divide by 2 because vertical and horizontal channel are added.
     pwr_nrm = signal / signal_sum  # determine normalized power (NOT normalized by Vdop bins)
     vel = np.sum(vel_bins * pwr_nrm)
     vel_diff = vel_bins - vel
@@ -100,14 +97,14 @@ def radar_moment_calculation(signal: np.array, vel_bins: np.array) -> np.array:
 
 
 @jit(nopython=True, fastmath=True)
-def find_peak_edges(signal: np.array) -> Tuple[int, int]:
+def find_peak_edges(signal: np.ndarray) -> Tuple[int, int]:
     """Returns the indices of left and right edge of the main signal peak in a Doppler spectra.
 
     Args:
-        signal (np.array): 1D array Doppler spectra
+        signal: 1D array Doppler spectra.
 
     Returns:
-        tuple: 2-element tuple containing the left / right indices of the main peak edges
+        2-element tuple containing the left / right indices of the main peak edges.
 
     """
     len_sig = len(signal)
@@ -130,16 +127,17 @@ def find_peak_edges(signal: np.array) -> Tuple[int, int]:
     return edge_left, edge_right
 
 
-def calc_spectral_LDR(header, data) -> np.array:
-    """
-    Compute spectral (S)LDR for vertically pointing STSR radar according to the method by Galetti et al. (2012);
-    Based on code by Alexander Myagkov (RPG).
+def calc_spectral_LDR(header: dict, data: dict) -> np.ndarray:
+    """Computes spectral (S)LDR for vertically pointing STSR radar.
+
+    Method by Galetti et al. (2012); Based on code by Alexander Myagkov (RPG).
+
     Args:
-        header (dict): lv0 nD variables.
-        data (dict): lv0 nD metadata.
+        header: Level 0 nD variables.
+        data: Level 0 nD metadata.
 
     Returns:
-        array containing SLDR in dB units
+        Computed SLDR [dB].
 
     """
     spec_tot = scale_spectra(data['TotSpec'], header['SWVersion'])
@@ -161,17 +159,20 @@ def calc_spectral_LDR(header, data) -> np.array:
     return sldr
 
 
-def scale_spectra(signal, software_version):
-    """
-    Starting from software version 5.40, the combined spectrum is normalized by 4. For previous versions, the combined
-    spectrum was normalized by 2.
-    Only for STSR mode radar (TBD)
+def scale_spectra(signal: np.ndarray, software_version: float) -> np.ndarray:
+    """Scales combined spectrum.
+
+    Starting from software version 5.40, the combined spectrum is normalized by 4.
+    For previous versions, the combined spectrum was normalized by 2.
+    Only for STSR mode radar (TBD).
+
     Args:
-        signal (np.array): combined spectrum (TotSpec)
-        software_version (float): 10 * radar software version number
+        signal: Combined spectrum (TotSpec).
+        software_version: 10 * radar software version number.
 
     Returns:
-        array containing the scaled spectra
+        Scaled spectra.
+
     """
     scale = 2 if software_version < 540 else 4
     return scale * signal

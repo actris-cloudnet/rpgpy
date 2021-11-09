@@ -10,10 +10,10 @@ def read_rpg_header(file_name: str) -> Tuple[dict, int]:
     Supports Level 0/1 and version 2/3/4.
 
     Args:
-        file_name (str): name of the file.
+        file_name: name of the file.
 
     Returns:
-        tuple: 2-element tuple containing the header (as dict) and file position.
+        2-element tuple containing the header (as dict) and file position.
 
     """
     def read(*fields):
@@ -151,7 +151,7 @@ def _dim(length: int, dtype: str = 'f') -> str:
     return f"({length},){dtype}"
 
 
-def _get_dtype(array: np.array) -> type:
+def _get_dtype(array: np.ndarray) -> type:
     if array.dtype in (np.int8, np.int32, np.uint32):
         return int
     return float

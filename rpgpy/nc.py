@@ -2,6 +2,7 @@
 import glob
 import uuid
 from typing import Tuple, Optional
+import numpy as np
 import numpy.ma as ma
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 import netCDF4
@@ -22,10 +23,10 @@ def spectra2nc(input_file: str,
     """Calculates moments from a RPG Level 0 file and writes a netCDF4 file.
 
     Args:
-        input_file (str): Level 0 filename.
-        output_file (str): Name of the output file.
-        n_points_min (int): Number of points in a valid spectral line. Default is 4.
-        global_attr (dict): Additional global attributes.
+        input_file: Level 0 filename.
+        output_file: Name of the output file.
+        n_points_min: Number of points in a valid spectral line. Default is 4.
+        global_attr: Additional global attributes.
 
     """
     level = 0
@@ -47,11 +48,11 @@ def rpg2nc(path_to_files: str, output_file: str, global_attr: Optional[dict] = N
     """Converts RPG binary files into a netCDF4 file.
 
     Args:
-        path_to_files (str): Directory containing RPG binary file(s) and optionally
+        path_to_files: Directory containing RPG binary file(s) and optionally
             a wildcard to distinguish between different types of files.
             E.g. '/path/to/data/*.LV0'
-        output_file (str): Name of the output file.
-        global_attr (dict, optional): Additional global attributes. Default is None.
+        output_file: Name of the output file.
+        global_attr: Additional global attributes.
 
     """
     files, level = _get_rpg_files(path_to_files)
@@ -79,24 +80,26 @@ def rpg2nc_multi(file_directory: Optional[str] = None,
                  recursive: Optional[bool] = True,
                  base_name: Optional[str] = None,
                  global_attr: Optional[dict] = None) -> list:
-    """Converts all files with extension ['.LV0', '.LV1', '.lv0', 'lv1']
+    """Converts several RPG binary files individually.
+    
+    Converts all files with extension ['.LV0', '.LV1', '.lv0', 'lv1']
     if include_lv0 is set to True (default); otherwise, it does it just for
     ['.LV1','.lv1'] contained in all the subdirectories of the specified folder.
     By default, it will write the new files with the same name of the original ones,
     just adding the extension '.nc' within directory where the program is executed.
 
     Args:
-        file_directory (str, optional): Root directory from which the function
-            will start looking for files to convert. Default is the current working directory.
-        output_directory (str, optional): Directory name where files are written. Default is
-            the current working directory.
-        include_lv0 (bool, optional): option to include Level 0 files or not. Default is True.
-        recursive (bool, optional): If False, does not search recursively. Default is True.
-        base_name (str, optional): Base name for new filenames. Default is None.
-        global_attr (dict, optional): Additional global attributes. Default is None.
+        file_directory: Root directory from which the function will start looking for files 
+            to convert. Default is the current working directory.
+        output_directory: Directory name where files are written. Default is the current working 
+            directory.
+        include_lv0: option to include Level 0 files or not. Default is True.
+        recursive: If False, does not search recursively. Default is True.
+        base_name: Base name for new filenames.
+        global_attr: Additional global attributes.
 
     Returns:
-        list: full paths of the created netCDF files.
+        A list containing the full paths of the created netCDF files.
 
     """
     new_files = []
@@ -169,7 +172,7 @@ def _append_data(f: netCDF4.Dataset, data: dict, metadata: dict) -> None:
             f.variables[key][ind0:ind1, :, :] = array
 
 
-def _get_dtype(array) -> str:
+def _get_dtype(array: np.ndarray) -> str:
     if 'int' in str(array.dtype):
         return 'i4'
     return 'f4'
@@ -191,7 +194,7 @@ def _get_rpg_files(path_to_files: str) -> Tuple[list, int]:
     return files, level
 
 
-def _get_dim(f: netCDF4.Dataset, array) -> tuple:
+def _get_dim(f: netCDF4.Dataset, array: np.ndarray) -> tuple:
     """Finds correct dimensions for a variable."""
     if utils.isscalar(array):
         return ()
@@ -238,7 +241,7 @@ def _generator_files(dir_name: str, include_lv0: bool, recursive: bool):
                     yield os.path.join(subdir, file)
 
 
-def _new_filename(filepath):
+def _new_filename(filepath: str):
     return f'{os.path.split(filepath)[-1]}.nc'
 
 
