@@ -118,8 +118,8 @@ def read_rpg_header(file_name: str) -> Tuple[dict, int]:
             _ = np.fromfile(file, 'i4', 24)
             _ = np.fromfile(file, 'uint32', 10000)
 
-        if level == 0:
-            header['velocity_vectors'] = utils.create_velocity_vectors(header)
+    if level == 0:
+        header['velocity_vectors'] = utils.create_velocity_vectors(header)
 
     file_position = file.tell()
     file.close()
