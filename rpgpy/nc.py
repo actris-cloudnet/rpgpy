@@ -9,7 +9,7 @@ from numpy import ma
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 import netCDF4
 from tqdm import tqdm
-from rpgpy import read_rpg, utils
+from rpgpy import read_rpg, utils, version
 from rpgpy.spcutil import spectra2moments
 import rpgpy.metadata
 
@@ -214,6 +214,7 @@ def _create_global_attributes(f: netCDF4.Dataset, global_attr: Optional[dict], l
     f.Conventions = 'CF-1.7'
     f.year, f.month, f.day = _get_measurement_date(f)
     f.uuid = uuid.uuid4().hex
+    f.rpgpy_version = version.__version__
     f.history = f"Radar file created: {utils.get_current_time()}"
     f.level = level
     if global_attr is not None and isinstance(global_attr, dict):

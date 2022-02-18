@@ -34,6 +34,7 @@ class TestSTSRMode:
         assert 'ldr' not in nc.variables
         assert 'zdr' in nc.variables
         assert nc.variables['zdr'].long_name == self.expected_long_name
+        assert hasattr(nc, 'rpgpy_version')
         nc.close()
 
 
