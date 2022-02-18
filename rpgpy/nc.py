@@ -1,17 +1,17 @@
 """Module for writing netCDF file."""
+import os
+import logging
 import glob
 import uuid
 from typing import Tuple, Optional
 import numpy as np
-import numpy.ma as ma
+from numpy import ma
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 import netCDF4
 from tqdm import tqdm
 from rpgpy import read_rpg, utils
 from rpgpy.spcutil import spectra2moments
 import rpgpy.metadata
-import os
-import logging
 
 SKIP_ME = ('ProgName', 'CustName', 'HAlts', 'TAlts', 'StartTime', 'StopTime')
 
@@ -81,7 +81,7 @@ def rpg2nc_multi(file_directory: Optional[str] = None,
                  base_name: Optional[str] = None,
                  global_attr: Optional[dict] = None) -> list:
     """Converts several RPG binary files individually.
-    
+
     Converts all files with extension ['.LV0', '.LV1', '.lv0', 'lv1']
     if include_lv0 is set to True (default); otherwise, it does it just for
     ['.LV1','.lv1'] contained in all the subdirectories of the specified folder.
@@ -89,10 +89,10 @@ def rpg2nc_multi(file_directory: Optional[str] = None,
     just adding the extension '.nc' within directory where the program is executed.
 
     Args:
-        file_directory: Root directory from which the function will start looking for files 
-            to convert. Default is the current working directory.
-        output_directory: Directory name where files are written. Default is the current working 
-            directory.
+        file_directory: Root directory from which the function will start looking for
+            files to convert. Default is the current working directory.
+        output_directory: Directory name where files are written.
+            Default is the current working directory.
         include_lv0: option to include Level 0 files or not. Default is True.
         recursive: If False, does not search recursively. Default is True.
         base_name: Base name for new filenames.
@@ -235,7 +235,7 @@ def _generator_files(dir_name: str, include_lv0: bool, recursive: bool):
             if file.lower().endswith(includes):
                 yield os.path.join(dir_name, file)
     else:
-        for subdir, dirs, files in sorted(os.walk(dir_name)):
+        for subdir, _, files in sorted(os.walk(dir_name)):
             for file in files:
                 if file.lower().endswith(includes):
                     yield os.path.join(subdir, file)

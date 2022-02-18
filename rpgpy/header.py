@@ -1,7 +1,7 @@
 """Module for reading RPG 94 GHz radar header."""
+from typing import Tuple, Iterator
 import numpy as np
 from rpgpy import utils
-from typing import Tuple, Iterator
 
 
 def read_rpg_header(file_name: str) -> Tuple[dict, int]:

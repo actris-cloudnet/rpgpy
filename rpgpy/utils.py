@@ -1,11 +1,12 @@
-from typing import Tuple
-import numpy.ma as ma
-import numpy as np
 import datetime
+from typing import Tuple
+import numpy as np
+from numpy import ma
 import pytz
 
 
 def get_current_time() -> str:
+    """Returns current UTC time."""
     return datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 
 
@@ -45,13 +46,13 @@ def get_rpg_file_type(header: dict) -> Tuple[int, int]:
     file_code = header['FileCode']
     if file_code == 789346:
         return 0, 2
-    elif file_code == 889346:
+    if file_code == 889346:
         return 0, 3
-    elif file_code == 789347:
+    if file_code == 789347:
         return 1, 2
-    elif file_code == 889347:
+    if file_code == 889347:
         return 1, 3
-    elif file_code == 889348:
+    if file_code == 889348:
         return 1, 4
     raise RuntimeError('Unknown RPG binary file.')
 
