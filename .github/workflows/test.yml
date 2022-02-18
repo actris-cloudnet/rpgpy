@@ -11,7 +11,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.8, 3.9]
 
     steps:
     - uses: actions/checkout@v2
@@ -22,8 +22,14 @@ jobs:
     - name: Install dependencies
       run: |
         python3 -m pip install --upgrade pip
-        python3 -m pip install .
+        python3 -m pip install .[test]
         python3 setup.py build_ext --inplace
+    - name: Lint with pylint
+      run: |
+        pylint rpgpy/*.py --errors-only
+    - name: Typecheck with mypy
+      run: |
+        mypy --ignore-missing-import rpgpy
     - name: Test with pytest
       run: |
         pytest

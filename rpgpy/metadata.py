@@ -1,7 +1,13 @@
-from collections import namedtuple
+from typing import NamedTuple, Optional
 
-Meta = namedtuple('Meta', ('name', 'long_name', 'units', 'comment'))
-Meta.__new__.__defaults__ = (None,) * len(Meta._fields)
+
+class Meta(NamedTuple):
+    name: str
+    long_name: str
+    standard_name: Optional[str] = None
+    units: Optional[str] = None
+    comment: Optional[str] = None
+
 
 METADATA = {
     'FileCode': Meta(
