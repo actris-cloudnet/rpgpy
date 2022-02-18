@@ -53,12 +53,10 @@ def spectra2moments(data: dict,
         # shift mean Doppler velocity by half a bin
         moments[:, ranges[ind_chirp]:ranges[ind_chirp + 1], 1] -= dopp_res / 2.0
 
-    moments = {key: moments[:, :, i] for i, key in enumerate(['Ze', 'MeanVel', 'SpecWidth',
-                                                              'Skewn', 'Kurt'])}
-    for key in moments.keys():
-        moments[key][no_signal] = fill_value
-
-    return moments
+    output = {key: moments[:, :, i] for i, key in enumerate(['Ze', 'MeanVel', 'SpecWidth', 'Skewn', 'Kurt'])}
+    for key in output.keys():
+        output[key][no_signal] = fill_value
+    return output
 
 
 @jit(nopython=True, fastmath=True)

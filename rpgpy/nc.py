@@ -18,9 +18,9 @@ SKIP_ME = ('ProgName', 'CustName', 'HAlts', 'TAlts', 'StartTime', 'StopTime')
 
 def spectra2nc(input_file: str,
                output_file: str,
-               n_points_min: Optional[int] = 4,
+               n_points_min: int = 4,
                global_attr: Optional[dict] = None) -> None:
-    """Calculates moments from a RPG Level 0 file and writes a netCDF4 file.
+    """Calculates moments from RPG Level 0 file and writes netCDF4 file.
 
     Args:
         input_file: Level 0 filename.
@@ -76,8 +76,8 @@ def rpg2nc(path_to_files: str, output_file: str, global_attr: Optional[dict] = N
 
 def rpg2nc_multi(file_directory: Optional[str] = None,
                  output_directory: Optional[str] = None,
-                 include_lv0: Optional[bool] = True,
-                 recursive: Optional[bool] = True,
+                 include_lv0: bool = True,
+                 recursive: bool = True,
                  base_name: Optional[str] = None,
                  global_attr: Optional[dict] = None) -> list:
     """Converts several RPG binary files individually.
@@ -198,7 +198,7 @@ def _get_dim(f: netCDF4.Dataset, array: np.ndarray) -> tuple:
     """Finds correct dimensions for a variable."""
     if utils.isscalar(array):
         return ()
-    variable_size = ()
+    variable_size = []
     file_dims = f.dimensions
     for length in array.shape:
         try:
@@ -206,17 +206,17 @@ def _get_dim(f: netCDF4.Dataset, array: np.ndarray) -> tuple:
                    if file_dims[key].size == length][0]
         except IndexError:
             dim = 'time'
-        variable_size = variable_size + (dim,)
-    return variable_size
+        variable_size.append(dim)
+    return tuple(variable_size)
 
 
-def _create_global_attributes(f: netCDF4.Dataset, global_attr: dict, level: int):
+def _create_global_attributes(f: netCDF4.Dataset, global_attr: Optional[dict], level: int):
     f.Conventions = 'CF-1.7'
     f.year, f.month, f.day = _get_measurement_date(f)
     f.uuid = uuid.uuid4().hex
     f.history = f"Radar file created: {utils.get_current_time()}"
     f.level = level
-    if global_attr and isinstance(global_attr, dict):
+    if global_attr is not None and isinstance(global_attr, dict):
         for key, value in global_attr.items():
             setattr(f, key, value)
 

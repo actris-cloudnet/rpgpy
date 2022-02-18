@@ -26,7 +26,7 @@ jobs:
         python3 setup.py build_ext --inplace
     - name: Lint with pylint
       run: |
-        pylint rpgpy/**/*.py --errors-only
+        pylint rpgpy/*.py --errors-only
     - name: Typecheck with mypy
       run: |
         mypy --ignore-missing-import rpgpy

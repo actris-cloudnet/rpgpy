@@ -9,7 +9,7 @@ def get_current_time() -> str:
     return datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 
 
-def rpg_seconds2date(time_stamp: int, date_only: bool = False) -> list:
+def rpg_seconds2date(time_stamp: float, date_only: bool = False) -> list:
     """Convert RPG timestamp to UTC date + time.
 
     Args:

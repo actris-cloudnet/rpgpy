@@ -25,7 +25,7 @@ def read_rpg_header(file_name: str) -> Tuple[dict, int]:
             else:
                 header[name] = np.array(array, dtype=_get_dtype(array))
 
-    header = {}
+    header: dict = {}
     file = open(file_name, 'rb')
 
     read(('FileCode', 'i4'),
