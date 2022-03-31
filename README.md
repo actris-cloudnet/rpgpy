@@ -12,22 +12,21 @@ RpgPy is a Python / Cython software for
 # Installation
 
 ## From PyPI
-```
-$ python3 -m pip install rpgpy
-```
+
+    python3 -m pip install rpgpy
+
 NOTE: A C-compiler is required because the Cython code is compiled locally during installation.
 If you get an error about missing `Python.h`, you need to install the missing header files with `$ apt install python3-dev` (or similar).
 
 ## From source
-```
-$ git clone  https://github.com/actris-cloudnet/rpgpy/
-$ cd rpgpy/
-$ python3 -m venv venv
-$ source venv/bin/activate
-(venv) $ python3 -m pip install --upgrade pip
-(venv) $ python3 -m pip install .
-(venv) $ python3 setup.py build_ext --inplace
-```
+
+    git clone  https://github.com/actris-cloudnet/rpgpy/
+    cd rpgpy/
+    python3 -m venv venv
+    source venv/bin/activate
+    python3 -m pip install --upgrade pip
+    python3 -m pip install .
+
 
 # Quickstart
 
@@ -232,16 +231,30 @@ Returns:
 | `dict`    | Dictionary containing `Ze` (reflectivity), `MeanVel` (mean velocity), `SpecWidth` (spectral width), `Skewn` (skewness) and `Kurt` (kurtosis), which are 2D numpy arrays (time x range).|
 
 
-## Tests
+## Development
+
+Install test-dependencies and [pre-commit](https://pre-commit.com/) hooks:
+
+    python3 -m pip install -e .[test]
+    pre-commit install
+
+Compile Cython if you change `.pyx` files:
+
+    python3 setup.py build_ext --inplace
+
+### Tests
+
 Run unit tests:
-```
-(venv) $ pytest
-```
+
+    pytest
 
 Run end-to-end tests:
-```
-(venv) $ for f in tests/e2e/*/main.py; do $f; done
-```
+
+    for f in tests/e2e/*/*runner.py; do $f; done
+
+Force `pre-commit` checks of all files:
+
+    pre-commit run --all
 
 
 ## Performance
