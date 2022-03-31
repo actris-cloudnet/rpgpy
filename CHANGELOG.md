@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.11.0
+
+- Use default `zlib` compression settings
+- Lock maximum `numpy` version required by `numba`
+- Add CHANGELOG.md
+- Add `pre-commit` for checking the code
+- Reformat the code with `black`
+
 ## 0.10.2
 
 - Fix bug causing crash with version 2 data
