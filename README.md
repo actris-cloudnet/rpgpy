@@ -27,6 +27,9 @@ If you get an error about missing `Python.h`, you need to install the missing he
     python3 -m pip install --upgrade pip
     python3 -m pip install .
 
+Compile Cython code if needed:
+
+    python3 setup.py build_ext --inplace
 
 # Quickstart
 
