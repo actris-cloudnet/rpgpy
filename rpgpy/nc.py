@@ -143,8 +143,7 @@ def _write_initial_data(f: netCDF4.Dataset, data: dict, metadata: dict) -> None:
             continue
         fill_value = 0 if array.ndim > 1 and not ma.isMaskedArray(array) else None
         var = f.createVariable(metadata[key].name, _get_dtype(array),
-                               _get_dim(f, array), zlib=True, complevel=3,
-                               shuffle=False, fill_value=fill_value)
+                               _get_dim(f, array), zlib=True, fill_value=fill_value)
         var[:] = array
         _set_attributes(var, key, metadata)
 
