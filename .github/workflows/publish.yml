@@ -14,7 +14,7 @@ jobs:
       run: |
         version=${GITHUB_REF#refs/tags/v}
         sed "0,/^## ${version//./\\.}/d;/^## /,\$d" CHANGELOG.md > ${{ github.workspace }}-CHANGELOG.txt
-        echo "::set-output name=name::CloudnetPy $version"
+        echo "::set-output name=name::RpgPy $version"
       id: changelog
     - name: Create release
       uses: softprops/action-gh-release@v1
