@@ -9,3 +9,5 @@ rpgpy/*.so
 tests/*/**/*cache*
 bin/*.nc
 .vscode/
+scripts/
+*~

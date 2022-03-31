@@ -35,5 +35,5 @@ jobs:
         pytest
     - name: Run e2e tests
       run: |
-        ./tests/e2e/level1/main.py
-        ./tests/e2e/level0/main.py
+        ./tests/e2e/level1/l1_test_runner.py
+        ./tests/e2e/level0/l0_test_runner.py

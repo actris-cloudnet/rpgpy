@@ -1,13 +1,16 @@
-from typing import Tuple, Optional
+from typing import Optional, Tuple
+
 import numpy as np
 from numba import jit
 
 
-def spectra2moments(data: dict,
-                    header: dict,
-                    spec_var: Optional[str] = 'TotSpec',
-                    fill_value: Optional[float] = -999.0,
-                    n_points_min: Optional[int] = 4) -> dict:
+def spectra2moments(
+    data: dict,
+    header: dict,
+    spec_var: Optional[str] = "TotSpec",
+    fill_value: Optional[float] = -999.0,
+    n_points_min: Optional[int] = 4,
+) -> dict:
     """Calculates radar moments from the main peak.
 
     This routine calculates the radar moments: reflectivity, mean Doppler velocity, spectrum
@@ -34,10 +37,10 @@ def spectra2moments(data: dict,
     n_time, n_range, _ = spectra.shape
     moments = np.full((n_time, n_range, 5), np.nan)
     no_signal = np.all(spectra == 0, axis=2)
-    ranges = np.append(header['RngOffs'], header['RAltN'])
+    ranges = np.append(header["RngOffs"], header["RAltN"])
 
-    for ind_chirp in range(header['SequN']):
-        dopp_res = np.mean(np.diff(header['velocity_vectors'][ind_chirp]))
+    for ind_chirp in range(header["SequN"]):
+        dopp_res = np.mean(np.diff(header["velocity_vectors"][ind_chirp]))
         for ind_range in range(ranges[ind_chirp], ranges[ind_chirp + 1]):
             for ind_time in range(n_time):
                 if no_signal[ind_time, ind_range]:
@@ -48,12 +51,16 @@ def spectra2moments(data: dict,
                     continue
                 moments[ind_time, ind_range, :] = radar_moment_calculation(
                     spectra[ind_time, ind_range, edge_left:edge_right],
-                    header['velocity_vectors'][ind_chirp][edge_left:edge_right])
+                    header["velocity_vectors"][ind_chirp][edge_left:edge_right],
+                )
 
         # shift mean Doppler velocity by half a bin
-        moments[:, ranges[ind_chirp]:ranges[ind_chirp + 1], 1] -= dopp_res / 2.0
+        moments[:, ranges[ind_chirp] : ranges[ind_chirp + 1], 1] -= dopp_res / 2.0
 
-    output = {key: moments[:, :, i] for i, key in enumerate(['Ze', 'MeanVel', 'SpecWidth', 'Skewn', 'Kurt'])}
+    output = {
+        key: moments[:, :, i]
+        for i, key in enumerate(["Ze", "MeanVel", "SpecWidth", "Skewn", "Kurt"])
+    }
     for key in output.keys():
         output[key][no_signal] = fill_value
     return output
@@ -82,7 +89,7 @@ def radar_moment_calculation(signal: np.ndarray, vel_bins: np.ndarray) -> np.nda
     """
 
     signal_sum = np.sum(signal)  # linear full spectrum Ze [mm^6/m^3], scalar
-    ze_lin = signal_sum / 2.0    # divide by 2 because vertical and horizontal channel are added.
+    ze_lin = signal_sum / 2.0  # divide by 2 because vertical and horizontal channel are added.
     pwr_nrm = signal / signal_sum  # determine normalized power (NOT normalized by Vdop bins)
     vel = np.sum(vel_bins * pwr_nrm)
     vel_diff = vel_bins - vel
@@ -119,7 +126,9 @@ def find_peak_edges(signal: np.ndarray) -> Tuple[int, int]:
     for ind in range(imax, -1, -1):
         if signal[ind] > threshold:
             continue
-        edge_left = ind + 1  # the +1 is important, otherwise a fill_value will corrupt the numba code
+        edge_left = (
+            ind + 1
+        )  # the +1 is important, otherwise a fill_value will corrupt the numba code
         break
 
     return edge_left, edge_right
@@ -138,21 +147,24 @@ def calc_spectral_LDR(header: dict, data: dict) -> np.ndarray:
         Computed SLDR [dB].
 
     """
-    spec_tot = scale_spectra(data['TotSpec'], header['SWVersion'])
-    spec_V = spec_tot - data['HSpec'] - 2 * data['ReVHSpec']
-    noise_V = data['TotNoisePow']/2.  # TBD: how to obtain noise power in vertical channel?
+    spec_tot = scale_spectra(data["TotSpec"], header["SWVersion"])
+    spec_V = spec_tot - data["HSpec"] - 2 * data["ReVHSpec"]
+    noise_V = data["TotNoisePow"] / 2.0  # TBD: how to obtain noise power in vertical channel?
 
-    bins_per_chirp = np.diff(np.hstack((header['RngOffs'], header['RAltN'])))
-    noise_h_per_bin = (data['HNoisePow']/np.repeat(header['SpecN'], bins_per_chirp))[:, :, np.newaxis]
-    noise_v_per_bin = (noise_V/np.repeat(header['SpecN'], bins_per_chirp))[:, :, np.newaxis]
-    SNRv = spec_V/noise_v_per_bin
-    SNRh = data['HSpec']/noise_h_per_bin
-    snr_mask = ((SNRv < 1000) | (SNRh < 1000))
+    bins_per_chirp = np.diff(np.hstack((header["RngOffs"], header["RAltN"])))
+    noise_h_per_bin = (data["HNoisePow"] / np.repeat(header["SpecN"], bins_per_chirp))[
+        :, :, np.newaxis
+    ]
+    noise_v_per_bin = (noise_V / np.repeat(header["SpecN"], bins_per_chirp))[:, :, np.newaxis]
+    SNRv = spec_V / noise_v_per_bin
+    SNRh = data["HSpec"] / noise_h_per_bin
+    snr_mask = (SNRv < 1000) | (SNRh < 1000)
 
-    rhv = np.abs(data['ReVHSpec']+complex(imag=1) * data['ImVHSpec']) / np.sqrt(
-        (spec_V + noise_v_per_bin) * (data['HSpec'] + noise_h_per_bin))
-    sldr = 10*np.log10((1-rhv)/(1+rhv))
-    snr_mask = (snr_mask | (data['TotSpec'] == 0.))
+    rhv = np.abs(data["ReVHSpec"] + complex(imag=1) * data["ImVHSpec"]) / np.sqrt(
+        (spec_V + noise_v_per_bin) * (data["HSpec"] + noise_h_per_bin)
+    )
+    sldr = 10 * np.log10((1 - rhv) / (1 + rhv))
+    snr_mask = snr_mask | (data["TotSpec"] == 0.0)
     sldr[snr_mask] = -999
     return sldr
 

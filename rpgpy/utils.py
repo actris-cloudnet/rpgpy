@@ -1,13 +1,14 @@
 import datetime
 from typing import Tuple
+
 import numpy as np
-from numpy import ma
 import pytz
+from numpy import ma
 
 
 def get_current_time() -> str:
     """Returns current UTC time."""
-    return datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+    return datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
 
 def rpg_seconds2date(time_stamp: float, date_only: bool = False) -> list:
@@ -24,7 +25,7 @@ def rpg_seconds2date(time_stamp: float, date_only: bool = False) -> list:
     epoch = (2001, 1, 1)
     epoch_in_seconds = datetime.datetime.timestamp(datetime.datetime(*epoch, tzinfo=pytz.utc))
     time_stamp += epoch_in_seconds
-    date_time = datetime.datetime.utcfromtimestamp(time_stamp).strftime('%Y %m %d %H %M %S').split()
+    date_time = datetime.datetime.utcfromtimestamp(time_stamp).strftime("%Y %m %d %H %M %S").split()
     if date_only:
         return date_time[:3]
     return date_time
@@ -43,7 +44,7 @@ def get_rpg_file_type(header: dict) -> Tuple[int, int]:
         RuntimeError: Unknown file type.
 
     """
-    file_code = header['FileCode']
+    file_code = header["FileCode"]
     if file_code == 789346:
         return 0, 2
     if file_code == 889346:
@@ -54,7 +55,7 @@ def get_rpg_file_type(header: dict) -> Tuple[int, int]:
         return 1, 3
     if file_code == 889348:
         return 1, 4
-    raise RuntimeError('Unknown RPG binary file.')
+    raise RuntimeError("Unknown RPG binary file.")
 
 
 def isscalar(array) -> bool:
@@ -74,7 +75,7 @@ def isscalar(array) -> bool:
 
     """
     arr = ma.array(array)
-    if not hasattr(arr, '__len__') or arr.shape == () or len(arr) == 1:
+    if not hasattr(arr, "__len__") or arr.shape == () or len(arr) == 1:
         return True
     return False
 
@@ -90,14 +91,12 @@ def create_velocity_vectors(header: dict) -> ma.masked_array:
            vectors (max number of bins) where the padded values are masked.
 
     """
-    n_chirps = header['SequN']
-    n_bins_max = np.max(header['SpecN'])
+    n_chirps = header["SequN"]
+    n_bins_max = np.max(header["SpecN"])
     velocity_vectors = ma.masked_all((n_chirps, n_bins_max))
-    for ind, (n_bins, chirp_max_vel) in enumerate(zip(header['SpecN'], header['MaxVel'])):
+    for ind, (n_bins, chirp_max_vel) in enumerate(zip(header["SpecN"], header["MaxVel"])):
         bins_to_shift = (n_bins_max - n_bins) // 2
         dopp_res = chirp_max_vel / n_bins
-        velocity = np.linspace(-chirp_max_vel + dopp_res,
-                               +chirp_max_vel - dopp_res,
-                               n_bins)
-        velocity_vectors[ind, bins_to_shift:bins_to_shift+len(velocity)] = velocity
+        velocity = np.linspace(-chirp_max_vel + dopp_res, +chirp_max_vel - dopp_res, n_bins)
+        velocity_vectors[ind, bins_to_shift : bins_to_shift + len(velocity)] = velocity
     return velocity_vectors

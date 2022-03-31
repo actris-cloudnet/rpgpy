@@ -67,6 +67,3 @@ This version fixes spectral matrices so that the difference chirps correspond to
 Version `0.3.1.` adds bug fixes.
 
 ## 0.3.0
-
-
-

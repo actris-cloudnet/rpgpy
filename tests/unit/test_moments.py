@@ -1,16 +1,15 @@
 import os
-from rpgpy import spectra2moments
-from rpgpy import spcutil
-from rpgpy import read_rpg
-import numpy as np
 from time import time
+
+import numpy as np
 from numpy.testing import assert_array_almost_equal
+
+from rpgpy import read_rpg, spcutil, spectra2moments
 
 FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
 class TestFindPeaks:
-
     def test_main_peak_1(self):
         data = np.array([0, 0, 0, 0.3, 0, 0, 0.2, 0.3, 0.5, 0.2, 0, 0, 0, 0.2])
         ind_left, ind_right = spcutil.find_peak_edges(data)
@@ -43,36 +42,36 @@ class TestFindPeaks:
 
 
 class TestMoments:
-    input_file = f'{FILE_PATH}/../data/level0/v3-889346/200704_000002_P10_ZEN.LV0'
+    input_file = f"{FILE_PATH}/../data/level0/v3-889346/200704_000002_P10_ZEN.LV0"
     header, data = read_rpg(input_file)
-    source_data_mean = np.mean(data['TotSpec'])
+    source_data_mean = np.mean(data["TotSpec"])
     start = time()
     moments = spectra2moments(data, header)
     stop = time()
-    print('')
-    print(f'Time elapsed: {stop - start} seconds')
+    print("")
+    print(f"Time elapsed: {stop - start} seconds")
 
     def test_header(self):
-        assert self.header['SWVersion'] == 525
-        assert self.header['FileCode'] == 889346
+        assert self.header["SWVersion"] == 525
+        assert self.header["FileCode"] == 889346
 
     def test_that_does_not_alter_input_data(self):
-        assert_array_almost_equal(self.source_data_mean, np.mean(self.data['TotSpec']))
+        assert_array_almost_equal(self.source_data_mean, np.mean(self.data["TotSpec"]))
 
     def test_that_we_get_the_reference_value(self):
         moments = spectra2moments(self.data, self.header, n_points_min=1)
-        assert round(np.mean(moments['Ze'][moments['Ze'] > 0] * 1e5), 2) == 10.56
+        assert round(np.mean(moments["Ze"][moments["Ze"] > 0] * 1e5), 2) == 10.56
 
     def test_that_moments_contain_no_nans(self):
         for key, data in self.moments.items():
             assert bool(np.isnan(data).any()) is False
 
     def test_that_works_with_hspec(self):
-        moments = spectra2moments(self.data, self.header, spec_var='HSpec')
+        moments = spectra2moments(self.data, self.header, spec_var="HSpec")
 
 
 class TestSLDR:
-    input_file = f'{FILE_PATH}/../data/level0/v3-889346/190912_060003_P05_ZEN.LV0'
+    input_file = f"{FILE_PATH}/../data/level0/v3-889346/190912_060003_P05_ZEN.LV0"
     header, data = read_rpg(input_file)
 
     def test_spectral_LDR(self):

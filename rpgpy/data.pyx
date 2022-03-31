@@ -1,11 +1,14 @@
 """RPG cloud radar binary reader in Cython."""
 from libc.stdio cimport *
-from libc.stdlib cimport malloc, free
+from libc.stdlib cimport free, malloc
+
 import logging
 from typing import Tuple
+
 import numpy as np
-from rpgpy import utils
+
 from rpgpy import header as head
+from rpgpy import utils
 from rpgpy.metadata import METADATA
 
 DEF MAX_N_SPECTRAL_BLOCKS = 100
