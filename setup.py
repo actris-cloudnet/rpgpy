@@ -26,7 +26,7 @@ setup(
     url="https://github.com/actris-cloudnet/rpgpy",
     license="MIT License",
     install_requires=["numpy<=1.21", "cython", "netCDF4", "tqdm", "pytz", "numba"],
-    extras_require={"test": ["pytest", "pylint", "mypy", "types-pytz"]},
+    extras_require={"test": ["pytest", "pylint", "mypy", "types-pytz", "pre-commit"]},
     include_package_data=True,
     packages=find_packages(),
     python_requires=">=3.8",
