@@ -3,6 +3,9 @@ import pytest
 
 
 class TestRpgPy:
+
+    filename = ""
+
     @pytest.fixture(autouse=True)
     def _fetch_params(self, params):
         self.filename = params["filename"]

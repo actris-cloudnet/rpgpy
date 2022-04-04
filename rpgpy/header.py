@@ -29,7 +29,7 @@ def read_rpg_header(file_name: str) -> Tuple[dict, int]:
                 header[name] = np.array(array, dtype=_get_dtype(array))
 
     header: dict = {}
-    file = open(file_name, "rb")
+    file = open(file_name, "rb")  # pylint: disable=R1732
 
     read(("FileCode", "i4"), ("HeaderLen", "i4"))
 

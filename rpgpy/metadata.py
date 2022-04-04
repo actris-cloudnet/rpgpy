@@ -153,7 +153,8 @@ METADATA = {
     "FFTWindow": Meta(
         name="fft_window",
         long_name="FFT Window",
-        comment="FFT window in use: 0=square, 1=parzen, 2=blackman, 3=welch, 4=slepian2, 5=slepian3",
+        comment="FFT window in use: 0=square, 1=parzen, 2=blackman, 3=welch, 4=slepian2, "
+        "5=slepian3",
     ),
     "FFTInputRng": Meta(
         name="adc_voltage_range",
@@ -171,7 +172,8 @@ METADATA = {
     "QF": Meta(
         name="quality_flag",
         long_name="Quality Flag",
-        comment="Bit 1=ADC saturation, Bit 2=spectral width too high, Bit 3=no transm. power leveling",
+        comment="Bit 1=ADC saturation, Bit 2=spectral width too high, Bit 3=no transm. power "
+        "leveling",
     ),
     "RR": Meta(name="rain_rate", long_name="Rain Rate", units="mm/h"),
     "RelHum": Meta(name="relative_humidity", long_name="Relative Humidity", units="%"),

@@ -12,12 +12,12 @@ from rpgpy import read_rpg, rpg2nc, rpg2nc_multi
 
 def main():
     data_path = "tests/data/level1/"
-    for folder in os.listdir(data_path):
+    for folder in os.listdir(data_path):  # pylint: disable=R1702
         for file in os.listdir(os.path.join(data_path, folder)):
             filename = os.path.join(data_path, folder, file)
             header, data = read_rpg(filename)
 
-            data_file = NamedTemporaryFile(suffix=".pkl")
+            data_file = NamedTemporaryFile(suffix=".pkl")  # pylint: disable=R1732
             with open(data_file.name, "wb") as f:
                 pickle.dump(data, f)
 
@@ -27,7 +27,7 @@ def main():
 
             global_attr = {"foo": "bar"}
 
-            output_file = NamedTemporaryFile()
+            output_file = NamedTemporaryFile()  # pylint: disable=R1732
             rpg2nc(
                 f"{os.path.join(data_path, folder)}/{file}",
                 output_file.name,
@@ -39,7 +39,7 @@ def main():
             base_name = "test"
             rpg2nc_multi(data_path, base_name=base_name, include_lv0=False, global_attr=global_attr)
 
-            for subdir, dirs, files in sorted(os.walk(".")):
+            for _, _, files in sorted(os.walk(".")):
                 for nc_file in files:
                     if file.startswith(base_name) and file.endswith(".nc"):
                         pytest_args = [
@@ -50,7 +50,7 @@ def main():
                         ]
                         try:
                             subprocess.check_call(pytest_args)
-                        except subprocess.CalledProcessError:
+                        except subprocess.CalledProcessError:  # pylint: disable=W0706
                             raise
 
             # cleaning up the project folder

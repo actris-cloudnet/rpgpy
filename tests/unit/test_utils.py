@@ -14,7 +14,7 @@ def test_rpg_seconds2date():
 
 
 @pytest.mark.parametrize(
-    "input, result",
+    "data, result",
     [
         (0, ["2001", "01", "01", "00", "00", "00"]),
         (24 * 60 * 60 * 10 + 1, ["2001", "01", "11", "00", "00", "01"]),
@@ -22,8 +22,8 @@ def test_rpg_seconds2date():
         (625107602, ["2020", "10", "23", "01", "00", "02"]),
     ],
 )
-def test_seconds2date(input, result):
-    assert utils.rpg_seconds2date(input) == result
+def test_seconds2date(data, result):
+    assert utils.rpg_seconds2date(data) == result
 
 
 def test_create_velocity_vectors():

@@ -1,8 +1,8 @@
 import glob
 import os
+from tempfile import NamedTemporaryFile
 
 import netCDF4
-import pytest
 
 import rpgpy.nc
 from rpgpy import read_rpg, rpg2nc, rpg2nc_multi, spectra2nc
@@ -13,26 +13,20 @@ FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 class TestSTSRMode:
 
     expected_long_name = "Differential Reflectivity Ratio"
-
-    @pytest.fixture(autouse=True)
-    def _run_before_and_after_tests(self):
-        self.output_file = f"{FILE_PATH}/output.nc"
-        self.input_file = f"{FILE_PATH}/../data/misc/BaseN_210913_001152_P01_PPI.LV1"
-        yield
-        if os.path.exists(self.output_file):
-            os.remove(self.output_file)
+    input_file = f"{FILE_PATH}/../data/misc/BaseN_210913_001152_P01_PPI.LV1"
 
     def test_binary_file_reading(self):
-        header, data = read_rpg(self.input_file)
+        header, _ = read_rpg(self.input_file)
         assert header["DualPol"] == 2
 
     def test_binary_file_reading_2(self):
-        header, data = read_rpg(self.input_file, rpg_names=False)
+        _, data = read_rpg(self.input_file, rpg_names=False)
         assert self.expected_long_name in data
 
     def test_converted_netcdf(self):
-        rpg2nc(self.input_file, self.output_file)
-        nc = netCDF4.Dataset(self.output_file)
+        output_file = NamedTemporaryFile()  # pylint: disable=R1732
+        rpg2nc(self.input_file, output_file.name)
+        nc = netCDF4.Dataset(output_file.name)
         assert "ldr" not in nc.variables
         assert "zdr" in nc.variables
         assert nc.variables["zdr"].long_name == self.expected_long_name
@@ -43,26 +37,20 @@ class TestSTSRMode:
 class TestLDRMode:
 
     expected_long_name = "Linear Depolarisation Ratio"
-
-    @pytest.fixture(autouse=True)
-    def _run_before_and_after_tests(self):
-        self.input_file = f"{FILE_PATH}/../data/misc/210929_070000_P09_ZEN.LV1"
-        self.output_file = f"{FILE_PATH}/output.nc"
-        yield
-        if os.path.exists(self.output_file):
-            os.remove(self.output_file)
+    input_file = f"{FILE_PATH}/../data/misc/210929_070000_P09_ZEN.LV1"
 
     def test_binary_file_reading(self):
-        header, data = read_rpg(self.input_file)
+        header, _ = read_rpg(self.input_file)
         assert header["DualPol"] == 1
 
     def test_binary_file_reading_2(self):
-        header, data = read_rpg(self.input_file, rpg_names=False)
+        _, data = read_rpg(self.input_file, rpg_names=False)
         assert self.expected_long_name in data
 
     def test_converted_netcdf(self):
-        rpg2nc(self.input_file, self.output_file)
-        nc = netCDF4.Dataset(self.output_file)
+        output_file = NamedTemporaryFile()  # pylint: disable=R1732
+        rpg2nc(self.input_file, output_file.name)
+        nc = netCDF4.Dataset(output_file.name)
         assert "zdr" not in nc.variables
         assert "ldr" in nc.variables
         assert nc.variables["ldr"].long_name == self.expected_long_name
@@ -82,20 +70,22 @@ class TestSpectra2Nc:
             assert key in nc.variables
             assert nc.variables[key].shape == expected_shape
         assert "time" in nc.variables
-        assert nc.location == "Hyytiala"
+        assert getattr(nc, "location") == "Hyytiala"
         nc.close()
         os.remove(output_file)
 
 
 class TestStationNameReading:
-    def test_valid_customer_name(self):
-        self.input_file = f"{FILE_PATH}/../data/misc/210929_070000_P09_ZEN.LV1"
-        header, data = read_rpg(self.input_file)
+    @staticmethod
+    def test_valid_customer_name():
+        input_file = f"{FILE_PATH}/../data/misc/210929_070000_P09_ZEN.LV1"
+        header, _ = read_rpg(input_file)
         assert header["CustName"] == "ESA 1"
 
-    def test_invalid_customer_name(self):
-        self.input_file = f"{FILE_PATH}/../data/misc/joyrad94_20210925000001_P01_ZEN.lv1"
-        header, data = read_rpg(self.input_file)
+    @staticmethod
+    def test_invalid_customer_name():
+        input_file = f"{FILE_PATH}/../data/misc/joyrad94_20210925000001_P01_ZEN.lv1"
+        header, _ = read_rpg(input_file)
         assert header["CustName"] == "Univ. Cologne (J%lich)"
 
 
@@ -137,7 +127,7 @@ class TestRpg2ncMulti:
             expected_filename = f"{cwd}/{os.path.basename(file)}.nc"
             assert os.path.exists(expected_filename)
             os.remove(expected_filename)
-        assert glob.glob(f"{cwd}/*.nc") == []
+        assert not glob.glob(f"{cwd}/*.nc")
 
     def test_output_dir(self):
         output_dir = f"{FILE_PATH}/../data/level0/v3-889346/"
@@ -147,7 +137,8 @@ class TestRpg2ncMulti:
             assert os.path.exists(expected_filename)
             os.remove(expected_filename)
 
-    def test_recursive(self):
+    @staticmethod
+    def test_recursive():
         input_dir = f"{FILE_PATH}/../data/"
         output_dir = f"{FILE_PATH}/../data/level0/v3-889346/"
         files = rpg2nc_multi(file_directory=input_dir, output_directory=output_dir, recursive=False)
@@ -166,8 +157,8 @@ class TestGeneratorFiles:
     lv0 = (".lv0", ".LV0")
 
     def test_lv1(self):
-        files = rpgpy.nc._generator_files(self.dir_name, False, True)
-        files = [file for file in files]
+        files = rpgpy.nc._generator_files(self.dir_name, False, True)  # pylint: disable=W0212
+        files = list(files)
         for file in files:
             assert not file.endswith(self.lv0)
             assert file.endswith(self.lv1)
@@ -175,8 +166,8 @@ class TestGeneratorFiles:
         assert len(files) >= 6
 
     def test_lv1_and_lv0(self):
-        files = rpgpy.nc._generator_files(self.dir_name, True, True)
-        files = [file for file in files]
+        files = rpgpy.nc._generator_files(self.dir_name, True, True)  # pylint: disable=W0212
+        files = list(files)
         for file in files:
             assert file.endswith(self.lv1 + self.lv0)
             assert os.path.exists(file)

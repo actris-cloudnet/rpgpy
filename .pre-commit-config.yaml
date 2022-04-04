@@ -29,8 +29,7 @@ repos:
         language: system
         types: [python]
         require_serial: true
-        args: ["--errors-only", "--jobs=4"]
-    hooks:
+        args: ["--jobs=4"]
       - id: mypy
         name: mypy
         entry: mypy

@@ -21,7 +21,7 @@ def main():
 
             assert str(header["FileCode"]) in folder
 
-            data_file = NamedTemporaryFile(suffix=".pkl")
+            data_file = NamedTemporaryFile(suffix=".pkl")  # pylint: disable=R1732
             with open(data_file.name, "wb") as f:
                 d = {
                     "Time": data["Time"],
@@ -33,7 +33,7 @@ def main():
             )
 
         global_attr = {"foo": "bar"}
-        output_file = NamedTemporaryFile()
+        output_file = NamedTemporaryFile()  # pylint: disable=R1732
         rpg2nc(
             f"{os.path.join(data_path, folder)}/2*.LV0", output_file.name, global_attr=global_attr
         )
@@ -42,7 +42,7 @@ def main():
         base_name = "test"
         rpg2nc_multi(data_path, base_name=base_name, global_attr=global_attr)
 
-        for subdir, dirs, files in sorted(os.walk(".")):
+        for _, _, files in sorted(os.walk(".")):
             for file in files:
                 if file.startswith(base_name) and file.endswith(".nc"):
                     pytest_args = [
@@ -53,7 +53,7 @@ def main():
                     ]
                     try:
                         subprocess.check_call(pytest_args)
-                    except subprocess.CalledProcessError:
+                    except subprocess.CalledProcessError:  # pylint: disable=W0706
                         raise
 
         # cleaning up the project folder

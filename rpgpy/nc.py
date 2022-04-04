@@ -75,7 +75,7 @@ def rpg2nc(path_to_files: str, output_file: str, global_attr: Optional[dict] = N
     logging.info(f"Created new file: {output_file}")
 
 
-def rpg2nc_multi(
+def rpg2nc_multi(  # pylint: disable=R0913
     file_directory: Optional[str] = None,
     output_directory: Optional[str] = None,
     include_lv0: bool = True,

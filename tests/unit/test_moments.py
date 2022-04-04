@@ -10,31 +10,36 @@ FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
 class TestFindPeaks:
-    def test_main_peak_1(self):
+    @staticmethod
+    def test_main_peak_1():
         data = np.array([0, 0, 0, 0.3, 0, 0, 0.2, 0.3, 0.5, 0.2, 0, 0, 0, 0.2])
         ind_left, ind_right = spcutil.find_peak_edges(data)
         assert ind_left == 6
         assert ind_right == 10
 
-    def test_find_single_value(self):
+    @staticmethod
+    def test_find_single_value():
         data = np.array([0, 0, 0, 0.3, 0, 0])
         ind_left, ind_right = spcutil.find_peak_edges(data)
         assert ind_left == 3
         assert ind_right == 4
 
-    def test_find_left_edge(self):
+    @staticmethod
+    def test_find_left_edge():
         data = np.array([0.1, 0.2, 0.3, 0.5, 0, 0])
         ind_left, ind_right = spcutil.find_peak_edges(data)
         assert ind_left == 0
         assert ind_right == 4
 
-    def test_find_right_edge(self):
+    @staticmethod
+    def test_find_right_edge():
         data = np.array([0, 0.2, 0.3, 0.5, 0.4, 0.3])
         ind_left, ind_right = spcutil.find_peak_edges(data)
         assert ind_left == 1
         assert ind_right == 6  # is this OK, or should be 5 ?
 
-    def test_find_peak_with_secondary_peak(self):
+    @staticmethod
+    def test_find_peak_with_secondary_peak():
         data = np.array([0, 0.1, 0.3, 0.2, 0.35, 0.5, 0.3, 0.1, 0])
         ind_left, ind_right = spcutil.find_peak_edges(data)
         assert ind_left == 1
@@ -63,16 +68,14 @@ class TestMoments:
         assert round(np.mean(moments["Ze"][moments["Ze"] > 0] * 1e5), 2) == 10.56
 
     def test_that_moments_contain_no_nans(self):
-        for key, data in self.moments.items():
+        for _, data in self.moments.items():
             assert bool(np.isnan(data).any()) is False
 
     def test_that_works_with_hspec(self):
-        moments = spectra2moments(self.data, self.header, spec_var="HSpec")
+        spectra2moments(self.data, self.header, spec_var="HSpec")
 
 
-class TestSLDR:
+def test_spectral_ldr():
     input_file = f"{FILE_PATH}/../data/level0/v3-889346/190912_060003_P05_ZEN.LV0"
     header, data = read_rpg(input_file)
-
-    def test_spectral_LDR(self):
-        sldr = spcutil.calc_spectral_LDR(self.header, self.data)
+    spcutil.calc_spectral_LDR(header, data)

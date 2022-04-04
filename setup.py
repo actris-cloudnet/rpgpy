@@ -9,10 +9,10 @@ extensions = [
 ]
 
 version: dict = {}
-with open("rpgpy/version.py") as f:
-    exec(f.read(), version)
+with open("rpgpy/version.py", encoding="utf-8") as f:
+    exec(f.read(), version)  # pylint: disable=W0122
 
-with open("README.md") as f:
+with open("README.md", encoding="utf-8") as f:
     readme = f.read()
 
 setup(

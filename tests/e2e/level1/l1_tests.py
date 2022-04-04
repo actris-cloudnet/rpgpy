@@ -7,6 +7,9 @@ from rpgpy import utils
 
 
 class TestRpgPy:
+
+    data = None
+
     @pytest.fixture(autouse=True)
     def _fetch_params(self, params):
         self.data = self._read(params["data"])
