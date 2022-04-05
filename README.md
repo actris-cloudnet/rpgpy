@@ -26,9 +26,6 @@ If you get an error about missing `Python.h`, you need to install the missing he
     source venv/bin/activate
     python3 -m pip install --upgrade pip
     python3 -m pip install .
-
-Compile Cython code if needed:
-
     python3 setup.py build_ext --inplace
 
 # Quickstart
@@ -238,10 +235,10 @@ Returns:
 
 Install test-dependencies and [pre-commit](https://pre-commit.com/) hooks:
 
-    python3 -m pip install -e .[test]
+    python3 -m pip install -e .[test,dev]
     pre-commit install
 
-Compile Cython if you change `.pyx` files:
+Compile Cython (repeat if you change `.pyx` files):
 
     python3 setup.py build_ext --inplace
 
