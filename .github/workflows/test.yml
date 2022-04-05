@@ -29,10 +29,10 @@ jobs:
         pylint rpgpy/ tests/
     - name: Typecheck with mypy
       run: |
-        mypy --ignore-missing-import rpgpy
+        mypy --ignore-missing-import rpgpy/ tests/
     - name: Test with pytest
       run: |
-        pytest
+        pytest --flake-finder tests/unit/ --flake-runs=2
     - name: Run e2e tests
       run: |
         ./tests/e2e/level1/l1_test_runner.py
