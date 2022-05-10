@@ -101,22 +101,22 @@ This works only with Level 0 data.
 Convert RPG cloud radar file(s) into single netCDF file.
 
 ```python
-rpg2nc(path_to_files: str, output_file: str, **kwargs)
+rpg2nc(path_to_files, output_file, **kwargs)
 ```
 
 Positional arguments:
 
-|  Name           | Type         | Description
-| :---            | :----------  | :---
-| `path_to_files` | `str`        | Filename of single file, or multiple files identified using a wildcard, e.g., `/foo/bar/*.LV0`.
-| `output_file`   | `str`        | Output file name.
+| Name            | Type                        | Description                                                                                     |
+|:----------------|:----------------------------|:------------------------------------------------------------------------------------------------|
+| `path_to_files` | `str` &#124; `pathlib.Path` | Filename of single file, or multiple files identified using a wildcard, e.g., `/foo/bar/*.LV0`. |
+| `output_file`   | `str` &#124; `pathlib.Path` | Output file name.                                                                               |
 
 
 Keyword arguments:
 
-|  Name         | Type         | Default value  | Description
-| :---          | :----------  | :---           | :---
-| `global_attr` | `dict`       | `None`         | Additional global attributes.
+| Name          | Type   | Default value | Description                   |
+|:--------------|:-------|:--------------|:------------------------------|
+| `global_attr` | `dict` | `None`        | Additional global attributes. |
 
 
 ##
@@ -132,42 +132,42 @@ Default functionality:
 
 Keyword arguments:
 
-|  Name              | Type        | Default value              | Description
-| :---               | :------     | :---                       | :---
-| `file_directory`   | `str`       | current working directory  | Root path of the search.
-| `output_directory` | `str`       | current working directory  | Path name where the netCDF4 files are written.
-| `include_lv0`      | `bool`      | `True`                     | If `False`, excludes Level 0 files.
-| `recursive`        | `bool`      | `True`                     | If `False`, does not search input files recursively.
-| `base_name`        | `str`       | `None`                     | Optional filename prefix for the converted files.
-| `global_attr`      | `dict`      | `None`                     | Additional global attributes.
+| Name               | Type                        | Default value             | Description                                          |
+|:-------------------|:----------------------------|:--------------------------|:-----------------------------------------------------|
+| `file_directory`   | `str` &#124; `pathlib.Path` | current working directory | Root path of the search.                             |
+| `output_directory` | `str` &#124; `pathlib.Path` | current working directory | Path name where the netCDF4 files are written.       |
+| `include_lv0`      | `bool`                      | `True`                    | If `False`, excludes Level 0 files.                  |
+| `recursive`        | `bool`                      | `True`                    | If `False`, does not search input files recursively. |
+| `base_name`        | `str`                       | `None`                    | Optional filename prefix for the converted files.    |
+| `global_attr`      | `dict`                      | `None`                    | Additional global attributes.                        |
 
 Returns:
 
-| Type        | Description                                                |
-| :---------- | :---                                                       |
-| `list`      | Full paths of the successfully created netCDF files. |
+| Type   | Description                                                 |
+|:-------|:------------------------------------------------------------|
+| `list` | Full paths of the successfully created netCDF files.        |
 
 ##
 ### spectra2nc
 Calculate moments from RPG Level 0 spectra and write a netCDF4 file.
 ```python
-spectra2nc(input_file: str, output_file: str, **kwargs)
+spectra2nc(input_file, output_file, **kwargs)
 ```
 
 Positional arguments:
 
-|  Name              | Type         | Description
-| :---               | :----------  | :---
-| `input_file`       | `str`        | Filename of RGP Level 0 file.
-| `output_file`      | `str`        | Output file name.
+| Name          | Type                        | Description                   |
+|:--------------|:----------------------------|:------------------------------|
+| `input_file`  | `str` &#124; `pathlib.Path` | Filename of RGP Level 0 file. |
+| `output_file` | `str` &#124; `pathlib.Path` | Output file name.             |
 
 
 Keyword arguments:
 
-|  Name         | Type        | Default value  | Description
-| :---          | :---------  | :---           | :---
-| `global_attr` | `dict`      | `None`         | Additional global attributes.
-| `n_points_min` | `int`      | 4              | Minimum number of points in a proper spectral line.
+| Name           | Type   | Default value | Description                                         |
+|:---------------|:-------|:--------------|:----------------------------------------------------|
+| `global_attr`  | `dict` | `None`        | Additional global attributes.                       |
+| `n_points_min` | `int`  | 4             | Minimum number of points in a proper spectral line. |
 
 
 ##
@@ -176,26 +176,26 @@ Keyword arguments:
 Read RPG cloud radar binary file.
 
 ```python
-header, data = read_rpg(filename: str, **kwargs)
+header, data = read_rpg(filename, **kwargs)
 ```
 
 Positional arguments:
 
-| Name        | Type     | Description                                |
-| :---        | :------  | :---                                       |
-| `filename`  | `str`    | Filename of RPG cloud radar Level 1 or Level 0 binary file. |
+| Name       | Type                        | Description                                                 |
+|:-----------|:----------------------------|:------------------------------------------------------------|
+| `filename` | `str` &#124; `pathlib.Path` | Filename of RPG cloud radar Level 1 or Level 0 binary file. |
 
 Keyword arguments:
 
-|  Name       | Type     | Default value | Description
-| :---        | :------  | :---          | :---                                       |
-| `rpg_names` | `bool`   | `True`        | If `True`, uses RPG manual names in the returned dictionary, else uses more human-readable names.|
+| Name        | Type     | Default value | Description                                                                                       |
+|:------------| :------  | :---          |:--------------------------------------------------------------------------------------------------|
+| `rpg_names` | `bool`   | `True`        | If `True`, uses RPG manual names in the returned dictionary, else uses more human-readable names. |
 
 Returns:
 
-| Type        | Description                                                |
-| :---------- | :---                                                       |
-| `tuple`     | 2-element tuple containing `header` and `data` dictionary. |
+| Type    | Description                                                 |
+|:--------|:------------------------------------------------------------|
+| `tuple` | 2-element tuple containing `header` and `data` dictionary.  |
 
 
 ##
@@ -205,30 +205,30 @@ Calculate spectral moments from Level 0 spectral data. A call to [`read_rpg`](#r
 is required before using this function.
 
 ```python
-moments = spectra2moments(data: dict, header: dict, **kwargs)
+moments = spectra2moments(data, header, **kwargs)
 ```
 
 Positional arguments:
 
-|  Name          | Type       | Description
-| :---           | :--------  | :---
-| `data`         | `dict`     | Level 0 data dictionary from [`read_rpg`](#read_rpg).
-| `header`       | `dict`     | Level 0 header dictionary from [`read_rpg`](#read_rpg).
+| Name     | Type   | Description                                             |
+|:---------|:-------|:--------------------------------------------------------|
+| `data`   | `dict` | Level 0 data dictionary from [`read_rpg`](#read_rpg).   |
+| `header` | `dict` | Level 0 header dictionary from [`read_rpg`](#read_rpg). |
 
 Keyword arguments:
 
-|  Name          | Type       | Default value | Description
-| :---           | :--------  | :---          | :---
-| `spec_var`     | `str`      | `"TotSpec"`   | Spectral variable to be analyzed: `"TotSpec"` or `"HSpec"`.
-| `fill_value`   | `float`    | -999.0        | Value for the clear sky data points.
-| `n_points_min` | `int`      | 4             | Minimum number of points in a proper spectral line.
+| Name           | Type    | Default value | Description                                                 |
+|:---------------|:--------|:--------------|:------------------------------------------------------------|
+| `spec_var`     | `str`   | `"TotSpec"`   | Spectral variable to be analyzed: `"TotSpec"` or `"HSpec"`. |
+| `fill_value`   | `float` | -999.0        | Value for the clear sky data points.                        |
+| `n_points_min` | `int`   | 4             | Minimum number of points in a proper spectral line.         |
 
 
 Returns:
 
-| Type      | Description                                                 |
-| :-------  | :---                                                        |
-| `dict`    | Dictionary containing `Ze` (reflectivity), `MeanVel` (mean velocity), `SpecWidth` (spectral width), `Skewn` (skewness) and `Kurt` (kurtosis), which are 2D numpy arrays (time x range).|
+| Type       | Description                                                                                                                                                                             |
+|:-----------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `dict`     | Dictionary containing `Ze` (reflectivity), `MeanVel` (mean velocity), `SpecWidth` (spectral width), `Skewn` (skewness) and `Kurt` (kurtosis), which are 2D numpy arrays (time x range). |
 
 
 ## Development
