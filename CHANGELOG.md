@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.12.0 – 2022-05-11
+
+- Accept Path object as filename
+- Add release dates to CHANGELOG.md
+- Run pytest-flakefinder on CI
+- Separate test and dev dependencies
+
 ## 0.11.0 - 2022-03-31
 
 - Use default `zlib` compression settings
