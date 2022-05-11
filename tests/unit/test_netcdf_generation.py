@@ -1,5 +1,6 @@
 import glob
 import os
+from pathlib import Path
 from tempfile import NamedTemporaryFile
 
 import netCDF4
@@ -32,6 +33,17 @@ class TestSTSRMode:
         assert nc.variables["zdr"].long_name == self.expected_long_name
         assert hasattr(nc, "rpgpy_version")
         nc.close()
+
+    def test_rpg2nc_with_pathlib(self):
+        output_file = NamedTemporaryFile()  # pylint: disable=R1732
+        rpg2nc(Path(self.input_file), Path(output_file.name))
+        nc = netCDF4.Dataset(output_file.name)
+        assert "ldr" not in nc.variables
+        nc.close()
+
+    def test_read_rpg_with_pathlib(self):
+        header, _ = read_rpg(Path(self.input_file))
+        assert header["DualPol"] == 2
 
 
 class TestLDRMode:
@@ -74,6 +86,13 @@ class TestSpectra2Nc:
         nc.close()
         os.remove(output_file)
 
+    def test_with_pathlib(self):
+        output_file = f"{FILE_PATH}/../data/level0/v3-889346/output.nc"
+        spectra2nc(Path(self.input_file), Path(output_file), global_attr={"location": "Hyytiala"})
+        nc = netCDF4.Dataset(output_file)
+        nc.close()
+        os.remove(output_file)
+
 
 class TestStationNameReading:
     @staticmethod
@@ -97,6 +116,15 @@ class TestRpg2ncMulti:
 
     def test_with_explicit_path(self):
         rpg2nc_multi(file_directory=self.input_file_path)
+        for file in self.input_files:
+            expected_filename = f"{self.cwd}/{os.path.basename(file)}.nc"
+            assert os.path.exists(expected_filename)
+            nc = netCDF4.Dataset(expected_filename)
+            nc.close()
+            os.remove(expected_filename)
+
+    def test_with_explicit_pathlib_path(self):
+        rpg2nc_multi(file_directory=Path(self.input_file_path))
         for file in self.input_files:
             expected_filename = f"{self.cwd}/{os.path.basename(file)}.nc"
             assert os.path.exists(expected_filename)
@@ -137,6 +165,14 @@ class TestRpg2ncMulti:
             assert os.path.exists(expected_filename)
             os.remove(expected_filename)
 
+    def test_output_dir_pathlib(self):
+        output_dir = Path(f"{FILE_PATH}/../data/level0/v3-889346/")
+        rpg2nc_multi(file_directory=self.input_file_path, output_directory=Path(output_dir))
+        for file in self.input_files:
+            expected_filename = f"{output_dir}/{os.path.basename(file)}.nc"
+            assert os.path.exists(expected_filename)
+            os.remove(expected_filename)
+
     @staticmethod
     def test_recursive():
         input_dir = f"{FILE_PATH}/../data/"
@@ -152,7 +188,7 @@ class TestRpg2ncMulti:
 
 class TestGeneratorFiles:
 
-    dir_name = f"{FILE_PATH}/../data/"
+    dir_name = Path(f"{FILE_PATH}/../data/")
     lv1 = (".lv1", ".LV1")
     lv0 = (".lv0", ".LV0")
 

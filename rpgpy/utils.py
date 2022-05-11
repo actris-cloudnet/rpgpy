@@ -1,5 +1,7 @@
 import datetime
-from typing import Tuple
+import os
+from pathlib import Path
+from typing import Tuple, Union
 
 import numpy as np
 import pytz
@@ -100,3 +102,10 @@ def create_velocity_vectors(header: dict) -> ma.masked_array:
         velocity = np.linspace(-chirp_max_vel + dopp_res, +chirp_max_vel - dopp_res, n_bins)
         velocity_vectors[ind, bins_to_shift : bins_to_shift + len(velocity)] = velocity
     return velocity_vectors
+
+
+def str2path(path: Union[Path, str, None]) -> Path:
+    """Converts path as str to pathlib.Path."""
+    if path is None:
+        return Path(os.getcwd())
+    return Path(path) if isinstance(path, str) else path

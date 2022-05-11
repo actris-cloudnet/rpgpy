@@ -3,7 +3,8 @@ from libc.stdio cimport *
 from libc.stdlib cimport free, malloc
 
 import logging
-from typing import Tuple
+from pathlib import Path
+from typing import Tuple, Union
 
 import numpy as np
 
@@ -14,19 +15,19 @@ from rpgpy.metadata import METADATA
 DEF MAX_N_SPECTRAL_BLOCKS = 100
 
 
-def read_rpg(file_name: str, rpg_names: bool = True) -> Tuple[dict, dict]:
+def read_rpg(file_name: Union[Path, str], rpg_names: bool = True) -> Tuple[dict, dict]:
     """ Reads RPG Level 1 / Level 0 binary file.
 
     Args:
-        file_name (str): File name.
-        rpg_names (bool, optional): If True, uses RPG naming scheme
-            for the returned data dict. Otherwise uses custom names.
-            Default is True.
+        file_name: File name.
+        rpg_names: If True, uses RPG naming scheme for the returned data dict.
+            Otherwise, uses custom names. Default is True.
 
     Returns:
-        tuple: 2-element tuple containing header (dict) and data (dict).
+        2-element tuple containing header (dict) and data (dict).
 
     """
+    file_name = utils.str2path(file_name)
     logging.debug(f'Reading {file_name}')
     header, _ = head.read_rpg_header(file_name)
     level, version = utils.get_rpg_file_type(header)
@@ -47,10 +48,10 @@ def _change_keys(a_dict: dict) -> dict:
     return dict_new
 
 
-def _read_rpg_l0(file_name: str, header: dict) -> dict:
+def _read_rpg_l0(file_name: Path, header: dict) -> dict:
     """Reads RPG LV0 binary file."""
 
-    filename_byte_string = file_name.encode("UTF-8")
+    filename_byte_string = str(file_name).encode("UTF-8")
     cdef:
         char* fname = filename_byte_string
         FILE *ptr
@@ -276,10 +277,10 @@ def _get_valid_l0_keys(header: dict) -> list:
     return keys
 
 
-def _read_rpg_l1(file_name: str, header: dict) -> dict:
+def _read_rpg_l1(file_name: Path, header: dict) -> dict:
     """Reads RPG LV1 binary file."""
 
-    filename_byte_string = file_name.encode("UTF-8")
+    filename_byte_string = str(file_name).encode("UTF-8")
     cdef:
         char* fname = filename_byte_string
         FILE *ptr
