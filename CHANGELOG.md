@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.12.1 – 2022-10-10
+
+- Add Windows and Mac to CI tests
+- Add Python 3.10
+- Update numpy version requirement
+
 ## 0.12.0 – 2022-05-11
 
 - Accept Path object as filename
