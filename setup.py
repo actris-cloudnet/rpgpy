@@ -25,7 +25,7 @@ setup(
     version=version["__version__"],
     url="https://github.com/actris-cloudnet/rpgpy",
     license="MIT License",
-    install_requires=["numpy<=1.21", "cython", "netCDF4", "tqdm", "pytz", "numba"],
+    install_requires=["numpy", "cython", "netCDF4", "tqdm", "pytz", "numba"],
     extras_require={
         "test": [
             "pytest-flakefinder",
