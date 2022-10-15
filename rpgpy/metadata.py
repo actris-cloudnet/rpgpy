@@ -10,6 +10,7 @@ class Meta(NamedTuple):
 
 
 METADATA = {
+    "DoppRes": Meta(name="doppler_resolution", long_name="Doppler resolution", units="m/s"),
     "FileCode": Meta(name="file_code", long_name="File Code"),
     "HeaderLen": Meta(name="header_length", long_name="Header Length", units="bytes"),
     "StartTime": Meta(

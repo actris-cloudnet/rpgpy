@@ -31,8 +31,10 @@ def read_rpg(file_name: Union[Path, str], rpg_names: bool = True) -> Tuple[dict,
     logging.debug(f'Reading {file_name}')
     header, _ = head.read_rpg_header(file_name)
     level, version = utils.get_rpg_file_type(header)
-    fun = _read_rpg_l0 if level == 0 else _read_rpg_l1
-    data = fun(file_name, header)
+    if level == 0:
+        data = _read_rpg_l0(file_name, header)
+    else:
+        data = _read_rpg_l1(file_name, header, version)
     if not rpg_names:
         data = _change_keys(data)
         header = _change_keys(header)
@@ -277,7 +279,7 @@ def _get_valid_l0_keys(header: dict) -> list:
     return keys
 
 
-def _read_rpg_l1(file_name: Path, header: dict) -> dict:
+def _read_rpg_l1(file_name: Path, header: dict, version: int) -> dict:
     """Reads RPG LV1 binary file."""
 
     filename_byte_string = str(file_name).encode("UTF-8")
@@ -288,6 +290,7 @@ def _read_rpg_l1(file_name: Path, header: dict) -> dict:
         int n_levels = header['RAltN']
         int polarization = header['DualPol']
         char *is_data = <char *> malloc(n_levels * sizeof(char))
+        int * n_samples_at_each_height = <int *> malloc(n_levels * sizeof(int))
 
     ptr = fopen(fname, "rb")
     fseek(ptr, 4, SEEK_CUR)
@@ -300,14 +303,14 @@ def _read_rpg_l1(file_name: Path, header: dict) -> dict:
         unsigned int [:] Time = np.empty(n_samples, np.uint32)
         int [:] MSec = np.empty(n_samples, np.int32)
         char [:] QF = np.empty(n_samples, np.int8)
-        float [:] RR, RelHum, EnvTemp, BaroP, WS, WD, DDVolt, DDTb, LWP, PowIF
+        float [:] RR, RelHum, EnvTemp, BaroP, WS, WD, DDVolt, DDTb, LWP, PowIF, RadC
         float [:] Elev, Azi, Status, TransPow, TransT, RecT, PCT
         float [:, :] Ze, MeanVel, SpecWidth, Skewn, Kurt, RefRat, CorrCoeff, DiffPh, SLDR
         float [:, :] SCorrCoeff, KDP, DiffAtt
         int n_dummy = 3 + header['TAltN'] + 2*header['HAltN'] + n_levels
 
     (RR, RelHum, EnvTemp, BaroP, WS, WD, DDVolt, DDTb, LWP, PowIF, Elev, Azi, Status,
-     TransPow, TransT, RecT, PCT) = [np.empty(n_samples, np.float32) for _ in range(17)]
+     TransPow, TransT, RecT, PCT, RadC) = [np.empty(n_samples, np.float32) for _ in range(18)]
 
     (Ze, MeanVel, SpecWidth, Skewn, Kurt, RefRat, CorrCoeff, DiffPh, SLDR, SCorrCoeff,
      KDP, DiffAtt) = [np.zeros((n_samples, n_levels), np.float32) for _ in range(12)]
@@ -315,12 +318,16 @@ def _read_rpg_l1(file_name: Path, header: dict) -> dict:
     if polarization > 0:
         n_dummy += n_levels
 
+    for i, n in enumerate(_get_n_samples(header)):
+        n_samples_at_each_height[i] = n
+
     for sample in range(n_samples):
 
-        fread(&SampBytes[sample], 4, 1, ptr)
-        fread(&Time[sample], 4, 1, ptr)
-        fread(&MSec[sample], 4, 1, ptr)
-        fread(&QF[sample], 1, 1, ptr)
+        fread(&SampBytes[sample], 4, 1, ptr) # sama
+        fread(&Time[sample], 4, 1, ptr) # sama
+        fread(&MSec[sample], 4, 1, ptr)  # sama
+        if version > 1:
+            fread(&QF[sample], 1, 1, ptr)
         fread(&RR[sample], 4, 1, ptr)
         fread(&RelHum[sample], 4, 1, ptr)
         fread(&EnvTemp[sample], 4, 1, ptr)
@@ -338,7 +345,13 @@ def _read_rpg_l1(file_name: Path, header: dict) -> dict:
         fread(&TransT[sample], 4, 1, ptr)
         fread(&RecT[sample], 4, 1, ptr)
         fread(&PCT[sample], 4, 1, ptr)
-        fseek(ptr, n_dummy * 4, SEEK_CUR)  # this chunk contains data (temp profile etc.)
+        if version == 1:
+            fseek(ptr, 3 * 4, SEEK_CUR)
+            fread(&RadC[sample], 4, 1, ptr)
+            fseek(ptr, header["SequN"] * 4, SEEK_CUR)
+        else:
+            fseek(ptr, n_dummy * 4, SEEK_CUR)  # this chunk contains data (temp profile etc.)
+
         fread(is_data, 1, n_levels, ptr)
 
         for alt_ind in range(n_levels):
@@ -349,18 +362,20 @@ def _read_rpg_l1(file_name: Path, header: dict) -> dict:
                 fread(&SpecWidth[sample, alt_ind], 4, 1, ptr)
                 fread(&Skewn[sample, alt_ind], 4, 1, ptr)
                 fread(&Kurt[sample, alt_ind], 4, 1, ptr)
+                if version == 1:
+                    fseek(ptr, n_samples_at_each_height[alt_ind] * 4, SEEK_CUR)
+                else:
+                    if polarization > 0:
+                        fread(&RefRat[sample, alt_ind], 4, 1, ptr)
+                        fread(&CorrCoeff[sample, alt_ind], 4, 1, ptr)
+                        fread(&DiffPh[sample, alt_ind], 4, 1, ptr)
 
-                if polarization > 0:
-                    fread(&RefRat[sample, alt_ind], 4, 1, ptr)
-                    fread(&CorrCoeff[sample, alt_ind], 4, 1, ptr)
-                    fread(&DiffPh[sample, alt_ind], 4, 1, ptr)
-
-                if polarization == 2:
-                    fseek(ptr, 4, SEEK_CUR)
-                    fread(&SLDR[sample, alt_ind], 4, 1, ptr)
-                    fread(&SCorrCoeff[sample, alt_ind], 4, 1, ptr)
-                    fread(&KDP[sample, alt_ind], 4, 1, ptr)
-                    fread(&DiffAtt[sample, alt_ind], 4, 1, ptr)
+                    if  polarization == 2:
+                        fseek(ptr, 4, SEEK_CUR)
+                        fread(&SLDR[sample, alt_ind], 4, 1, ptr)
+                        fread(&SCorrCoeff[sample, alt_ind], 4, 1, ptr)
+                        fread(&KDP[sample, alt_ind], 4, 1, ptr)
+                        fread(&DiffAtt[sample, alt_ind], 4, 1, ptr)
 
     fclose(ptr)
     free(is_data)

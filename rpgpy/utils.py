@@ -88,13 +88,15 @@ def get_rpg_file_type(header: dict) -> Tuple[int, int]:
         return 0, 2
     if file_code == 889346:
         return 0, 3
+    if file_code == 789345:
+        return 1, 1
     if file_code == 789347:
         return 1, 2
     if file_code == 889347:
         return 1, 3
     if file_code == 889348:
         return 1, 4
-    raise RuntimeError("Unknown RPG binary file.")
+    raise RuntimeError(f"Unsupported RPG binary file. File code: {file_code}")
 
 
 def isscalar(array) -> bool:
