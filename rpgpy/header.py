@@ -10,7 +10,7 @@ from rpgpy import utils
 def read_rpg_header(file_name: Path) -> Tuple[dict, int]:
     """Reads header from RPG binary file.
 
-    Supports Level 0 (version 2,3,4) and Level 1 (version 1,2,3,4)
+    Supports Level 0 (version 2.0, 3.5, 4.0) and Level 1 (version 1.0, 2.0, 3.5, 4.0)
 
     Args:
         file_name: name of the file.
@@ -37,10 +37,10 @@ def read_rpg_header(file_name: Path) -> Tuple[dict, int]:
 
     level, version = utils.get_rpg_file_type(header)
 
-    if version > 2:
+    if version > 2.0:
         read(("StartTime", "uint32"), ("StopTime", "uint32"))
 
-    if version > 1:
+    if version > 1.0:
         read(("CGProg", "i4"))
 
     read(("ModelNo", "i4"))
@@ -48,7 +48,7 @@ def read_rpg_header(file_name: Path) -> Tuple[dict, int]:
     header["ProgName"] = _read_string(file)
     header["CustName"] = _read_string(file)
 
-    if version > 1:
+    if version > 1.0:
         read(("Freq", "f"), ("AntSep", "f"), ("AntDia", "f"), ("AntG", "f"), ("HPBW", "f"))
 
         if level == 0:
@@ -86,7 +86,7 @@ def read_rpg_header(file_name: Path) -> Tuple[dict, int]:
             ("MaxVel", _dim(n_chirp)),
         )
 
-        if version > 2:
+        if version > 2.0:
             if level == 0:
                 read(
                     ("ChanBW", _dim(n_chirp)),

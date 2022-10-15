@@ -279,7 +279,7 @@ def _get_valid_l0_keys(header: dict) -> list:
     return keys
 
 
-def _read_rpg_l1(file_name: Path, header: dict, version: int) -> dict:
+def _read_rpg_l1(file_name: Path, header: dict, version: float) -> dict:
     """Reads RPG LV1 binary file."""
 
     filename_byte_string = str(file_name).encode("UTF-8")
@@ -326,7 +326,7 @@ def _read_rpg_l1(file_name: Path, header: dict, version: int) -> dict:
         fread(&SampBytes[sample], 4, 1, ptr) # sama
         fread(&Time[sample], 4, 1, ptr) # sama
         fread(&MSec[sample], 4, 1, ptr)  # sama
-        if version > 1:
+        if version > 1.0:
             fread(&QF[sample], 1, 1, ptr)
         fread(&RR[sample], 4, 1, ptr)
         fread(&RelHum[sample], 4, 1, ptr)
@@ -345,7 +345,7 @@ def _read_rpg_l1(file_name: Path, header: dict, version: int) -> dict:
         fread(&TransT[sample], 4, 1, ptr)
         fread(&RecT[sample], 4, 1, ptr)
         fread(&PCT[sample], 4, 1, ptr)
-        if version == 1:
+        if version == 1.0:
             fseek(ptr, 3 * 4, SEEK_CUR)
             fread(&RadC[sample], 4, 1, ptr)
             fseek(ptr, header["SequN"] * 4, SEEK_CUR)
@@ -362,7 +362,7 @@ def _read_rpg_l1(file_name: Path, header: dict, version: int) -> dict:
                 fread(&SpecWidth[sample, alt_ind], 4, 1, ptr)
                 fread(&Skewn[sample, alt_ind], 4, 1, ptr)
                 fread(&Kurt[sample, alt_ind], 4, 1, ptr)
-                if version == 1:
+                if version == 1.0:
                     fseek(ptr, n_samples_at_each_height[alt_ind] * 4, SEEK_CUR)
                 else:
                     if polarization > 0:
