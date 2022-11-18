@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.13.0 – 2022-11-18
+
+- Add `decode_rpg_status_flags` function
+- Add `rpg_seconds2datetime64` to quickly convert array of timestamps
+
 ## 0.12.1 – 2022-10-10
 
 - Add Windows and Mac to CI tests
