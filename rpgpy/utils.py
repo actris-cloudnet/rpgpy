@@ -33,6 +33,11 @@ def rpg_seconds2date(time_stamp: float, date_only: bool = False) -> list:
     return date_time
 
 
+def rpg_seconds2datetime64(timestamps: np.ndarray) -> np.ndarray:
+    """Convert NumPy array of RPG timestamps to datetime64 in UTC."""
+    return np.datetime64("2001-01-01") + timestamps.astype("timedelta64[s]")
+
+
 def get_rpg_file_type(header: dict) -> Tuple[int, int]:
     """Find level and version of RPG cloud radar binary file.
 

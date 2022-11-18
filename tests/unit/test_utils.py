@@ -26,6 +26,23 @@ def test_seconds2date(data, result):
     assert utils.rpg_seconds2date(data) == result
 
 
+def test_seconds2datetime64():
+    assert_array_equal(
+        utils.rpg_seconds2datetime64(
+            np.array([0, 24 * 60 * 60 * 10 + 1, 24 * 60 * 60 - 1, 625107602])
+        ),
+        np.array(
+            [
+                "2001-01-01T00:00:00",
+                "2001-01-11T00:00:01",
+                "2001-01-01T23:59:59",
+                "2020-10-23T01:00:02",
+            ],
+            dtype="datetime64",
+        ),
+    )
+
+
 def test_create_velocity_vectors():
     inp = {"SpecN": [20], "MaxVel": [10], "SequN": 1}
     res = [
