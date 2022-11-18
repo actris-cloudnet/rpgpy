@@ -1,7 +1,7 @@
 import datetime
 import os
 from pathlib import Path
-from typing import Tuple, Union
+from typing import Dict, NamedTuple, Tuple, Union
 
 import numpy as np
 import pytz
@@ -36,6 +36,37 @@ def rpg_seconds2date(time_stamp: float, date_only: bool = False) -> list:
 def rpg_seconds2datetime64(timestamps: np.ndarray) -> np.ndarray:
     """Convert NumPy array of RPG timestamps to datetime64 in UTC."""
     return np.datetime64("2001-01-01") + timestamps.astype("timedelta64[s]")
+
+
+class RpgStatusFlags(NamedTuple):
+    """
+    Status flag is a float which (as of 2022-11-17) can have up to 4 digits
+    (WXYZ), where:
+    - Z (least significant digit) is 1 when heater is on, otherwise 0 (please
+        note, that no RPG radar has a physical heater)
+    - Y is 1 when blower is on, otherwise 0
+    - X is 1 when temperature profile is from a coupled HATPRO, otherwise 0
+    - W is 1 when humidity profiles are from a coupled HATPRO, otherwise 0
+    """
+
+    heater: ma.MaskedArray
+    blower: ma.MaskedArray
+    hatpro_temperature: ma.MaskedArray
+    hatpro_humidity: ma.MaskedArray
+
+
+def decode_rpg_status_flags(flags: np.ndarray) -> RpgStatusFlags:
+    tmp = flags.astype(np.uint32)
+    valid_ind = tmp == flags
+    output = {}
+    for key in ["heater", "blower", "hatpro_temperature", "hatpro_humidity"]:
+        tmp, values = np.divmod(tmp, 10)
+        valid_ind &= values <= 1
+        output[key] = values
+    masked_output: Dict[str, ma.MaskedArray] = {
+        key: ma.masked_array(values, mask=valid_ind) for key, values in output.items()
+    }
+    return RpgStatusFlags(**masked_output)
 
 
 def get_rpg_file_type(header: dict) -> Tuple[int, int]:
