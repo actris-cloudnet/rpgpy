@@ -43,6 +43,30 @@ def test_seconds2datetime64():
     )
 
 
+def test_with_valid_status_flags():
+    flags = utils.decode_rpg_status_flags(np.array([0.0, 1.0, 10.0, 1100.0, 1010101.0]))
+    assert_array_equal(flags.heater.data, [0, 1, 0, 0, 1])
+    assert_array_equal(flags.blower.data, [0, 0, 1, 0, 0])
+    assert_array_equal(flags.hatpro_temperature.data, [0, 0, 0, 1, 1])
+    assert_array_equal(flags.hatpro_humidity.data, [0, 0, 0, 1, 0])
+    assert_array_equal(flags.heater.mask, [1, 1, 1, 1, 1])
+    assert_array_equal(flags.blower.mask, [1, 1, 1, 1, 1])
+    assert_array_equal(flags.hatpro_temperature.mask, [1, 1, 1, 1, 1])
+    assert_array_equal(flags.hatpro_humidity.mask, [1, 1, 1, 1, 1])
+
+
+def test_with_invalid_status_flags():
+    flags = utils.decode_rpg_status_flags(np.array([10.0, 1.1, 9.0, 211.0]))
+    assert flags.heater.data[0] == 0
+    assert flags.blower.data[0] == 1
+    assert flags.hatpro_temperature.data[0] == 0
+    assert flags.hatpro_humidity.data[0] == 0
+    assert_array_equal(flags.heater.mask, [1, 0, 0, 0])
+    assert_array_equal(flags.blower.mask, [1, 0, 0, 0])
+    assert_array_equal(flags.hatpro_temperature.mask, [1, 0, 0, 0])
+    assert_array_equal(flags.hatpro_humidity.mask, [1, 0, 0, 0])
+
+
 def test_create_velocity_vectors():
     inp = {"SpecN": [20], "MaxVel": [10], "SequN": 1}
     res = [
