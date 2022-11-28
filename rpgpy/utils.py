@@ -57,14 +57,14 @@ class RpgStatusFlags(NamedTuple):
 
 def decode_rpg_status_flags(flags: np.ndarray) -> RpgStatusFlags:
     tmp = flags.astype(np.uint32)
-    valid_ind = tmp == flags
+    mask = tmp != flags
     output = {}
     for key in ["heater", "blower", "hatpro_temperature", "hatpro_humidity"]:
         tmp, values = np.divmod(tmp, 10)
-        valid_ind &= values <= 1
+        mask |= values > 1
         output[key] = values
     masked_output: Dict[str, ma.MaskedArray] = {
-        key: ma.masked_array(values, mask=valid_ind) for key, values in output.items()
+        key: ma.masked_array(values, mask) for key, values in output.items()
     }
     return RpgStatusFlags(**masked_output)
 

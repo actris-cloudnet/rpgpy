@@ -49,10 +49,10 @@ def test_with_valid_status_flags():
     assert_array_equal(flags.blower.data, [0, 0, 1, 0, 0])
     assert_array_equal(flags.hatpro_temperature.data, [0, 0, 0, 1, 1])
     assert_array_equal(flags.hatpro_humidity.data, [0, 0, 0, 1, 0])
-    assert_array_equal(flags.heater.mask, [1, 1, 1, 1, 1])
-    assert_array_equal(flags.blower.mask, [1, 1, 1, 1, 1])
-    assert_array_equal(flags.hatpro_temperature.mask, [1, 1, 1, 1, 1])
-    assert_array_equal(flags.hatpro_humidity.mask, [1, 1, 1, 1, 1])
+    assert_array_equal(flags.heater.mask, [0, 0, 0, 0, 0])
+    assert_array_equal(flags.blower.mask, [0, 0, 0, 0, 0])
+    assert_array_equal(flags.hatpro_temperature.mask, [0, 0, 0, 0, 0])
+    assert_array_equal(flags.hatpro_humidity.mask, [0, 0, 0, 0, 0])
 
 
 def test_with_invalid_status_flags():
@@ -61,10 +61,10 @@ def test_with_invalid_status_flags():
     assert flags.blower.data[0] == 1
     assert flags.hatpro_temperature.data[0] == 0
     assert flags.hatpro_humidity.data[0] == 0
-    assert_array_equal(flags.heater.mask, [1, 0, 0, 0])
-    assert_array_equal(flags.blower.mask, [1, 0, 0, 0])
-    assert_array_equal(flags.hatpro_temperature.mask, [1, 0, 0, 0])
-    assert_array_equal(flags.hatpro_humidity.mask, [1, 0, 0, 0])
+    assert_array_equal(flags.heater.mask, [0, 1, 1, 1])
+    assert_array_equal(flags.blower.mask, [0, 1, 1, 1])
+    assert_array_equal(flags.hatpro_temperature.mask, [0, 1, 1, 1])
+    assert_array_equal(flags.hatpro_humidity.mask, [0, 1, 1, 1])
 
 
 def test_create_velocity_vectors():
