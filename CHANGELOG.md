@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.13.1 – 2022-11-28
+
+- Fix mask in `decode_rpg_status_flags`
+
 ## 0.13.0 – 2022-11-18
 
 - Add `decode_rpg_status_flags` function
