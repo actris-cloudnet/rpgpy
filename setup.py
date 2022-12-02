@@ -25,13 +25,12 @@ setup(
     version=version["__version__"],
     url="https://github.com/actris-cloudnet/rpgpy",
     license="MIT License",
-    install_requires=["numpy", "cython", "netCDF4", "tqdm", "pytz", "numba"],
+    install_requires=["numpy", "cython", "netCDF4", "tqdm", "numba"],
     extras_require={
         "test": [
             "pytest-flakefinder",
             "pylint",
             "mypy",
-            "types-pytz",
         ],
         "dev": ["pre-commit"],
     },
@@ -41,6 +40,8 @@ setup(
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "License :: OSI Approved :: MIT License",
         "Intended Audience :: Science/Research",
         "Topic :: Scientific/Engineering",
