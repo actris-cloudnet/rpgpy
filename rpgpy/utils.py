@@ -24,7 +24,9 @@ def rpg_seconds2date(time_stamp: float, date_only: bool = False) -> list:
 
     """
     epoch = (2001, 1, 1)
-    epoch_in_seconds = datetime.datetime.timestamp(datetime.datetime(*epoch, tzinfo=datetime.timezone.utc))
+    epoch_in_seconds = datetime.datetime.timestamp(
+        datetime.datetime(*epoch, tzinfo=datetime.timezone.utc)
+    )
     time_stamp += epoch_in_seconds
     date_time = datetime.datetime.utcfromtimestamp(time_stamp).strftime("%Y %m %d %H %M %S").split()
     if date_only:

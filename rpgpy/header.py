@@ -22,6 +22,7 @@ def read_rpg_header(file_name: Path) -> Tuple[dict, int]:
 
     def read(*fields):
         block = np.fromfile(file, np.dtype(list(fields)), 1)
+        assert block.dtype.names is not None
         for name in block.dtype.names:
             array = block[name][0]
             if utils.isscalar(array):

@@ -30,7 +30,7 @@ jobs:
         pylint rpgpy/ tests/
     - name: Typecheck with mypy
       run: |
-        mypy --ignore-missing-import rpgpy/ tests/
+        mypy --ignore-missing-import --check-untyped-defs rpgpy/ tests/
     - name: Test with pytest
       run: |
         pytest --flake-finder tests/unit/ --flake-runs=2

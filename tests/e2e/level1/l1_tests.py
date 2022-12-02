@@ -22,6 +22,7 @@ class TestRpgPy:
     @pytest.mark.level0
     @pytest.mark.level1
     def test_time_vector(self):
+        assert self.data is not None
         time = self.data["Time"]
         t0 = utils.rpg_seconds2date(time[0])[:4]
         for t in time:
@@ -30,4 +31,5 @@ class TestRpgPy:
 
     @pytest.mark.level1
     def test_no_negative_Ze_values(self):
+        assert self.data is not None
         assert np.all(self.data["Ze"] >= 0)

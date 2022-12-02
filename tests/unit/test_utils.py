@@ -116,5 +116,5 @@ def test_find_peak_edges():
 
 
 def test_scale_spectra():
-    assert spcutil.scale_spectra(1, 540) == 4
-    assert spcutil.scale_spectra(1, 539) == 2
+    assert spcutil.scale_spectra(np.array([1]), 540) == 4
+    assert spcutil.scale_spectra(np.array([1]), 539) == 2
