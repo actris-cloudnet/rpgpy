@@ -36,7 +36,6 @@ def spectra2nc(
     """
     input_file = utils.str2path(input_file)
     output_file = utils.str2path(output_file)
-    level = 0
     f = netCDF4.Dataset(output_file, "w", format="NETCDF4_CLASSIC")
     header, data = read_rpg(input_file)
     moments = spectra2moments(data, header, fill_value=0, n_points_min=n_points_min)
@@ -44,10 +43,10 @@ def spectra2nc(
     data = {**data, **moments}
     metadata = rpgpy.metadata.METADATA
     logging.info("Writing compressed netCDF4 file")
-    _create_dimensions(f, header, level)
+    _create_dimensions(f, header, level=0)
     _write_initial_data(f, header, metadata)
     _write_initial_data(f, data, metadata)
-    _create_global_attributes(f, global_attr, level)
+    _create_global_attributes(f, global_attr, header)
     f.close()
 
 
@@ -82,7 +81,7 @@ def rpg2nc(
             header, data = read_rpg(file)
             _check_header_consistency(f, header)
             _append_data(f, data, metadata)
-    _create_global_attributes(f, global_attr, level)
+    _create_global_attributes(f, global_attr, header)
     f.close()
     logging.info(f"Created new file: {output_file}")
 
@@ -227,11 +226,13 @@ def _get_dim(f: netCDF4.Dataset, array: np.ndarray) -> tuple:
     return tuple(variable_size)
 
 
-def _create_global_attributes(f: netCDF4.Dataset, global_attr: Optional[dict], level: int):
+def _create_global_attributes(f: netCDF4.Dataset, global_attr: Optional[dict], header: dict):
+    level, rpg_file_version = utils.get_rpg_file_type(header)
     f.Conventions = "CF-1.7"
     f.year, f.month, f.day = _get_measurement_date(f)
     f.uuid = uuid.uuid4().hex
     f.rpgpy_version = version.__version__
+    f.rpg_file_version = f"{rpg_file_version:.1f}"
     f.history = f"Radar file created: {utils.get_current_time()}"
     f.level = level
     if global_attr is not None and isinstance(global_attr, dict):

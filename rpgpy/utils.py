@@ -70,14 +70,14 @@ def decode_rpg_status_flags(flags: np.ndarray) -> RpgStatusFlags:
     return RpgStatusFlags(**masked_output)
 
 
-def get_rpg_file_type(header: dict) -> Tuple[int, int]:
+def get_rpg_file_type(header: dict) -> Tuple[int, float]:
     """Find level and version of RPG cloud radar binary file.
 
     Args:
         header (dict): Header of the radar file containing *file_code* key.
 
     Returns:
-        tuple: 2-element tuple containing Level (0 or 1) and Version (2, 3 or 4).
+        tuple: 2-element tuple containing Level (0 or 1) and Version (1.0, 2.0, 3.5 or 4.0).
 
     Raises:
         RuntimeError: Unknown file type.
@@ -85,16 +85,18 @@ def get_rpg_file_type(header: dict) -> Tuple[int, int]:
     """
     file_code = header["FileCode"]
     if file_code == 789346:
-        return 0, 2
+        return 0, 2.0
     if file_code == 889346:
-        return 0, 3
+        return 0, 3.5
+    if file_code == 789345:
+        return 1, 1.0
     if file_code == 789347:
-        return 1, 2
+        return 1, 2.0
     if file_code == 889347:
-        return 1, 3
+        return 1, 3.5
     if file_code == 889348:
-        return 1, 4
-    raise RuntimeError("Unknown RPG binary file.")
+        return 1, 4.0
+    raise RuntimeError(f"Unsupported RPG binary file. File code: {file_code}")
 
 
 def isscalar(array) -> bool:
