@@ -3,7 +3,6 @@ import argparse
 import os
 import pickle
 import subprocess
-from tempfile import NamedTemporaryFile
 
 import pytest
 
@@ -21,23 +20,23 @@ def main():
 
             assert str(header["FileCode"]) in folder
 
-            data_file = NamedTemporaryFile(suffix=".pkl")  # pylint: disable=R1732
-            with open(data_file.name, "wb") as f:
+            data_file = "temp_filename.pkl"
+            with open(data_file, "wb") as f:
                 d = {
                     "Time": data["Time"],
                 }
                 pickle.dump(d, f)
 
             pytest.main(
-                ["-v", "tests/e2e/level1/l1_tests.py", "-m", "level0", f"--data={data_file.name}"]
+                ["-v", "tests/e2e/level1/l1_tests.py", "-m", "level0", f"--data={data_file}"]
             )
 
         global_attr = {"foo": "bar"}
-        output_file = NamedTemporaryFile()  # pylint: disable=R1732
+        output_filename = "temp-file.nc"  # pylint: disable=R1732
         rpg2nc(
-            f"{os.path.join(data_path, folder)}/2*.LV0", output_file.name, global_attr=global_attr
+            f"{os.path.join(data_path, folder)}/2*.LV0", output_filename, global_attr=global_attr
         )
-        pytest.main(["-v", "tests/e2e/level0/l0_tests.py", f"--filename={output_file.name}"])
+        pytest.main(["-v", "tests/e2e/level0/l0_tests.py", f"--filename={output_filename}"])
 
         base_name = "test"
         rpg2nc_multi(data_path, base_name=base_name, global_attr=global_attr)
@@ -58,6 +57,7 @@ def main():
 
         # cleaning up the project folder
         os.system("rm *.nc")
+        os.remove(data_file)
 
 
 if __name__ == "__main__":

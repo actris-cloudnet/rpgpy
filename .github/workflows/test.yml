@@ -30,6 +30,9 @@ jobs:
         python3 -m pip install --upgrade pip
         python3 -m pip install .[test]
         python3 setup.py build_ext --inplace
+    - name: Test
+      run: |
+        pytest tests/unit/
     - name: Lint with pylint
       run: |
         pylint rpgpy/ tests/
@@ -41,5 +44,5 @@ jobs:
         pytest --flake-finder tests/unit/ --flake-runs=2
     - name: Run e2e tests
       run: |
-        ./tests/e2e/level1/l1_test_runner.py
-        ./tests/e2e/level0/l0_test_runner.py
+        python tests/e2e/level1/l1_test_runner.py
+        python tests/e2e/level0/l0_test_runner.py

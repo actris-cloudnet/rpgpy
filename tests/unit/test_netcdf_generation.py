@@ -1,11 +1,10 @@
 import glob
 import os
 from pathlib import Path
-from tempfile import NamedTemporaryFile
 
 import netCDF4
 
-import rpgpy.nc
+from rpgpy import nc as rpgpync
 from rpgpy import read_rpg, rpg2nc, rpg2nc_multi, spectra2nc
 
 FILE_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -25,21 +24,21 @@ class TestSTSRMode:
         assert self.expected_long_name in data
 
     def test_converted_netcdf(self):
-        output_file = NamedTemporaryFile()  # pylint: disable=R1732
-        rpg2nc(self.input_file, output_file.name)
-        nc = netCDF4.Dataset(output_file.name)
-        assert "ldr" not in nc.variables
-        assert "zdr" in nc.variables
-        assert nc.variables["zdr"].long_name == self.expected_long_name
-        assert hasattr(nc, "rpgpy_version")
-        nc.close()
+        output_filename = "temp-file.nc"
+        rpg2nc(self.input_file, output_filename)
+        with netCDF4.Dataset(output_filename) as nc:
+            assert "ldr" not in nc.variables
+            assert "zdr" in nc.variables
+            assert nc.variables["zdr"].long_name == self.expected_long_name
+            assert hasattr(nc, "rpgpy_version")
+        os.remove(output_filename)
 
     def test_rpg2nc_with_pathlib(self):
-        output_file = NamedTemporaryFile()  # pylint: disable=R1732
-        rpg2nc(Path(self.input_file), Path(output_file.name))
-        nc = netCDF4.Dataset(output_file.name)
-        assert "ldr" not in nc.variables
-        nc.close()
+        output_filename = "temp-file.nc"
+        rpg2nc(Path(self.input_file), Path(output_filename))
+        with netCDF4.Dataset(output_filename) as nc:
+            assert "ldr" not in nc.variables
+        os.remove(output_filename)
 
     def test_read_rpg_with_pathlib(self):
         header, _ = read_rpg(Path(self.input_file))
@@ -60,13 +59,13 @@ class TestLDRMode:
         assert self.expected_long_name in data
 
     def test_converted_netcdf(self):
-        output_file = NamedTemporaryFile()  # pylint: disable=R1732
-        rpg2nc(self.input_file, output_file.name)
-        nc = netCDF4.Dataset(output_file.name)
-        assert "zdr" not in nc.variables
-        assert "ldr" in nc.variables
-        assert nc.variables["ldr"].long_name == self.expected_long_name
-        nc.close()
+        output_filename = "temp-file.nc"
+        rpg2nc(self.input_file, output_filename)
+        with netCDF4.Dataset(output_filename) as nc:
+            assert "zdr" not in nc.variables
+            assert "ldr" in nc.variables
+            assert nc.variables["ldr"].long_name == self.expected_long_name
+        os.remove(output_filename)
 
 
 class TestSpectra2Nc:
@@ -76,21 +75,20 @@ class TestSpectra2Nc:
     def test_netcdf_creation(self):
         output_file = f"{FILE_PATH}/../data/level0/v3-889346/output.nc"
         spectra2nc(self.input_file, output_file, global_attr={"location": "Hyytiala"})
-        nc = netCDF4.Dataset(output_file)
-        expected_shape = (len(nc.variables["time"]), len(nc.variables["range_layers"]))
-        for key in ("Ze", "v", "width", "kurtosis", "skewness"):
-            assert key in nc.variables
-            assert nc.variables[key].shape == expected_shape
-        assert "time" in nc.variables
-        assert getattr(nc, "location") == "Hyytiala"
-        nc.close()
+        with netCDF4.Dataset(output_file) as nc:
+            expected_shape = (len(nc.variables["time"]), len(nc.variables["range_layers"]))
+            for key in ("Ze", "v", "width", "kurtosis", "skewness"):
+                assert key in nc.variables
+                assert nc.variables[key].shape == expected_shape
+            assert "time" in nc.variables
+            assert getattr(nc, "location") == "Hyytiala"
         os.remove(output_file)
 
     def test_with_pathlib(self):
         output_file = f"{FILE_PATH}/../data/level0/v3-889346/output.nc"
         spectra2nc(Path(self.input_file), Path(output_file), global_attr={"location": "Hyytiala"})
-        nc = netCDF4.Dataset(output_file)
-        nc.close()
+        with netCDF4.Dataset(output_file):
+            pass
         os.remove(output_file)
 
 
@@ -119,8 +117,8 @@ class TestRpg2ncMulti:
         for file in self.input_files:
             expected_filename = f"{self.cwd}/{os.path.basename(file)}.nc"
             assert os.path.exists(expected_filename)
-            nc = netCDF4.Dataset(expected_filename)
-            nc.close()
+            with netCDF4.Dataset(expected_filename):
+                pass
             os.remove(expected_filename)
 
     def test_with_explicit_pathlib_path(self):
@@ -128,8 +126,8 @@ class TestRpg2ncMulti:
         for file in self.input_files:
             expected_filename = f"{self.cwd}/{os.path.basename(file)}.nc"
             assert os.path.exists(expected_filename)
-            nc = netCDF4.Dataset(expected_filename)
-            nc.close()
+            with netCDF4.Dataset(expected_filename):
+                pass
             os.remove(expected_filename)
 
     def test_return_value(self):
@@ -193,7 +191,7 @@ class TestGeneratorFiles:
     lv0 = (".lv0", ".LV0")
 
     def test_lv1(self):
-        files = rpgpy.nc._generator_files(self.dir_name, False, True)  # pylint: disable=W0212
+        files = rpgpync._generator_files(self.dir_name, False, True)  # pylint: disable=W0212
         files = list(files)
         for file in files:
             assert not file.endswith(self.lv0)
@@ -202,7 +200,7 @@ class TestGeneratorFiles:
         assert len(files) >= 6
 
     def test_lv1_and_lv0(self):
-        files = rpgpy.nc._generator_files(self.dir_name, True, True)  # pylint: disable=W0212
+        files = rpgpync._generator_files(self.dir_name, True, True)  # pylint: disable=W0212
         files = list(files)
         for file in files:
             assert file.endswith(self.lv1 + self.lv0)
