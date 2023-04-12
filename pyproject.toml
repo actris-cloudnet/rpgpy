@@ -1,2 +1,39 @@
 [build-system]
 requires = ["setuptools", "wheel", "Cython"]
+
+[project]
+name="rpgPy"
+description = "Cython code for reading binary files from RPG cloud radar."
+authors = [{name = "Simo Tukiainen", email = "simo.tukiainen@fmi.fi"}]
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+]
+
+dependencies = ["numpy", "cython", "netCDF4", "tqdm", "numba"]
+
+dynamic = ["version"]
+
+[project.optional-dependencies]
+test = [
+    "pytest-flakefinder",
+    "pylint",
+    "mypy",
+]
+dev = ["pre-commit"]
+
+[project.urls]
+homepage = "https://github.com/actris-cloudnet/rpgpy"
+repository = "https://github.com/actris-cloudnet/rpgpy"
+changelog = "https://github.com/actris-cloudnet/rpgpy/blob/main/CHANGELOG.md"
+
+[tool.setuptools.dynamic]
+version = {attr = "rpgpy.version.__version__"}
