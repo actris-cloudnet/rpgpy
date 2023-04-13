@@ -4,9 +4,7 @@ on: [push]
 
 jobs:
   build:
-
     timeout-minutes: 20
-
 
     strategy:
       matrix:
@@ -15,34 +13,34 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: configure Pagefile
-      if: runner.os == 'Windows'
-      uses: al-cheb/configure-pagefile-action@v1.2
-      with:
-        minimum-size: 8GB
-    - name: Install dependencies
-      run: |
-        python3 -m pip install --upgrade pip
-        python3 -m pip install .[test]
-        python3 setup.py build_ext --inplace
-    - name: Test
-      run: |
-        pytest tests/unit/
-    - name: Lint with pylint
-      run: |
-        pylint rpgpy/ tests/
-    - name: Typecheck with mypy
-      run: |
-        mypy --ignore-missing-import --check-untyped-defs rpgpy/ tests/
-    - name: Test with pytest
-      run: |
-        pytest --flake-finder tests/unit/ --flake-runs=2
-    - name: Run e2e tests
-      run: |
-        python tests/e2e/level1/l1_test_runner.py
-        python tests/e2e/level0/l0_test_runner.py
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: configure Pagefile
+        if: runner.os == 'Windows'
+        uses: al-cheb/configure-pagefile-action@v1.2
+        with:
+          minimum-size: 8GB
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install .[test]
+          python3 setup.py build_ext --inplace
+      - name: Test
+        run: |
+          pytest tests/unit/
+      - name: Lint with pylint
+        run: |
+          pylint rpgpy/ tests/
+      - name: Typecheck with mypy
+        run: |
+          mypy rpgpy/ tests/
+      - name: Test with pytest
+        run: |
+          pytest --flake-finder tests/unit/ --flake-runs=2
+      - name: Run e2e tests
+        run: |
+          python tests/e2e/level1/l1_test_runner.py
+          python tests/e2e/level0/l0_test_runner.py

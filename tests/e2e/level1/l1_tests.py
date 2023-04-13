@@ -7,7 +7,6 @@ from rpgpy import utils
 
 
 class TestRpgPy:
-
     data = None
 
     @pytest.fixture(autouse=True)

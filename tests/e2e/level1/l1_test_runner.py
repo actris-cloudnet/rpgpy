@@ -10,7 +10,6 @@ from rpgpy import read_rpg, rpg2nc, rpg2nc_multi
 
 
 def main():
-
     data_path = "tests/data/level1/"
 
     for folder in os.listdir(data_path):

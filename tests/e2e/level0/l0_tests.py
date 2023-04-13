@@ -3,7 +3,6 @@ import pytest
 
 
 class TestRpgPy:
-
     filename = ""
 
     @pytest.fixture(autouse=True)

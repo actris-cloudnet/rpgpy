@@ -11,7 +11,6 @@ FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
 class TestSTSRMode:
-
     expected_long_name = "Differential Reflectivity Ratio"
     input_file = f"{FILE_PATH}/../data/misc/BaseN_210913_001152_P01_PPI.LV1"
 
@@ -46,7 +45,6 @@ class TestSTSRMode:
 
 
 class TestLDRMode:
-
     expected_long_name = "Linear Depolarisation Ratio"
     input_file = f"{FILE_PATH}/../data/misc/210929_070000_P09_ZEN.LV1"
 
@@ -69,7 +67,6 @@ class TestLDRMode:
 
 
 class TestSpectra2Nc:
-
     input_file = f"{FILE_PATH}/../data/level0/v3-889346/200704_000002_P10_ZEN.LV0"
 
     def test_netcdf_creation(self):
@@ -107,7 +104,6 @@ class TestStationNameReading:
 
 
 class TestRpg2ncMulti:
-
     cwd = os.getcwd()
     input_file_path = f"{FILE_PATH}/../data/misc/"
     input_files = glob.glob(f"{input_file_path}/*")
@@ -185,7 +181,6 @@ class TestRpg2ncMulti:
 
 
 class TestGeneratorFiles:
-
     dir_name = Path(f"{FILE_PATH}/../data/")
     lv1 = (".lv1", ".LV1")
     lv0 = (".lv0", ".LV0")
