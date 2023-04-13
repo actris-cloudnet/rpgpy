@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.14.0 – 2023-04-13
+
+- Add support for RPG version 1 files
+- Change RPG file version 3 to 3.5
+- Write `rpg_file_version` attribute to netCDF output
+- Add py.typed to enable type checking
+
 ## 0.13.1 – 2022-11-28
 
 - Fix mask in `decode_rpg_status_flags`
