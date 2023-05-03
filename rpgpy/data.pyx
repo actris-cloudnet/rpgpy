@@ -242,11 +242,12 @@ def _read_rpg_l0(file_name: Path, header: dict) -> dict:
     return {key: np.asarray(var_names[key]) for key in keys}
 
 
-def _get_n_samples(header: dict) -> np.array:
+def _get_n_samples(header: dict) -> np.ndarray:
     """Finds number of spectral samples at each height."""
     array = np.ones(header['RAltN'], dtype=int)
     sub_arrays = np.split(array, header['RngOffs'][1:])
-    sub_arrays *= header['SpecN']
+    for sub_array, scale in zip(sub_arrays, header['SpecN']):
+        sub_array *= scale
     return np.concatenate(sub_arrays)
 
 
@@ -323,9 +324,9 @@ def _read_rpg_l1(file_name: Path, header: dict, version: float) -> dict:
 
     for sample in range(n_samples):
 
-        fread(&SampBytes[sample], 4, 1, ptr) # sama
-        fread(&Time[sample], 4, 1, ptr) # sama
-        fread(&MSec[sample], 4, 1, ptr)  # sama
+        fread(&SampBytes[sample], 4, 1, ptr)
+        fread(&Time[sample], 4, 1, ptr)
+        fread(&MSec[sample], 4, 1, ptr)
         if version > 1.0:
             fread(&QF[sample], 1, 1, ptr)
         fread(&RR[sample], 4, 1, ptr)

@@ -48,7 +48,7 @@ class TestLDRMode:
     expected_long_name = "Linear Depolarisation Ratio"
     input_file = f"{FILE_PATH}/../data/misc/210929_070000_P09_ZEN.LV1"
 
-    def test_binary_file_reading(self):
+    def test_binary_file_reading_1(self):
         header, _ = read_rpg(self.input_file)
         assert header["DualPol"] == 1
 

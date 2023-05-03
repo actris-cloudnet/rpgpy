@@ -158,10 +158,14 @@ def calc_spectral_LDR(header: dict, data: dict) -> np.ndarray:
         :, :, np.newaxis
     ]
     noise_v_per_bin = (noise_V / np.repeat(header["SpecN"], bins_per_chirp))[:, :, np.newaxis]
+
+    # Avoid division by zero
+    noise_v_per_bin[noise_v_per_bin == 0] = 1e-10
+    noise_h_per_bin[noise_h_per_bin == 0] = 1e-10
+
     SNRv = spec_V / noise_v_per_bin
     SNRh = data["HSpec"] / noise_h_per_bin
     snr_mask = (SNRv < 1000) | (SNRh < 1000)
-
     rhv = np.abs(data["ReVHSpec"] + complex(imag=1) * data["ImVHSpec"]) / np.sqrt(
         (spec_V + noise_v_per_bin) * (data["HSpec"] + noise_h_per_bin)
     )

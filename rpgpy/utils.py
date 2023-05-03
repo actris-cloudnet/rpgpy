@@ -128,7 +128,7 @@ def create_velocity_vectors(header: dict) -> np.ndarray:
         header (dict): Header of the radar file.
 
     Returns:
-       maskedArray: Doppler velocity vector for each chirp. These are equally long
+       np.ndarray: Doppler velocity vector for each chirp. These are equally long
            vectors (max number of bins) where the padded values are masked.
 
     """

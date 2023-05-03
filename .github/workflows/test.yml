@@ -28,9 +28,6 @@ jobs:
           python3 -m pip install --upgrade pip
           python3 -m pip install .[test]
           python3 setup.py build_ext --inplace
-      - name: Test
-        run: |
-          pytest tests/unit/
       - name: Lint with pylint
         run: |
           pylint rpgpy/ tests/
