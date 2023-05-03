@@ -19,7 +19,7 @@ def spectra2moments(
 
     Args:
         data: Level 0 nD variables.
-        header: Level 0 meta data.
+        header: Level 0 metadata.
         spec_var: Name of the spectral variable. Possible names are 'TotSpec', 'VSpec', and 'HSpec'.
         fill_value: Clear sky fill value.
         n_points_min: Minimum number of points in a valid spectral line.
@@ -49,9 +49,11 @@ def spectra2moments(
                 if (edge_right - edge_left) < n_points_min:
                     no_signal[ind_time, ind_range] = True
                     continue
+                velocity_vector = header["velocity_vectors"][ind_chirp][edge_left:edge_right]
+                assert np.all(velocity_vector != 0)
                 moments[ind_time, ind_range, :] = radar_moment_calculation(
                     spectra[ind_time, ind_range, edge_left:edge_right],
-                    header["velocity_vectors"][ind_chirp][edge_left:edge_right],
+                    velocity_vector,
                 )
 
         # shift mean Doppler velocity by half a bin

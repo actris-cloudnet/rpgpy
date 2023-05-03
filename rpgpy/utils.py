@@ -121,7 +121,7 @@ def isscalar(array) -> bool:
     return False
 
 
-def create_velocity_vectors(header: dict) -> ma.masked_array:
+def create_velocity_vectors(header: dict) -> np.ndarray:
     """Create Doppler velocity vector for each chirp.
 
     Args:
@@ -134,7 +134,8 @@ def create_velocity_vectors(header: dict) -> ma.masked_array:
     """
     n_chirps = header["SequN"]
     n_bins_max = np.max(header["SpecN"])
-    velocity_vectors = ma.masked_all((n_chirps, n_bins_max))
+    # zeros will be automatically masked in the netCDF file:
+    velocity_vectors = np.zeros((n_chirps, n_bins_max))
     for ind, (n_bins, chirp_max_vel) in enumerate(zip(header["SpecN"], header["MaxVel"])):
         bins_to_shift = (n_bins_max - n_bins) // 2
         dopp_res = chirp_max_vel / n_bins

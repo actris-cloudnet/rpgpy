@@ -100,9 +100,7 @@ def test_create_velocity_vectors():
         [0, 0, 0, -6, -2, 2, 6, 0, 0, 0],
         [-4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 4.5],
     ]
-    mask = [[1, 1, 1, 0, 0, 0, 0, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
     assert_array_equal(utils.create_velocity_vectors(inp), res)
-    assert_array_equal(utils.create_velocity_vectors(inp).mask, mask)
 
 
 def test_find_peak_edges():
