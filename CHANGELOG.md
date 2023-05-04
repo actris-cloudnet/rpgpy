@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.14.2 – 2023-05-04
+
+- Support Python 3.11
+
 ## 0.14.1 – 2023-05-04
 
 - Fix numpy warnings
