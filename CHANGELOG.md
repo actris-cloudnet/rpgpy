@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.14.1 – 2023-05-04
+
+- Fix numpy warnings
+- Change velocity vectors to ordinary numpy array
+
 ## 0.14.0 – 2023-04-13
 
 - Add support for RPG version 1 files
