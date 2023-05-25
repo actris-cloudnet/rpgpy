@@ -18,14 +18,14 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      - name: configure Pagefile
+          cache: "pip"
+      - name: Configure Pagefile
         if: runner.os == 'Windows'
         uses: al-cheb/configure-pagefile-action@v1.3
         with:
           minimum-size: 8GB
       - name: Install dependencies
         run: |
-          python3 -m pip install --upgrade pip
           python3 -m pip install .[test]
           python3 setup.py build_ext --inplace
       - name: Lint with pylint
