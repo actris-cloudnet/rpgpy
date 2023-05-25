@@ -8,26 +8,26 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.8"
-      - name: Install build and twine
-        run: python -m pip install build twine
-      - name: Build a source tarball
-        run: python -m build --sdist
-      - name: Publish to PyPI
-        env:
-          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-        run: python -m twine upload dist/*
+          python-version: "3.10"
+      - name: Install dependencies
+        run: python -m pip install build
+      - name: Build package
+        run: python -m build
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@release/v1
       - name: Generate changelog
         run: |
           version=${GITHUB_REF#refs/tags/v}
           sed "0,/^## ${version//./\\.}/d;/^## /,\$d" CHANGELOG.md > ${{ github.workspace }}-CHANGELOG.txt
-          echo "::set-output name=name::RpgPy $version"
+          echo "name=RpgPy $version" >> $GITHUB_OUTPUT
         id: changelog
       - name: Create release
         uses: softprops/action-gh-release@v1
