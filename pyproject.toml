@@ -34,9 +34,9 @@ test = [
 dev = ["pre-commit"]
 
 [project.urls]
-homepage = "https://github.com/actris-cloudnet/rpgpy"
-repository = "https://github.com/actris-cloudnet/rpgpy"
-changelog = "https://github.com/actris-cloudnet/rpgpy/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/actris-cloudnet/rpgpy"
+Repository = "https://github.com/actris-cloudnet/rpgpy"
+Changelog = "https://github.com/actris-cloudnet/rpgpy/blob/main/CHANGELOG.md"
 
 [tool.setuptools.dynamic]
 version = {attr = "rpgpy.version.__version__"}
