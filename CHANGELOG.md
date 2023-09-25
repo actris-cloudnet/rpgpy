@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.14.5 – 2023-09-25
+
+- Distribute package only as source distribution
+
 ## 0.14.4 – 2023-09-25
 
 - Remove DEF that will be deprecated
