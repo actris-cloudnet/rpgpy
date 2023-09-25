@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.14.3 – 2023-09-25
+
+- Raise RPGFileError if file reading fails
+
 ## 0.14.2 – 2023-05-04
 
 - Support Python 3.11
