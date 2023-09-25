@@ -15,6 +15,13 @@ from rpgpy.metadata import METADATA
 DEF MAX_N_SPECTRAL_BLOCKS = 100
 
 
+class RPGFileError(Exception):
+    """Base class for exceptions in this module."""
+    def __init__(self, msg: str = "Problem with reading file"):
+        self.message = msg
+        super().__init__(self.message)
+
+
 def read_rpg(file_name: Union[Path, str], rpg_names: bool = True) -> Tuple[dict, dict]:
     """ Reads RPG Level 1 / Level 0 binary file.
 
@@ -231,6 +238,12 @@ def _read_rpg_l0(file_name: Path, header: dict) -> dict:
                         fread(&AliasMsk[sample, alt_ind], 1, 1, ptr)
                         fread(&MinVel[sample, alt_ind], 4, 1, ptr)
 
+    current_position = ftell(ptr)
+    fseek(ptr, 0, SEEK_END)
+    end_position = ftell(ptr)
+    if current_position != end_position:
+        raise RPGFileError('File position is not at the end of the file.')
+
     fclose(ptr)
     free(is_data)
     free(n_samples_at_each_height)
@@ -253,7 +266,7 @@ def _get_n_samples(header: dict) -> np.ndarray:
 
 
 def _get_valid_l0_keys(header: dict) -> list:
-    """Controls which variables ore provided as output."""
+    """Controls which variables are provided as output."""
 
     keys = ['Time', 'MSec', 'QF', 'RR', 'RelHum', 'EnvTemp',
             'BaroP', 'WS', 'WD', 'DDVolt', 'DDTb', 'LWP',
@@ -380,6 +393,13 @@ def _read_rpg_l1(file_name: Path, header: dict, version: float) -> dict:
                         fread(&KDP[sample, alt_ind], 4, 1, ptr)
                         fread(&DiffAtt[sample, alt_ind], 4, 1, ptr)
 
+
+    current_position = ftell(ptr)
+    fseek(ptr, 0, SEEK_END)
+    end_position = ftell(ptr)
+    if current_position != end_position:
+        raise RPGFileError('File position is not at the end of the file.')
+
     fclose(ptr)
     free(is_data)
 
@@ -390,7 +410,7 @@ def _read_rpg_l1(file_name: Path, header: dict, version: float) -> dict:
 
 
 def _get_valid_l1_keys(header: dict) -> list:
-    """Controls which variables our provided as output."""
+    """Controls which variables are provided as output."""
 
     keys = ['Time', 'MSec', 'QF', 'RR', 'RelHum', 'EnvTemp',
             'BaroP', 'WS', 'WD', 'DDVolt', 'DDTb', 'LWP',
@@ -410,5 +430,5 @@ def _get_valid_l1_keys(header: dict) -> list:
 def _check_timestamp(timestamp: int, header: dict):
     """Checks if timestamp is within the expected range."""
     if not (header['StartTime'] <= timestamp <= header['StopTime']):
-        raise RuntimeError(f'Timestamp {timestamp} is outside the expected range '
+        raise RPGFileError(f'Timestamp {timestamp} is outside the expected range '
                          f'[{header["StartTime"]}, {header["StopTime"]}].')
