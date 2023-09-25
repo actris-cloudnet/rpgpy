@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.14.4 – 2023-09-25
+
+- Remove DEF that will be deprecated
+- Unlock numba version
+
 ## 0.14.3 – 2023-09-25
 
 - Raise RPGFileError if file reading fails
