@@ -142,6 +142,7 @@ def _read_rpg_l0(file_name: Path, header: dict) -> dict:
     for sample in range(n_samples):
         fread(&SampBytes[sample], 4, 1, ptr)
         fread(&Time[sample], 4, 1, ptr)
+        _check_timestamp(Time[sample], header)
         fread(&MSec[sample], 4, 1, ptr)
         fread(&QF[sample], 1, 1, ptr)
         fread(&RR[sample], 4, 1, ptr)
@@ -252,7 +253,7 @@ def _get_n_samples(header: dict) -> np.ndarray:
 
 
 def _get_valid_l0_keys(header: dict) -> list:
-    """Controls which variables our provided as output."""
+    """Controls which variables ore provided as output."""
 
     keys = ['Time', 'MSec', 'QF', 'RR', 'RelHum', 'EnvTemp',
             'BaroP', 'WS', 'WD', 'DDVolt', 'DDTb', 'LWP',
@@ -326,6 +327,7 @@ def _read_rpg_l1(file_name: Path, header: dict, version: float) -> dict:
 
         fread(&SampBytes[sample], 4, 1, ptr)
         fread(&Time[sample], 4, 1, ptr)
+        _check_timestamp(Time[sample], header)
         fread(&MSec[sample], 4, 1, ptr)
         if version > 1.0:
             fread(&QF[sample], 1, 1, ptr)
@@ -403,3 +405,10 @@ def _get_valid_l1_keys(header: dict) -> list:
         keys += ['SLDR', 'SCorrCoeff', 'KDP', 'DiffAtt']
 
     return keys
+
+
+def _check_timestamp(timestamp: int, header: dict):
+    """Checks if timestamp is within the expected range."""
+    if not (header['StartTime'] <= timestamp <= header['StopTime']):
+        raise RuntimeError(f'Timestamp {timestamp} is outside the expected range '
+                         f'[{header["StartTime"]}, {header["StopTime"]}].')
