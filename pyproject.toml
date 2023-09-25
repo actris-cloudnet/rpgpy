@@ -20,7 +20,7 @@ classifiers = [
     "Topic :: Scientific/Engineering",
 ]
 
-dependencies = ["numpy", "cython", "netCDF4", "tqdm", "numba>=0.57,<0.58"]
+dependencies = ["numpy", "cython", "netCDF4", "tqdm", "numba"]
 
 dynamic = ["version"]
 
