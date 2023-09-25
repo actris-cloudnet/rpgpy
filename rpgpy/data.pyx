@@ -12,8 +12,6 @@ from rpgpy import header as head
 from rpgpy import utils
 from rpgpy.metadata import METADATA
 
-DEF MAX_N_SPECTRAL_BLOCKS = 100
-
 
 class RPGFileError(Exception):
     """Base class for exceptions in this module."""
@@ -72,10 +70,10 @@ def _read_rpg_l0(file_name: Path, header: dict) -> dict:
         int compression = header['CompEna']
         int polarization = header['DualPol']
         int anti_alias = header['AntiAlias']
-        short int min_ind[MAX_N_SPECTRAL_BLOCKS]
-        short int max_ind[MAX_N_SPECTRAL_BLOCKS]
-        short int n_block_points[MAX_N_SPECTRAL_BLOCKS]
-        short int spec_ind[MAX_N_SPECTRAL_BLOCKS]
+        short int min_ind[100]  # 100 is the maximum number of blocks
+        short int max_ind[100]
+        short int n_block_points[100]
+        short int spec_ind[100]
         char *is_data = <char *> malloc(n_levels * sizeof(char))
         int *n_samples_at_each_height = <int *> malloc(n_levels * sizeof(int))
 
