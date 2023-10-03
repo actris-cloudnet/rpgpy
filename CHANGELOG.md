@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.14.6 – 2023-10-03
+
+- Skip StartTime and StopTime check (with older file versions)
+
 ## 0.14.5 – 2023-09-25
 
 - Distribute package only as source distribution
