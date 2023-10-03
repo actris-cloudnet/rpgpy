@@ -427,6 +427,9 @@ def _get_valid_l1_keys(header: dict) -> list:
 
 def _check_timestamp(timestamp: int, header: dict):
     """Checks if timestamp is within the expected range."""
-    if not (header['StartTime'] <= timestamp <= header['StopTime']):
-        raise RPGFileError(f'Timestamp {timestamp} is outside the expected range '
-                         f'[{header["StartTime"]}, {header["StopTime"]}].')
+    try:
+        if not (header['StartTime'] <= timestamp <= header['StopTime']):
+            raise RPGFileError(f'Timestamp {timestamp} is outside the expected range '
+            f'[{header["StartTime"]}, {header["StopTime"]}].')
+    except KeyError:
+        return
