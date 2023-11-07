@@ -31,7 +31,7 @@ test = [
     "mypy",
     "types-tqdm",
 ]
-dev = ["pre-commit"]
+dev = ["pre-commit", "release-version"]
 
 [project.urls]
 Homepage = "https://github.com/actris-cloudnet/rpgpy"
@@ -70,3 +70,8 @@ disable = [
   "duplicate-code",
   "too-few-public-methods",
 ]
+
+[tool.release-version]
+filename = "rpgpy/version.py"
+pattern = ["MAJOR = (?P<major>\\d+)", "MINOR = (?P<minor>\\d+)", "PATCH = (?P<patch>\\d+)"]
+changelog = "CHANGELOG.md"

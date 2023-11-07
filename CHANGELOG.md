@@ -55,7 +55,7 @@
 - Run pytest-flakefinder on CI
 - Separate test and dev dependencies
 
-## 0.11.0 - 2022-03-31
+## 0.11.0 – 2022-03-31
 
 - Use default `zlib` compression settings
 - Lock maximum `numpy` version required by `numba`
@@ -63,15 +63,15 @@
 - Add `pre-commit` for checking the code
 - Reformat the code with `black`
 
-## 0.10.2 - 2021-11-09
+## 0.10.2 – 2021-11-09
 
 - Fix bug causing crash with version 2 data
 
-## 0.10.1 - 2021-10-13
+## 0.10.1 – 2021-10-13
 
 Bug fixes
 
-## 0.10.0 - 2021-10-04
+## 0.10.0 – 2021-10-04
 
 - `output_directory` and `recursive` keyword arguments, and return value to `rpg2nc_multi`
 - Minor optimization of `spectra2moments`
@@ -80,36 +80,36 @@ Bug fixes
 - Change `ldr`to `zdr` with STSR radar-mode measurements
 - Small bug fixes
 
-## 0.9.0 - 2021-09-03
+## 0.9.0 – 2021-09-03
 
 - `rpg2nc_multi` function to convert several rpg files to corresponding netCDF files
 
-## 0.8.0 - 2021-02-24
+## 0.8.0 – 2021-02-24
 
 This release adds function to calculate radar moments from Level 0 data.
 
-## 0.7.2 - 2021-02-16
+## 0.7.2 – 2021-02-16
 
 Adds vertical / horizontal sensitivity limit variables.
 
-## 0.7.1 - 2021-02-12
+## 0.7.1 – 2021-02-12
 
 Fixes serious bug that caused L0 spectral blocks to be read in wrong order in case of several blocks per spectrum
 
-## 0.7.0 - 2021-01-05
+## 0.7.0 – 2021-01-05
 
 Mask zero-values from multidimensional arrays in the created netcdf files
 
-## 0.6.1 - 2021-01-04
+## 0.6.1 – 2021-01-04
 
 Fixes Level 1 reading with dual polarization STSR-mode files
 
-## 0.6.0 - 2020-12-08
+## 0.6.0 – 2020-12-08
 
 - Level 1 data support to `rpg2nc`
 - Bug fixes
 
-## 0.5.0 - 2020-10-05
+## 0.5.0 – 2020-10-05
 
 This release:
 
@@ -119,14 +119,14 @@ This release:
 - Adds first unit and end-to-end tests and Github Actions CI
 - Fixes installation instructions
 
-## 0.4.0 - 2020-07-01
+## 0.4.0 – 2020-07-01
 
 This version fixes spectral matrices so that the difference chirps correspond to each other.
 
-## 0.3.1 - 2020-05-11
+## 0.3.1 – 2020-05-11
 
 Version `0.3.1.` adds bug fixes.
 
-## 0.3.0 - 2020-05-11
+## 0.3.0 – 2020-05-11
 
 First stable release.
