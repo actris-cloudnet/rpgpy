@@ -127,7 +127,9 @@ def rpg2nc_multi(  # pylint: disable=R0913
             rpg2nc(filepath, new_filename, global_attr)
             new_files.append(new_filename)
         except IndexError as err:
-            logging.warning(f"############### File {filepath} has not been converted: {err}")
+            logging.warning(
+                f"############### File {filepath} has not been converted: {err}"
+            )
     logging.info(f"Converted {len(new_files)} files")
     return new_files
 
@@ -139,7 +141,11 @@ def _check_header_consistency(f: netCDF4.Dataset, header: dict) -> None:
             try:
                 assert_array_almost_equal(array, f.variables[key])
             except AssertionError:
-                print("Warning: inconsistent header data in " + key, array, f.variables[key][:])
+                print(
+                    "Warning: inconsistent header data in " + key,
+                    array,
+                    f.variables[key][:],
+                )
 
 
 def _create_dimensions(f: netCDF4.Dataset, header: dict, level: int) -> None:
@@ -226,7 +232,9 @@ def _get_dim(f: netCDF4.Dataset, array: np.ndarray) -> tuple:
     return tuple(variable_size)
 
 
-def _create_global_attributes(f: netCDF4.Dataset, global_attr: Optional[dict], header: dict):
+def _create_global_attributes(
+    f: netCDF4.Dataset, global_attr: Optional[dict], header: dict
+):
     level, rpg_file_version = utils.get_rpg_file_type(header)
     f.Conventions = "CF-1.7"
     f.year, f.month, f.day = _get_measurement_date(f)

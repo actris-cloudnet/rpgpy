@@ -73,7 +73,10 @@ class TestSpectra2Nc:
         output_file = f"{FILE_PATH}/../data/level0/v3-889346/output.nc"
         spectra2nc(self.input_file, output_file, global_attr={"location": "Hyytiala"})
         with netCDF4.Dataset(output_file) as nc:
-            expected_shape = (len(nc.variables["time"]), len(nc.variables["range_layers"]))
+            expected_shape = (
+                len(nc.variables["time"]),
+                len(nc.variables["range_layers"]),
+            )
             for key in ("Ze", "v", "width", "kurtosis", "skewness"):
                 assert key in nc.variables
                 assert nc.variables[key].shape == expected_shape
@@ -83,7 +86,11 @@ class TestSpectra2Nc:
 
     def test_with_pathlib(self):
         output_file = f"{FILE_PATH}/../data/level0/v3-889346/output.nc"
-        spectra2nc(Path(self.input_file), Path(output_file), global_attr={"location": "Hyytiala"})
+        spectra2nc(
+            Path(self.input_file),
+            Path(output_file),
+            global_attr={"location": "Hyytiala"},
+        )
         with netCDF4.Dataset(output_file):
             pass
         os.remove(output_file)
@@ -161,7 +168,9 @@ class TestRpg2ncMulti:
 
     def test_output_dir_pathlib(self):
         output_dir = Path(f"{FILE_PATH}/../data/level0/v3-889346/")
-        rpg2nc_multi(file_directory=self.input_file_path, output_directory=Path(output_dir))
+        rpg2nc_multi(
+            file_directory=self.input_file_path, output_directory=Path(output_dir)
+        )
         for file in self.input_files:
             expected_filename = f"{output_dir}/{os.path.basename(file)}.nc"
             assert os.path.exists(expected_filename)
@@ -171,10 +180,14 @@ class TestRpg2ncMulti:
     def test_recursive():
         input_dir = f"{FILE_PATH}/../data/"
         output_dir = f"{FILE_PATH}/../data/level0/v3-889346/"
-        files = rpg2nc_multi(file_directory=input_dir, output_directory=output_dir, recursive=False)
+        files = rpg2nc_multi(
+            file_directory=input_dir, output_directory=output_dir, recursive=False
+        )
         assert len(files) == 0
         input_dir = f"{FILE_PATH}/../data/misc/"
-        files = rpg2nc_multi(file_directory=input_dir, output_directory=input_dir, recursive=False)
+        files = rpg2nc_multi(
+            file_directory=input_dir, output_directory=input_dir, recursive=False
+        )
         assert len(files) == 3
         for file in files:
             os.remove(file)

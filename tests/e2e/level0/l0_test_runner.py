@@ -27,15 +27,25 @@ def main():
                 pickle.dump(d, f)
 
             pytest.main(
-                ["-v", "tests/e2e/level1/l1_tests.py", "-m", "level0", f"--data={data_file}"]
+                [
+                    "-v",
+                    "tests/e2e/level1/l1_tests.py",
+                    "-m",
+                    "level0",
+                    f"--data={data_file}",
+                ]
             )
 
         global_attr = {"foo": "bar"}
         output_filename = "temp-file.nc"  # pylint: disable=R1732
         rpg2nc(
-            f"{os.path.join(data_path, folder)}/2*.LV0", output_filename, global_attr=global_attr
+            f"{os.path.join(data_path, folder)}/2*.LV0",
+            output_filename,
+            global_attr=global_attr,
         )
-        pytest.main(["-v", "tests/e2e/level0/l0_tests.py", f"--filename={output_filename}"])
+        pytest.main(
+            ["-v", "tests/e2e/level0/l0_tests.py", f"--filename={output_filename}"]
+        )
 
         base_name = "test"
         rpg2nc_multi(data_path, base_name=base_name, global_attr=global_attr)

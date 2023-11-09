@@ -1,6 +1,6 @@
 name: RpgPy CI
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -26,14 +26,12 @@ jobs:
           minimum-size: 8GB
       - name: Install dependencies
         run: |
-          python3 -m pip install .[test]
+          python3 -m pip install .[test,dev]
           python3 setup.py build_ext --inplace
-      - name: Lint with pylint
+      - name: Run pre-commit checks
+        if: startsWith(matrix.os, 'ubuntu-')
         run: |
-          pylint rpgpy/ tests/
-      - name: Typecheck with mypy
-        run: |
-          mypy rpgpy/ tests/
+          pre-commit run --all-files --show-diff-on-failure
       - name: Test with pytest
         run: |
           pytest --flake-finder tests/unit/ --flake-runs=2

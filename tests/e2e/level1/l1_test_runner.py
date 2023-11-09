@@ -34,10 +34,17 @@ def main():
                 global_attr=global_attr,
             )
 
-            pytest.main(["-v", "tests/e2e/level0/l0_tests.py", f"--filename={output_filename}"])
+            pytest.main(
+                ["-v", "tests/e2e/level0/l0_tests.py", f"--filename={output_filename}"]
+            )
 
             base_name = "test"
-            rpg2nc_multi(data_path, base_name=base_name, include_lv0=False, global_attr=global_attr)
+            rpg2nc_multi(
+                data_path,
+                base_name=base_name,
+                include_lv0=False,
+                global_attr=global_attr,
+            )
 
             for _, _, files in sorted(os.walk(".")):
                 for nc_file in files:

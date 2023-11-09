@@ -28,7 +28,11 @@ def rpg_seconds2date(time_stamp: float, date_only: bool = False) -> list:
         datetime.datetime(*epoch, tzinfo=datetime.timezone.utc)
     )
     time_stamp += epoch_in_seconds
-    date_time = datetime.datetime.utcfromtimestamp(time_stamp).strftime("%Y %m %d %H %M %S").split()
+    date_time = (
+        datetime.datetime.utcfromtimestamp(time_stamp)
+        .strftime("%Y %m %d %H %M %S")
+        .split()
+    )
     if date_only:
         return date_time[:3]
     return date_time
@@ -136,10 +140,14 @@ def create_velocity_vectors(header: dict) -> np.ndarray:
     n_bins_max = np.max(header["SpecN"])
     # zeros will be automatically masked in the netCDF file:
     velocity_vectors = np.zeros((n_chirps, n_bins_max))
-    for ind, (n_bins, chirp_max_vel) in enumerate(zip(header["SpecN"], header["MaxVel"])):
+    for ind, (n_bins, chirp_max_vel) in enumerate(
+        zip(header["SpecN"], header["MaxVel"])
+    ):
         bins_to_shift = (n_bins_max - n_bins) // 2
         dopp_res = chirp_max_vel / n_bins
-        velocity = np.linspace(-chirp_max_vel + dopp_res, +chirp_max_vel - dopp_res, n_bins)
+        velocity = np.linspace(
+            -chirp_max_vel + dopp_res, +chirp_max_vel - dopp_res, n_bins
+        )
         velocity_vectors[ind, bins_to_shift : bins_to_shift + len(velocity)] = velocity
     return velocity_vectors
 

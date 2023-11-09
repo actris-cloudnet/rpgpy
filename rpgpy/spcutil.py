@@ -49,7 +49,9 @@ def spectra2moments(
                 if (edge_right - edge_left) < n_points_min:
                     no_signal[ind_time, ind_range] = True
                     continue
-                velocity_vector = header["velocity_vectors"][ind_chirp][edge_left:edge_right]
+                velocity_vector = header["velocity_vectors"][ind_chirp][
+                    edge_left:edge_right
+                ]
                 assert np.all(velocity_vector != 0)
                 moments[ind_time, ind_range, :] = radar_moment_calculation(
                     spectra[ind_time, ind_range, edge_left:edge_right],
@@ -91,8 +93,12 @@ def radar_moment_calculation(signal: np.ndarray, vel_bins: np.ndarray) -> np.nda
     """
 
     signal_sum = np.sum(signal)  # linear full spectrum Ze [mm^6/m^3], scalar
-    ze_lin = signal_sum / 2.0  # divide by 2 because vertical and horizontal channel are added.
-    pwr_nrm = signal / signal_sum  # determine normalized power (NOT normalized by Vdop bins)
+    ze_lin = (
+        signal_sum / 2.0
+    )  # divide by 2 because vertical and horizontal channel are added.
+    pwr_nrm = (
+        signal / signal_sum
+    )  # determine normalized power (NOT normalized by Vdop bins)
     vel = np.sum(vel_bins * pwr_nrm)
     vel_diff = vel_bins - vel
     vel_diff2 = vel_diff * vel_diff
@@ -151,13 +157,17 @@ def calc_spectral_LDR(header: dict, data: dict) -> np.ndarray:
     """
     spec_tot = scale_spectra(data["TotSpec"], header["SWVersion"])
     spec_V = spec_tot - data["HSpec"] - 2 * data["ReVHSpec"]
-    noise_V = data["TotNoisePow"] / 2.0  # TBD: how to obtain noise power in vertical channel?
+    noise_V = (
+        data["TotNoisePow"] / 2.0
+    )  # TBD: how to obtain noise power in vertical channel?
 
     bins_per_chirp = np.diff(np.hstack((header["RngOffs"], header["RAltN"])))
     noise_h_per_bin = (data["HNoisePow"] / np.repeat(header["SpecN"], bins_per_chirp))[
         :, :, np.newaxis
     ]
-    noise_v_per_bin = (noise_V / np.repeat(header["SpecN"], bins_per_chirp))[:, :, np.newaxis]
+    noise_v_per_bin = (noise_V / np.repeat(header["SpecN"], bins_per_chirp))[
+        :, :, np.newaxis
+    ]
 
     # Avoid division by zero
     noise_v_per_bin[noise_v_per_bin == 0] = 1e-10

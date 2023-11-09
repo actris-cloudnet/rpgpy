@@ -27,7 +27,6 @@ dynamic = ["version"]
 [project.optional-dependencies]
 test = [
     "pytest-flakefinder",
-    "pylint",
     "mypy",
     "types-tqdm",
 ]
@@ -38,40 +37,23 @@ Homepage = "https://github.com/actris-cloudnet/rpgpy"
 Repository = "https://github.com/actris-cloudnet/rpgpy"
 Changelog = "https://github.com/actris-cloudnet/rpgpy/blob/main/CHANGELOG.md"
 
-[tool.setuptools.dynamic]
-version = {attr = "rpgpy.version.__version__"}
+[tool.mypy]
+check_untyped_defs = true
 
 [[tool.mypy.overrides]]
 module = ["Cython.Build", "setuptools", "netCDF4", "numba", "rpgpy.data"]
 ignore_missing_imports = true
 
-[tool.black]
-line-length = 100
-
-[tool.isort]
-profile = "black"
-line_length = 100
-
-[tool.pylint]
-max-line-length = 100
-ignored-modules = ["netCDF4"]
-disable = [
-  "missing-module-docstring",
-  "missing-class-docstring",
-  "missing-function-docstring",
-  "too-many-statements",
-  "invalid-name",
-  "too-many-branches",
-  "import-error",
-  "too-many-nested-blocks",
-  "logging-fstring-interpolation",
-  "too-many-locals",
-  "cyclic-import",
-  "duplicate-code",
-  "too-few-public-methods",
-]
-
 [tool.release-version]
 filename = "rpgpy/version.py"
 pattern = ["MAJOR = (?P<major>\\d+)", "MINOR = (?P<minor>\\d+)", "PATCH = (?P<patch>\\d+)"]
 changelog = "CHANGELOG.md"
+
+[tool.ruff]
+extend-select = ["I"]
+
+[tool.ruff.lint.extend-per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.setuptools.dynamic]
+version = {attr = "rpgpy.version.__version__"}

@@ -10,17 +10,23 @@ class Meta(NamedTuple):
 
 
 METADATA = {
-    "DoppRes": Meta(name="doppler_resolution", long_name="Doppler resolution", units="m/s"),
+    "DoppRes": Meta(
+        name="doppler_resolution", long_name="Doppler resolution", units="m/s"
+    ),
     "FileCode": Meta(name="file_code", long_name="File Code"),
     "HeaderLen": Meta(name="header_length", long_name="Header Length", units="bytes"),
     "StartTime": Meta(
-        name="start_time", long_name="Start Time", comment="time of first sample in file"
+        name="start_time",
+        long_name="Start Time",
+        comment="time of first sample in file",
     ),
     "StopTime": Meta(
         name="stop_time", long_name="Stop Time", comment="time of last sample in file"
     ),
     "CGProg": Meta(
-        name="program_number", long_name="Program Number", comment="chirp generator program number"
+        name="program_number",
+        long_name="Program Number",
+        comment="chirp generator program number",
     ),
     "ModelNo": Meta(
         name="model_number",
@@ -37,8 +43,12 @@ METADATA = {
         comment="separation of both antenna axis (bistatic configuration)",
     ),
     "AntDia": Meta(name="antenna_diameter", long_name="Antenna Diameter", units="m"),
-    "AntG": Meta(name="antenna_gain", long_name="Antenna Gain", comment="linear antenna gain"),
-    "HPBW": Meta(name="half_power_beam_width", long_name="Half Power Beam Width", units="degrees"),
+    "AntG": Meta(
+        name="antenna_gain", long_name="Antenna Gain", comment="linear antenna gain"
+    ),
+    "HPBW": Meta(
+        name="half_power_beam_width", long_name="Half Power Beam Width", units="degrees"
+    ),
     "Cr": Meta(name="radar_constant", long_name="Radar Constant"),
     "DualPol": Meta(
         name="dual_polarisation",
@@ -57,8 +67,12 @@ METADATA = {
         comment="0=spectra not anti-aliased, 1=spectra have been anti-aliased",
     ),
     "SampDur": Meta(name="sample_duration", long_name="Sample Duration", units="s"),
-    "GPSLat": Meta(name="gps_latitude", long_name="GPS Latitude", units="degrees_north"),
-    "GPSLong": Meta(name="gps_longitude", long_name="GPS Longitude", units="degrees_east"),
+    "GPSLat": Meta(
+        name="gps_latitude", long_name="GPS Latitude", units="degrees_north"
+    ),
+    "GPSLong": Meta(
+        name="gps_longitude", long_name="GPS Longitude", units="degrees_east"
+    ),
     "CalInt": Meta(
         name="calibration_interval",
         long_name="Calibration Interval",
@@ -86,18 +100,32 @@ METADATA = {
     "HAlts": Meta(name="humidity_layers", long_name="Humidity Layers"),
     "Fr": Meta(name="range_factors", long_name="Range Factors"),
     "SpecN": Meta(
-        name="n_samples_in_chirp", long_name="Number of Spectral Samples in Each Chirp Sequence"
+        name="n_samples_in_chirp",
+        long_name="Number of Spectral Samples in Each Chirp Sequence",
     ),
-    "RngOffs": Meta(name="chirp_start_indices", long_name="Chirp Sequence Start Indices"),
+    "RngOffs": Meta(
+        name="chirp_start_indices", long_name="Chirp Sequence Start Indices"
+    ),
     "ChirpReps": Meta(
-        name="n_chirps_in_sequence", long_name="Number of Averaged Chirps in Each Sequence"
+        name="n_chirps_in_sequence",
+        long_name="Number of Averaged Chirps in Each Sequence",
     ),
-    "SeqIntTime": Meta(name="integration_time", long_name="Effective Sequence Integration Time"),
-    "dR": Meta(name="range_resolution", long_name="Chirp Sequence Range Resolution", units="m"),
+    "SeqIntTime": Meta(
+        name="integration_time", long_name="Effective Sequence Integration Time"
+    ),
+    "dR": Meta(
+        name="range_resolution", long_name="Chirp Sequence Range Resolution", units="m"
+    ),
     "MaxVel": Meta(name="nyquist_velocity", long_name="Nyquist velocity", units="m/s"),
-    "ChanBW": Meta(name="bandwidth", long_name="Bandwidth of Individual Radar Channel", units="Hz"),
-    "ChirpLowIF": Meta(name="lowest_IF_frequency", long_name="Lowest IF Frequency", units="Hz"),
-    "ChirpHighIF": Meta(name="highest_IF_frequency", long_name="Highest IF Frequency", units="Hz"),
+    "ChanBW": Meta(
+        name="bandwidth", long_name="Bandwidth of Individual Radar Channel", units="Hz"
+    ),
+    "ChirpLowIF": Meta(
+        name="lowest_IF_frequency", long_name="Lowest IF Frequency", units="Hz"
+    ),
+    "ChirpHighIF": Meta(
+        name="highest_IF_frequency", long_name="Highest IF Frequency", units="Hz"
+    ),
     "RangeMin": Meta(
         name="minimum_altitude",
         long_name="Minimum Altitude",
@@ -110,7 +138,9 @@ METADATA = {
         units="m",
         comment="maximum altitude (range) of the sequence)",
     ),
-    "ChirpFFTSize": Meta(name="fft_size", long_name="FFT Size", comment="Must be power of 2"),
+    "ChirpFFTSize": Meta(
+        name="fft_size", long_name="FFT Size", comment="Must be power of 2"
+    ),
     "ChirpInvSamples": Meta(
         name="n_invalid_samples",
         long_name="Number of Invalid Samples",
@@ -122,9 +152,13 @@ METADATA = {
     "FFTStartInd": Meta(name="fft_start_index", long_name="FFT Start Index"),
     "FFTStopInd": Meta(name="fft_stop_index", long_name="FFT Stop Index"),
     "ChirpFFTNo": Meta(
-        name="n_chirp_fft", long_name="Number of FFT Range Layers in Chirp", comment="Usually = 1"
+        name="n_chirp_fft",
+        long_name="Number of FFT Range Layers in Chirp",
+        comment="Usually = 1",
     ),
-    "SampRate": Meta(name="adc_sampling_rate", long_name="ADC Sampling Rate", units="Hz"),
+    "SampRate": Meta(
+        name="adc_sampling_rate", long_name="ADC Sampling Rate", units="Hz"
+    ),
     "MaxRange": Meta(
         name="maximum_range",
         long_name="Maximum Range",
@@ -168,7 +202,9 @@ METADATA = {
         long_name="Noise Filter Threshold",
         comment="noise filter threshold factor (multiple of STD in Doppler spectra)",
     ),
-    "Time": Meta(name="time", long_name="Time of Sample", comment="since 1.1.2001", units="s"),
+    "Time": Meta(
+        name="time", long_name="Time of Sample", comment="since 1.1.2001", units="s"
+    ),
     "MSec": Meta(name="time_ms", long_name="Milliseconds of Sample", units="ms"),
     "QF": Meta(
         name="quality_flag",
@@ -182,11 +218,21 @@ METADATA = {
     "BaroP": Meta(name="pressure", long_name="Barometric Pressure", units="hPa"),
     "WS": Meta(name="wind_speed", long_name="Wind Speed", units="km/h"),
     "WD": Meta(name="wind_direction", long_name="Wind Direction", units="degrees"),
-    "DDVolt": Meta(name="voltage", long_name="Direct Detection Channel Voltage", units="V"),
-    "DDTb": Meta(name="brightness_temperature", long_name="Brightness Temperature", units="K"),
-    "TransPow": Meta(name="transmitter_power", long_name="Transmitter Power", units="W"),
-    "TransT": Meta(name="transmitter_temperature", long_name="Transmitter Temperature", units="K"),
-    "RecT": Meta(name="receiver_temperature", long_name="Receiver Temperature", units="K"),
+    "DDVolt": Meta(
+        name="voltage", long_name="Direct Detection Channel Voltage", units="V"
+    ),
+    "DDTb": Meta(
+        name="brightness_temperature", long_name="Brightness Temperature", units="K"
+    ),
+    "TransPow": Meta(
+        name="transmitter_power", long_name="Transmitter Power", units="W"
+    ),
+    "TransT": Meta(
+        name="transmitter_temperature", long_name="Transmitter Temperature", units="K"
+    ),
+    "RecT": Meta(
+        name="receiver_temperature", long_name="Receiver Temperature", units="K"
+    ),
     "PCT": Meta(name="pc_temperature", long_name="PC Temperature", units="K"),
     "LWP": Meta(name="lwp", long_name="Liquid Water Path", units="g/m2"),
     "Elev": Meta(name="elevation", long_name="Elevation Angle", units="degrees"),
@@ -196,7 +242,9 @@ METADATA = {
         long_name="Status Flag",
         comment="mitigation status flags: 0/1=heater switch (ON/OFF) 0/10=blower switch (ON/OFF)",
     ),
-    "TotSpec": Meta(name="doppler_spectrum", long_name="Doppler Spectrum", comment="linear Ze"),
+    "TotSpec": Meta(
+        name="doppler_spectrum", long_name="Doppler Spectrum", comment="linear Ze"
+    ),
     "HSpec": Meta(
         name="doppler_spectrum_h",
         long_name="Doppler Spectrum H",
@@ -208,7 +256,9 @@ METADATA = {
         comment="real part, linear Ze",
     ),
     "LDRSpec": Meta(
-        name="LDR spectrum", long_name="linear depolarisation ratio Doppler spectra", units="dB"
+        name="LDR spectrum",
+        long_name="linear depolarisation ratio Doppler spectra",
+        units="dB",
     ),
     "ImVHSpec": Meta(
         name="covariance_spectrum_im",
@@ -216,15 +266,21 @@ METADATA = {
         comment="imaginary part, linear Ze",
     ),
     "RefRat": Meta(name="ldr", long_name="Linear Depolarisation Ratio", units="dB"),
-    "DiffPh": Meta(name="differential_phase", long_name="Differential Phase", units="rad"),
+    "DiffPh": Meta(
+        name="differential_phase", long_name="Differential Phase", units="rad"
+    ),
     "SLDR": Meta(name="ldr_slanted", long_name="LDR Slanted", units="dB"),
-    "CorrCoeff": Meta(name="correlation_coefficient", long_name="Correlation Coefficient"),
+    "CorrCoeff": Meta(
+        name="correlation_coefficient", long_name="Correlation Coefficient"
+    ),
     "SCorrCoeff": Meta(
         name="correlation_coefficient_slanted",
         long_name="Correlation Coefficient Slanted",
     ),
     "KDP": Meta(
-        name="differential_phase_shift", long_name="Differential Phase Shift", units="rad/km"
+        name="differential_phase_shift",
+        long_name="Differential Phase Shift",
+        units="rad/km",
     ),
     "SLv": Meta(
         name="sensitivity_limit_v",
@@ -237,7 +293,9 @@ METADATA = {
         comment="linear units",
     ),
     "DiffAtt": Meta(
-        name="differential_attenuation", long_name="Differential Attenuation", units="db/km"
+        name="differential_attenuation",
+        long_name="Differential Attenuation",
+        units="db/km",
     ),
     "TotNoisePow": Meta(
         name="integrated_noise",
@@ -255,21 +313,41 @@ METADATA = {
         comment="mask indicating if anti-aliasing has been applied (=1) or not (=0)",
     ),
     "MinVel": Meta(name="minimum_velocity", long_name="Minimum Velocity", units="m/s"),
-    "PowIF": Meta(name="IF_power", long_name="Intermediate Frequency Power", units="uW"),
-    "Ze": Meta(name="Ze", long_name="Reflectivity", comment="vertical polarisation, linear units"),
+    "PowIF": Meta(
+        name="IF_power", long_name="Intermediate Frequency Power", units="uW"
+    ),
+    "Ze": Meta(
+        name="Ze",
+        long_name="Reflectivity",
+        comment="vertical polarisation, linear units",
+    ),
     "MeanVel": Meta(
-        name="v", long_name="Doppler Velocity", units="m/s", comment="vertical polarisation"
+        name="v",
+        long_name="Doppler Velocity",
+        units="m/s",
+        comment="vertical polarisation",
     ),
     "SpecWidth": Meta(
-        name="width", long_name="Spectral Width", units="m/s", comment="vertical polarisation"
+        name="width",
+        long_name="Spectral Width",
+        units="m/s",
+        comment="vertical polarisation",
     ),
-    "Skewn": Meta(name="skewness", long_name="Spectral Skewness", comment="vertical polarisation"),
-    "Kurt": Meta(name="kurtosis", long_name="Spectral Kurtosis", comment="vertical polarisation"),
+    "Skewn": Meta(
+        name="skewness", long_name="Spectral Skewness", comment="vertical polarisation"
+    ),
+    "Kurt": Meta(
+        name="kurtosis", long_name="Spectral Kurtosis", comment="vertical polarisation"
+    ),
     "velocity_vectors": Meta(
-        name="velocity_vectors", long_name="Doppler velocity bins", comment="for each chirp"
+        name="velocity_vectors",
+        long_name="Doppler velocity bins",
+        comment="for each chirp",
     ),
     "InstCalPar": Meta(name="Cal_period", units="s", long_name="Calibration period"),
     "SWVersion": Meta(
-        name="software_version", long_name="Software version", comment="Multiplied by 100"
+        name="software_version",
+        long_name="Software version",
+        comment="Multiplied by 100",
     ),
 }

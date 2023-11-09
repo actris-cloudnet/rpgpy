@@ -49,7 +49,13 @@ def read_rpg_header(file_name: Path) -> Tuple[dict, int]:
     header["CustName"] = _read_string(file)
 
     if version > 1.0:
-        read(("Freq", "f"), ("AntSep", "f"), ("AntDia", "f"), ("AntG", "f"), ("HPBW", "f"))
+        read(
+            ("Freq", "f"),
+            ("AntSep", "f"),
+            ("AntDia", "f"),
+            ("AntG", "f"),
+            ("HPBW", "f"),
+        )
 
         if level == 0:
             read(("Cr", "f"))
@@ -72,7 +78,11 @@ def read_rpg_header(file_name: Path) -> Tuple[dict, int]:
 
         n_levels, n_temp, n_humidity, n_chirp = _get_number_of_levels(header)
 
-        read(("RAlts", _dim(n_levels)), ("TAlts", _dim(n_temp)), ("HAlts", _dim(n_humidity)))
+        read(
+            ("RAlts", _dim(n_levels)),
+            ("TAlts", _dim(n_temp)),
+            ("HAlts", _dim(n_humidity)),
+        )
 
         if level == 0:
             read(("Fr", _dim(n_levels)))
