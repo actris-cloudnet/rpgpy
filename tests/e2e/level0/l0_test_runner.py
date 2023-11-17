@@ -37,7 +37,7 @@ def main():
             )
 
         global_attr = {"foo": "bar"}
-        output_filename = "temp-file.nc"  # pylint: disable=R1732
+        output_filename = "temp-file.nc"
         rpg2nc(
             f"{os.path.join(data_path, folder)}/2*.LV0",
             output_filename,
@@ -61,7 +61,7 @@ def main():
                     ]
                     try:
                         subprocess.check_call(pytest_args)
-                    except subprocess.CalledProcessError:  # pylint: disable=W0706
+                    except subprocess.CalledProcessError:
                         raise
 
         # cleaning up the project folder

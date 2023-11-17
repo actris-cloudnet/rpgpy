@@ -57,7 +57,7 @@ def main():
                         ]
                         try:
                             subprocess.check_call(pytest_args)
-                        except subprocess.CalledProcessError:  # pylint: disable=W0706
+                        except subprocess.CalledProcessError:
                             raise
 
             # cleaning up the project folder

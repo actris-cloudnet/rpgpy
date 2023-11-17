@@ -199,7 +199,7 @@ class TestGeneratorFiles:
     lv0 = (".lv0", ".LV0")
 
     def test_lv1(self):
-        files = rpgpync._generator_files(self.dir_name, False, True)  # pylint: disable=W0212
+        files = rpgpync._generator_files(self.dir_name, False, True)
         files = list(files)
         for file in files:
             assert not file.endswith(self.lv0)
@@ -208,7 +208,7 @@ class TestGeneratorFiles:
         assert len(files) >= 6
 
     def test_lv1_and_lv0(self):
-        files = rpgpync._generator_files(self.dir_name, True, True)  # pylint: disable=W0212
+        files = rpgpync._generator_files(self.dir_name, True, True)
         files = list(files)
         for file in files:
             assert file.endswith(self.lv1 + self.lv0)
