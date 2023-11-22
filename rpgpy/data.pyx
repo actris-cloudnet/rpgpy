@@ -4,7 +4,6 @@ from libc.stdlib cimport free, malloc
 
 import logging
 from pathlib import Path
-from typing import Tuple, Union
 
 import numpy as np
 
@@ -20,7 +19,7 @@ class RPGFileError(Exception):
         super().__init__(self.message)
 
 
-def read_rpg(file_name: Union[Path, str], rpg_names: bool = True) -> Tuple[dict, dict]:
+def read_rpg(file_name: Path | str, rpg_names: bool = True) -> tuple[dict, dict]:
     """ Reads RPG Level 1 / Level 0 binary file.
 
     Args:

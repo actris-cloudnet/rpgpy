@@ -1,13 +1,13 @@
 """Module for reading RPG 94 GHz radar header."""
 from pathlib import Path
-from typing import Iterator, Tuple
+from typing import Iterator
 
 import numpy as np
 
 from rpgpy import utils
 
 
-def read_rpg_header(file_name: Path) -> Tuple[dict, int]:
+def read_rpg_header(file_name: Path) -> tuple[dict, int]:
     """Reads header from RPG binary file.
 
     Supports Level 0 (version 2.0, 3.5, 4.0) and Level 1 (version 1.0, 2.0, 3.5, 4.0)

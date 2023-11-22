@@ -1,12 +1,12 @@
-from typing import NamedTuple, Optional
+from typing import NamedTuple
 
 
 class Meta(NamedTuple):
     name: str
     long_name: str
-    standard_name: Optional[str] = None
-    units: Optional[str] = None
-    comment: Optional[str] = None
+    standard_name: str | None = None
+    units: str | None = None
+    comment: str | None = None
 
 
 METADATA = {

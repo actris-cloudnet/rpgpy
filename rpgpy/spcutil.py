@@ -1,5 +1,3 @@
-from typing import Optional, Tuple
-
 import numpy as np
 from numba import jit
 
@@ -7,9 +5,9 @@ from numba import jit
 def spectra2moments(
     data: dict,
     header: dict,
-    spec_var: Optional[str] = "TotSpec",
-    fill_value: Optional[float] = -999.0,
-    n_points_min: Optional[int] = 4,
+    spec_var: str = "TotSpec",
+    fill_value: float = -999.0,
+    n_points_min: int = 4,
 ) -> dict:
     """Calculates radar moments from the main peak.
 
@@ -110,7 +108,7 @@ def radar_moment_calculation(signal: np.ndarray, vel_bins: np.ndarray) -> np.nda
 
 
 @jit(nopython=True, fastmath=True)
-def find_peak_edges(signal: np.ndarray) -> Tuple[int, int]:
+def find_peak_edges(signal: np.ndarray) -> tuple[int, int]:
     """Returns the indices of left and right edge of the main signal peak in a Doppler spectra.
 
     Args:

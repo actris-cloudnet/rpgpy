@@ -1,7 +1,7 @@
 import datetime
 import os
 from pathlib import Path
-from typing import Dict, NamedTuple, Tuple, Union
+from typing import NamedTuple
 
 import numpy as np
 from numpy import ma
@@ -59,13 +59,13 @@ def decode_rpg_status_flags(flags: np.ndarray) -> RpgStatusFlags:
         tmp, values = np.divmod(tmp, 10)
         mask |= values > 1
         output[key] = values
-    masked_output: Dict[str, ma.MaskedArray] = {
+    masked_output: dict[str, ma.MaskedArray] = {
         key: ma.masked_array(values, mask) for key, values in output.items()
     }
     return RpgStatusFlags(**masked_output)
 
 
-def get_rpg_file_type(header: dict) -> Tuple[int, float]:
+def get_rpg_file_type(header: dict) -> tuple[int, float]:
     """Find level and version of RPG cloud radar binary file.
 
     Args:
@@ -143,7 +143,7 @@ def create_velocity_vectors(header: dict) -> np.ndarray:
     return velocity_vectors
 
 
-def str2path(path: Union[Path, str, None]) -> Path:
+def str2path(path: Path | str | None) -> Path:
     """Converts path as str to pathlib.Path."""
     if path is None:
         return Path(os.getcwd())

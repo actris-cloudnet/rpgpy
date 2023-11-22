@@ -4,7 +4,6 @@ import logging
 import os
 import uuid
 from pathlib import Path
-from typing import Optional, Tuple, Union
 
 import netCDF4
 import numpy as np
@@ -20,10 +19,10 @@ SKIP_ME = ("ProgName", "CustName", "HAlts", "TAlts", "StartTime", "StopTime")
 
 
 def spectra2nc(
-    input_file: Union[Path, str],
-    output_file: Union[Path, str],
+    input_file: Path | str,
+    output_file: Path | str,
     n_points_min: int = 4,
-    global_attr: Optional[dict] = None,
+    global_attr: dict | None = None,
 ) -> None:
     """Calculates moments from RPG Level 0 file and writes netCDF4 file.
 
@@ -46,14 +45,14 @@ def spectra2nc(
     _create_dimensions(f, header, level=0)
     _write_initial_data(f, header, metadata)
     _write_initial_data(f, data, metadata)
-    _create_global_attributes(f, global_attr, header)
+    _create_global_attributes(f, header, global_attr)
     f.close()
 
 
 def rpg2nc(
-    path_to_files: Union[Path, str],
-    output_file: Union[Path, str],
-    global_attr: Optional[dict] = None,
+    path_to_files: Path | str,
+    output_file: Path | str,
+    global_attr: dict | None = None,
 ) -> None:
     """Converts RPG binary files into a netCDF4 file.
 
@@ -81,18 +80,18 @@ def rpg2nc(
             header, data = read_rpg(file)
             _check_header_consistency(f, header)
             _append_data(f, data, metadata)
-    _create_global_attributes(f, global_attr, header)
+    _create_global_attributes(f, header, global_attr)
     f.close()
     logging.info(f"Created new file: {output_file}")
 
 
 def rpg2nc_multi(
-    file_directory: Optional[Union[Path, str]] = None,
-    output_directory: Optional[Union[Path, str]] = None,
+    file_directory: Path | str | None = None,
+    output_directory: Path | str | None = None,
     include_lv0: bool = True,
     recursive: bool = True,
-    base_name: Optional[str] = None,
-    global_attr: Optional[dict] = None,
+    base_name: str | None = None,
+    global_attr: dict | None = None,
 ) -> list:
     """Converts several RPG binary files individually.
 
@@ -201,7 +200,7 @@ def _get_dtype(array: np.ndarray) -> str:
     return "f4"
 
 
-def _get_rpg_files(path_to_files: Path) -> Tuple[list, int]:
+def _get_rpg_files(path_to_files: Path) -> tuple[list, int]:
     """Returns list of RPG files for one day sorted by filename and level (0 or 1)."""
     files = glob.glob(str(path_to_files))
     files.sort()
@@ -233,7 +232,7 @@ def _get_dim(f: netCDF4.Dataset, array: np.ndarray) -> tuple:
 
 
 def _create_global_attributes(
-    f: netCDF4.Dataset, global_attr: Optional[dict], header: dict
+    f: netCDF4.Dataset, header: dict, global_attr: dict | None
 ):
     level, rpg_file_version = utils.get_rpg_file_type(header)
     f.Conventions = "CF-1.7"
