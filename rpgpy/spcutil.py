@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import numpy as np
 from numba import jit
 
@@ -11,21 +13,24 @@ def spectra2moments(
 ) -> dict:
     """Calculates radar moments from the main peak.
 
-    This routine calculates the radar moments: reflectivity, mean Doppler velocity, spectrum
-    width, skewness and kurtosis from compressed level 0 spectrum files (NoiseFactor > 0)
-    of the 94 GHz RPG cloud radar. Considering only the largest peak.
+    This routine calculates the radar moments: reflectivity, mean Doppler velocity,
+    spectrum width, skewness and kurtosis from compressed level 0 spectrum files
+    (NoiseFactor > 0) of the 94 GHz RPG cloud radar. Considering only the largest peak.
 
     Args:
+    ----
         data: Level 0 nD variables.
         header: Level 0 metadata.
-        spec_var: Name of the spectral variable. Possible names are 'TotSpec', 'VSpec', and 'HSpec'.
-        fill_value: Clear sky fill value.
+        spec_var: Name of the spectral variable. Possible names are 'TotSpec', 'VSpec',
+            and 'HSpec'. fill_value: Clear sky fill value.
         n_points_min: Minimum number of points in a valid spectral line.
 
     Returns:
+    -------
         A dict with keys: 'Ze', 'MeanVel', 'SpecWidth', 'Skewn', 'Kurt'.
 
     Examples:
+    --------
         >>> from rpgpy import read_rpg, spectra2moments
         >>> header, data = read_rpg('rpg-fmcw-94-file.LV0')
         >>> moments = spectra2moments(data, header)
@@ -63,7 +68,7 @@ def spectra2moments(
         key: moments[:, :, i]
         for i, key in enumerate(["Ze", "MeanVel", "SpecWidth", "Skewn", "Kurt"])
     }
-    for key in output.keys():
+    for key in output:
         output[key][no_signal] = fill_value
     return output
 
@@ -76,10 +81,12 @@ def radar_moment_calculation(signal: np.ndarray, vel_bins: np.ndarray) -> np.nda
     skewness, and kurtosis of one Doppler spectrum. Optimized for the use of Numba.
 
     Args:
+    ----
         signal: Detected signal from a Doppler spectrum.
         vel_bins: Extracted velocity bins of the signal (same length as signal).
 
     Returns:
+    -------
         array containing:
 
             - Reflectivity (0th moment) over range of velocity bins [mm6/m3]
@@ -89,7 +96,6 @@ def radar_moment_calculation(signal: np.ndarray, vel_bins: np.ndarray) -> np.nda
             - Kurtosis (4th moment) over range of velocity bins
 
     """
-
     signal_sum = np.sum(signal)  # linear full spectrum Ze [mm^6/m^3], scalar
     ze_lin = (
         signal_sum / 2.0
@@ -109,12 +115,15 @@ def radar_moment_calculation(signal: np.ndarray, vel_bins: np.ndarray) -> np.nda
 
 @jit(nopython=True, fastmath=True)
 def find_peak_edges(signal: np.ndarray) -> tuple[int, int]:
-    """Returns the indices of left and right edge of the main signal peak in a Doppler spectra.
+    """Returns the indices of left and right edge of the main signal peak in a Doppler
+    spectra.
 
     Args:
+    ----
         signal: 1D array Doppler spectra.
 
     Returns:
+    -------
         2-element tuple containing the left / right indices of the main peak edges.
 
     """
@@ -146,10 +155,12 @@ def calc_spectral_LDR(header: dict, data: dict) -> np.ndarray:
     Method by Galetti et al. (2012); Based on code by Alexander Myagkov (RPG).
 
     Args:
+    ----
         header: Level 0 nD variables.
         data: Level 0 nD metadata.
 
     Returns:
+    -------
         Computed SLDR [dB].
 
     """
@@ -161,10 +172,14 @@ def calc_spectral_LDR(header: dict, data: dict) -> np.ndarray:
 
     bins_per_chirp = np.diff(np.hstack((header["RngOffs"], header["RAltN"])))
     noise_h_per_bin = (data["HNoisePow"] / np.repeat(header["SpecN"], bins_per_chirp))[
-        :, :, np.newaxis
+        :,
+        :,
+        np.newaxis,
     ]
     noise_v_per_bin = (noise_V / np.repeat(header["SpecN"], bins_per_chirp))[
-        :, :, np.newaxis
+        :,
+        :,
+        np.newaxis,
     ]
 
     # Avoid division by zero
@@ -175,7 +190,7 @@ def calc_spectral_LDR(header: dict, data: dict) -> np.ndarray:
     SNRh = data["HSpec"] / noise_h_per_bin
     snr_mask = (SNRv < 1000) | (SNRh < 1000)
     rhv = np.abs(data["ReVHSpec"] + complex(imag=1) * data["ImVHSpec"]) / np.sqrt(
-        (spec_V + noise_v_per_bin) * (data["HSpec"] + noise_h_per_bin)
+        (spec_V + noise_v_per_bin) * (data["HSpec"] + noise_h_per_bin),
     )
     sldr = 10 * np.log10((1 - rhv) / (1 + rhv))
     snr_mask = snr_mask | (data["TotSpec"] == 0.0)
@@ -191,10 +206,12 @@ def scale_spectra(signal: np.ndarray, software_version: float) -> np.ndarray:
     Only for STSR mode radar (TBD).
 
     Args:
+    ----
         signal: Combined spectrum (TotSpec).
         software_version: 10 * radar software version number.
 
     Returns:
+    -------
         Scaled spectra.
 
     """

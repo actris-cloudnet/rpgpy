@@ -81,7 +81,7 @@ class TestSpectra2Nc:
                 assert key in nc.variables
                 assert nc.variables[key].shape == expected_shape
             assert "time" in nc.variables
-            assert getattr(nc, "location") == "Hyytiala"
+            assert nc.location == "Hyytiala"
         os.remove(output_file)
 
     def test_with_pathlib(self):
@@ -199,7 +199,9 @@ class TestGeneratorFiles:
     lv0 = (".lv0", ".LV0")
 
     def test_lv1(self):
-        files = rpgpync._generator_files(self.dir_name, False, True)
+        files = rpgpync._generator_files(  # noqa: SLF001
+            self.dir_name, include_lv0=False, recursive=True
+        )
         files = list(files)
         for file in files:
             assert not file.endswith(self.lv0)
@@ -208,7 +210,9 @@ class TestGeneratorFiles:
         assert len(files) >= 6
 
     def test_lv1_and_lv0(self):
-        files = rpgpync._generator_files(self.dir_name, True, True)
+        files = rpgpync._generator_files(  # noqa: SLF001
+            self.dir_name, include_lv0=True, recursive=True
+        )
         files = list(files)
         for file in files:
             assert file.endswith(self.lv1 + self.lv0)

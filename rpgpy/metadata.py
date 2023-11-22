@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import NamedTuple
 
 
@@ -11,7 +13,9 @@ class Meta(NamedTuple):
 
 METADATA = {
     "DoppRes": Meta(
-        name="doppler_resolution", long_name="Doppler resolution", units="m/s"
+        name="doppler_resolution",
+        long_name="Doppler resolution",
+        units="m/s",
     ),
     "FileCode": Meta(name="file_code", long_name="File Code"),
     "HeaderLen": Meta(name="header_length", long_name="Header Length", units="bytes"),
@@ -21,7 +25,9 @@ METADATA = {
         comment="time of first sample in file",
     ),
     "StopTime": Meta(
-        name="stop_time", long_name="Stop Time", comment="time of last sample in file"
+        name="stop_time",
+        long_name="Stop Time",
+        comment="time of last sample in file",
     ),
     "CGProg": Meta(
         name="program_number",
@@ -44,10 +50,14 @@ METADATA = {
     ),
     "AntDia": Meta(name="antenna_diameter", long_name="Antenna Diameter", units="m"),
     "AntG": Meta(
-        name="antenna_gain", long_name="Antenna Gain", comment="linear antenna gain"
+        name="antenna_gain",
+        long_name="Antenna Gain",
+        comment="linear antenna gain",
     ),
     "HPBW": Meta(
-        name="half_power_beam_width", long_name="Half Power Beam Width", units="degrees"
+        name="half_power_beam_width",
+        long_name="Half Power Beam Width",
+        units="degrees",
     ),
     "Cr": Meta(name="radar_constant", long_name="Radar Constant"),
     "DualPol": Meta(
@@ -59,7 +69,8 @@ METADATA = {
     "CompEna": Meta(
         name="compression",
         long_name="Compression",
-        comment="0=not compressed, 1=compressed, 2=compressed and polarimetric variables saved",
+        comment="0=not compressed, 1=compressed, 2=compressed and polarimetric "
+        "variables saved",
     ),
     "AntiAlias": Meta(
         name="anti_alias",
@@ -68,10 +79,14 @@ METADATA = {
     ),
     "SampDur": Meta(name="sample_duration", long_name="Sample Duration", units="s"),
     "GPSLat": Meta(
-        name="gps_latitude", long_name="GPS Latitude", units="degrees_north"
+        name="gps_latitude",
+        long_name="GPS Latitude",
+        units="degrees_north",
     ),
     "GPSLong": Meta(
-        name="gps_longitude", long_name="GPS Longitude", units="degrees_east"
+        name="gps_longitude",
+        long_name="GPS Longitude",
+        units="degrees_east",
     ),
     "CalInt": Meta(
         name="calibration_interval",
@@ -104,27 +119,37 @@ METADATA = {
         long_name="Number of Spectral Samples in Each Chirp Sequence",
     ),
     "RngOffs": Meta(
-        name="chirp_start_indices", long_name="Chirp Sequence Start Indices"
+        name="chirp_start_indices",
+        long_name="Chirp Sequence Start Indices",
     ),
     "ChirpReps": Meta(
         name="n_chirps_in_sequence",
         long_name="Number of Averaged Chirps in Each Sequence",
     ),
     "SeqIntTime": Meta(
-        name="integration_time", long_name="Effective Sequence Integration Time"
+        name="integration_time",
+        long_name="Effective Sequence Integration Time",
     ),
     "dR": Meta(
-        name="range_resolution", long_name="Chirp Sequence Range Resolution", units="m"
+        name="range_resolution",
+        long_name="Chirp Sequence Range Resolution",
+        units="m",
     ),
     "MaxVel": Meta(name="nyquist_velocity", long_name="Nyquist velocity", units="m/s"),
     "ChanBW": Meta(
-        name="bandwidth", long_name="Bandwidth of Individual Radar Channel", units="Hz"
+        name="bandwidth",
+        long_name="Bandwidth of Individual Radar Channel",
+        units="Hz",
     ),
     "ChirpLowIF": Meta(
-        name="lowest_IF_frequency", long_name="Lowest IF Frequency", units="Hz"
+        name="lowest_IF_frequency",
+        long_name="Lowest IF Frequency",
+        units="Hz",
     ),
     "ChirpHighIF": Meta(
-        name="highest_IF_frequency", long_name="Highest IF Frequency", units="Hz"
+        name="highest_IF_frequency",
+        long_name="Highest IF Frequency",
+        units="Hz",
     ),
     "RangeMin": Meta(
         name="minimum_altitude",
@@ -139,14 +164,18 @@ METADATA = {
         comment="maximum altitude (range) of the sequence)",
     ),
     "ChirpFFTSize": Meta(
-        name="fft_size", long_name="FFT Size", comment="Must be power of 2"
+        name="fft_size",
+        long_name="FFT Size",
+        comment="Must be power of 2",
     ),
     "ChirpInvSamples": Meta(
         name="n_invalid_samples",
         long_name="Number of Invalid Samples",
     ),
     "ChirpCenterFr": Meta(
-        name="chirp_center_frequency", long_name="Chirp Center Frequency", units="MHz"
+        name="chirp_center_frequency",
+        long_name="Chirp Center Frequency",
+        units="MHz",
     ),
     "ChirpBWFr": Meta(name="chirp_bandwidth", long_name="Chirp Bandwidth", units="MHz"),
     "FFTStartInd": Meta(name="fft_start_index", long_name="FFT Start Index"),
@@ -157,7 +186,9 @@ METADATA = {
         comment="Usually = 1",
     ),
     "SampRate": Meta(
-        name="adc_sampling_rate", long_name="ADC Sampling Rate", units="Hz"
+        name="adc_sampling_rate",
+        long_name="ADC Sampling Rate",
+        units="Hz",
     ),
     "MaxRange": Meta(
         name="maximum_range",
@@ -188,7 +219,8 @@ METADATA = {
     "FFTWindow": Meta(
         name="fft_window",
         long_name="FFT Window",
-        comment="FFT window in use: 0=square, 1=parzen, 2=blackman, 3=welch, 4=slepian2, "
+        comment="FFT window in use: 0=square, 1=parzen, 2=blackman, 3=welch, "
+        "4=slepian2, "
         "5=slepian3",
     ),
     "FFTInputRng": Meta(
@@ -203,13 +235,17 @@ METADATA = {
         comment="noise filter threshold factor (multiple of STD in Doppler spectra)",
     ),
     "Time": Meta(
-        name="time", long_name="Time of Sample", comment="since 1.1.2001", units="s"
+        name="time",
+        long_name="Time of Sample",
+        comment="since 1.1.2001",
+        units="s",
     ),
     "MSec": Meta(name="time_ms", long_name="Milliseconds of Sample", units="ms"),
     "QF": Meta(
         name="quality_flag",
         long_name="Quality Flag",
-        comment="Bit 1=ADC saturation, Bit 2=spectral width too high, Bit 3=no transm. power "
+        comment="Bit 1=ADC saturation, Bit 2=spectral width too high, Bit 3=no "
+        "transm. power "
         "leveling",
     ),
     "RR": Meta(name="rain_rate", long_name="Rain Rate", units="mm/h"),
@@ -219,19 +255,29 @@ METADATA = {
     "WS": Meta(name="wind_speed", long_name="Wind Speed", units="km/h"),
     "WD": Meta(name="wind_direction", long_name="Wind Direction", units="degrees"),
     "DDVolt": Meta(
-        name="voltage", long_name="Direct Detection Channel Voltage", units="V"
+        name="voltage",
+        long_name="Direct Detection Channel Voltage",
+        units="V",
     ),
     "DDTb": Meta(
-        name="brightness_temperature", long_name="Brightness Temperature", units="K"
+        name="brightness_temperature",
+        long_name="Brightness Temperature",
+        units="K",
     ),
     "TransPow": Meta(
-        name="transmitter_power", long_name="Transmitter Power", units="W"
+        name="transmitter_power",
+        long_name="Transmitter Power",
+        units="W",
     ),
     "TransT": Meta(
-        name="transmitter_temperature", long_name="Transmitter Temperature", units="K"
+        name="transmitter_temperature",
+        long_name="Transmitter Temperature",
+        units="K",
     ),
     "RecT": Meta(
-        name="receiver_temperature", long_name="Receiver Temperature", units="K"
+        name="receiver_temperature",
+        long_name="Receiver Temperature",
+        units="K",
     ),
     "PCT": Meta(name="pc_temperature", long_name="PC Temperature", units="K"),
     "LWP": Meta(name="lwp", long_name="Liquid Water Path", units="g/m2"),
@@ -240,10 +286,13 @@ METADATA = {
     "Status": Meta(
         name="status_flag",
         long_name="Status Flag",
-        comment="mitigation status flags: 0/1=heater switch (ON/OFF) 0/10=blower switch (ON/OFF)",
+        comment="mitigation status flags: 0/1=heater switch (ON/OFF) 0/10=blower "
+        "switch (ON/OFF)",
     ),
     "TotSpec": Meta(
-        name="doppler_spectrum", long_name="Doppler Spectrum", comment="linear Ze"
+        name="doppler_spectrum",
+        long_name="Doppler Spectrum",
+        comment="linear Ze",
     ),
     "HSpec": Meta(
         name="doppler_spectrum_h",
@@ -267,11 +316,14 @@ METADATA = {
     ),
     "RefRat": Meta(name="ldr", long_name="Linear Depolarisation Ratio", units="dB"),
     "DiffPh": Meta(
-        name="differential_phase", long_name="Differential Phase", units="rad"
+        name="differential_phase",
+        long_name="Differential Phase",
+        units="rad",
     ),
     "SLDR": Meta(name="ldr_slanted", long_name="LDR Slanted", units="dB"),
     "CorrCoeff": Meta(
-        name="correlation_coefficient", long_name="Correlation Coefficient"
+        name="correlation_coefficient",
+        long_name="Correlation Coefficient",
     ),
     "SCorrCoeff": Meta(
         name="correlation_coefficient_slanted",
@@ -314,7 +366,9 @@ METADATA = {
     ),
     "MinVel": Meta(name="minimum_velocity", long_name="Minimum Velocity", units="m/s"),
     "PowIF": Meta(
-        name="IF_power", long_name="Intermediate Frequency Power", units="uW"
+        name="IF_power",
+        long_name="Intermediate Frequency Power",
+        units="uW",
     ),
     "Ze": Meta(
         name="Ze",
@@ -334,10 +388,14 @@ METADATA = {
         comment="vertical polarisation",
     ),
     "Skewn": Meta(
-        name="skewness", long_name="Spectral Skewness", comment="vertical polarisation"
+        name="skewness",
+        long_name="Spectral Skewness",
+        comment="vertical polarisation",
     ),
     "Kurt": Meta(
-        name="kurtosis", long_name="Spectral Kurtosis", comment="vertical polarisation"
+        name="kurtosis",
+        long_name="Spectral Kurtosis",
+        comment="vertical polarisation",
     ),
     "velocity_vectors": Meta(
         name="velocity_vectors",

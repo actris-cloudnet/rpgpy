@@ -55,10 +55,7 @@ def main():
                             "tests/e2e/level1/l1_tests.py",
                             f"--filename={nc_file}",
                         ]
-                        try:
-                            subprocess.check_call(pytest_args)
-                        except subprocess.CalledProcessError:
-                            raise
+                        subprocess.check_call(pytest_args)
 
             # cleaning up the project folder
             os.system("rm *.nc")

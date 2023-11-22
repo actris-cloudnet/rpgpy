@@ -1,10 +1,14 @@
 """Module for reading RPG 94 GHz radar header."""
-from pathlib import Path
-from typing import Iterator
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, BinaryIO, Iterator
 
 import numpy as np
 
 from rpgpy import utils
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def read_rpg_header(file_name: Path) -> tuple[dict, int]:
@@ -13,13 +17,20 @@ def read_rpg_header(file_name: Path) -> tuple[dict, int]:
     Supports Level 0 (version 2.0, 3.5, 4.0) and Level 1 (version 1.0, 2.0, 3.5, 4.0)
 
     Args:
+    ----
         file_name: name of the file.
 
     Returns:
+    -------
         2-element tuple containing the header (as dict) and file position.
 
     """
 
+    with open(file_name, "rb") as file:
+        return _read_header(file)
+
+
+def _read_header(file: BinaryIO) -> tuple[dict, int]:
     def read(*fields):
         block = np.fromfile(file, np.dtype(list(fields)), 1)
         assert block.dtype.names is not None
@@ -31,7 +42,6 @@ def read_rpg_header(file_name: Path) -> tuple[dict, int]:
                 header[name] = np.array(array, dtype=_get_dtype(array))
 
     header: dict = {}
-    file = open(file_name, "rb")
 
     read(("FileCode", "i4"), ("HeaderLen", "i4"))
 
@@ -162,7 +172,6 @@ def read_rpg_header(file_name: Path) -> tuple[dict, int]:
             header["DualPol"] = np.array([0])
 
     file_position = file.tell()
-    file.close()
     return header, file_position
 
 

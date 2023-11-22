@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import os
 from pathlib import Path
@@ -13,15 +15,18 @@ def get_current_time() -> str:
 
 
 def rpg_seconds2datetime64(
-    seconds: np.ndarray, milliseconds: np.ndarray | None = None
+    seconds: np.ndarray,
+    milliseconds: np.ndarray | None = None,
 ) -> np.ndarray:
     """Convert RPG timestamps to datetime64 in UTC.
 
     Args:
+    ----
         seconds (np.ndarray): A NumPy array of seconds since 2001-01-01.
         milliseconds (np.ndarray, optional): A NumPy array of milliseconds.
 
     Returns:
+    -------
         np.ndarray: A NumPy array of datetime64 timestamps in UTC.
 
     """
@@ -35,8 +40,7 @@ def rpg_seconds2datetime64(
 
 
 class RpgStatusFlags(NamedTuple):
-    """
-    Status flag is a float which (as of 2022-11-17) can have up to 4 digits
+    """Status flag is a float which (as of 2022-11-17) can have up to 4 digits
     (WXYZ), where:
     - Z (least significant digit) is 1 when heater is on, otherwise 0 (please
         note, that no RPG radar has a physical heater)
@@ -69,12 +73,16 @@ def get_rpg_file_type(header: dict) -> tuple[int, float]:
     """Find level and version of RPG cloud radar binary file.
 
     Args:
+    ----
         header (dict): Header of the radar file containing *file_code* key.
 
     Returns:
-        tuple: 2-element tuple containing Level (0 or 1) and Version (1.0, 2.0, 3.5 or 4.0).
+    -------
+        tuple: 2-element tuple containing Level (0 or 1) and Version (1.0, 2.0, 3.5
+            or 4.0).
 
     Raises:
+    ------
         RuntimeError: Unknown file type.
 
     """
@@ -91,7 +99,8 @@ def get_rpg_file_type(header: dict) -> tuple[int, float]:
         return 1, 3.5
     if file_code == 889348:
         return 1, 4.0
-    raise RuntimeError(f"Unsupported RPG binary file. File code: {file_code}")
+    msg = f"Unknown file type. File code: {file_code}"
+    raise RuntimeError(msg)
 
 
 def isscalar(array) -> bool:
@@ -99,7 +108,8 @@ def isscalar(array) -> bool:
 
     By "scalar" we mean that array has a single value.
 
-    Examples:
+    Examples
+    --------
         >>> isscalar(1)
             True
         >>> isscalar([1])
@@ -120,9 +130,11 @@ def create_velocity_vectors(header: dict) -> np.ndarray:
     """Create Doppler velocity vector for each chirp.
 
     Args:
+    ----
         header (dict): Header of the radar file.
 
     Returns:
+    -------
        np.ndarray: Doppler velocity vector for each chirp. These are equally long
            vectors (max number of bins) where the padded values are masked.
 
@@ -132,12 +144,14 @@ def create_velocity_vectors(header: dict) -> np.ndarray:
     # zeros will be automatically masked in the netCDF file:
     velocity_vectors = np.zeros((n_chirps, n_bins_max))
     for ind, (n_bins, chirp_max_vel) in enumerate(
-        zip(header["SpecN"], header["MaxVel"])
+        zip(header["SpecN"], header["MaxVel"]),
     ):
         bins_to_shift = (n_bins_max - n_bins) // 2
         dopp_res = chirp_max_vel / n_bins
         velocity = np.linspace(
-            -chirp_max_vel + dopp_res, +chirp_max_vel - dopp_res, n_bins
+            -chirp_max_vel + dopp_res,
+            +chirp_max_vel - dopp_res,
+            n_bins,
         )
         velocity_vectors[ind, bins_to_shift : bins_to_shift + len(velocity)] = velocity
     return velocity_vectors

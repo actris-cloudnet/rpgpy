@@ -16,10 +16,10 @@ class TestRpgPy:
     @staticmethod
     def _read(filename):
         with open(filename, "rb") as f:
-            return pickle.load(f)
+            return pickle.load(f)  # noqa: S301
 
-    @pytest.mark.level0
-    @pytest.mark.level1
+    @pytest.mark.level0()
+    @pytest.mark.level1()
     def test_time_vector(self):
         assert self.data is not None
         time = self.data["Time"]
@@ -27,7 +27,7 @@ class TestRpgPy:
         dates = np.unique(datetimes.astype("datetime64[D]"))
         assert len(dates) == 1
 
-    @pytest.mark.level1
+    @pytest.mark.level1()
     def test_no_negative_Ze_values(self):
         assert self.data is not None
         assert np.all(self.data["Ze"] >= 0)

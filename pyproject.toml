@@ -1,32 +1,30 @@
 [build-system]
-requires = ["setuptools", "wheel", "Cython"]
+requires = ["Cython", "setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name="rpgPy"
+name = "rpgPy"
 description = "Cython code for reading binary files from RPG cloud radar."
 authors = [{name = "Simo Tukiainen", email = "simo.tukiainen@fmi.fi"}]
 readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.8"
 classifiers = [
-    "Development Status :: 4 - Beta",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "License :: OSI Approved :: MIT License",
-    "Intended Audience :: Science/Research",
-    "Topic :: Scientific/Engineering",
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Scientific/Engineering",
 ]
-
-dependencies = ["numpy", "cython", "netCDF4", "tqdm", "numba"]
-
+dependencies = ["cython", "netCDF4", "numba", "numpy", "tqdm"]
 dynamic = ["version"]
 
 [project.optional-dependencies]
 test = [
-    "pytest-flakefinder",
-    "mypy",
-    "types-tqdm",
+  "mypy",
+  "pytest-flakefinder",
+  "types-tqdm",
 ]
 dev = ["pre-commit", "release-version"]
 
@@ -39,7 +37,7 @@ Changelog = "https://github.com/actris-cloudnet/rpgpy/blob/main/CHANGELOG.md"
 check_untyped_defs = true
 
 [[tool.mypy.overrides]]
-module = ["Cython.Build", "setuptools", "netCDF4", "numba", "rpgpy.data"]
+module = ["Cython.Build", "netCDF4", "numba", "rpgpy.data", "setuptools"]
 ignore_missing_imports = true
 
 [tool.release-version]
@@ -50,8 +48,35 @@ changelog = "CHANGELOG.md"
 [tool.ruff]
 extend-select = ["I"]
 
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+  "ANN", # missing types, use mypy for this
+  "C9", # too complex, fix me later
+  "COM812", # Formatting
+  "D", # documentation
+  "DTZ00", # do not check timezone info
+  "FIX002", # TODOs
+  "INP",
+  "ISC001", # Formatter wants me
+  "N8", # uppercase variable names
+  "PD011", # false positive
+  "PERF", # try except in loop
+  "PLR", # too many arguments etc.
+  "PTH", # use pathlib, fix me later
+  "RUF002", # unicode in doc string
+  "S101", # use assert
+  "S60",
+  "TD002", # TODOs
+  "TD003", # TODOs
+]
+
 [tool.ruff.lint.extend-per-file-ignores]
 "__init__.py" = ["F401"]
 
 [tool.setuptools.dynamic]
 version = {attr = "rpgpy.version.__version__"}
+
+[tool.tomlsort]
+trailing_comma_inline_array = true
+sort_inline_arrays = true

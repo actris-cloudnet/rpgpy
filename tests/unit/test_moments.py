@@ -1,3 +1,4 @@
+import logging
 import os
 from time import time
 
@@ -53,8 +54,8 @@ class TestMoments:
     start = time()
     moments = spectra2moments(data, header)
     stop = time()
-    print("")
-    print(f"Time elapsed: {stop - start} seconds")
+    msg = f"Time elapsed: {stop - start} seconds"
+    logging.info(msg)
 
     def test_header(self):
         assert self.header["SWVersion"] == 525

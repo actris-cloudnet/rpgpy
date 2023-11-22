@@ -1,9 +1,11 @@
 """Module for writing netCDF file."""
+from __future__ import annotations
+
 import glob
 import logging
 import os
 import uuid
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import netCDF4
 import numpy as np
@@ -14,6 +16,9 @@ from tqdm import tqdm
 import rpgpy.metadata
 from rpgpy import read_rpg, utils, version
 from rpgpy.spcutil import spectra2moments
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 SKIP_ME = ("ProgName", "CustName", "HAlts", "TAlts", "StartTime", "StopTime")
 
@@ -27,6 +32,7 @@ def spectra2nc(
     """Calculates moments from RPG Level 0 file and writes netCDF4 file.
 
     Args:
+    ----
         input_file: Level 0 filename.
         output_file: Name of the output file.
         n_points_min: Number of points in a valid spectral line. Default is 4.
@@ -57,6 +63,7 @@ def rpg2nc(
     """Converts RPG binary files into a netCDF4 file.
 
     Args:
+    ----
         path_to_files: Directory containing RPG binary file(s) and optionally
             a wildcard to distinguish between different types of files.
             E.g. '/path/to/data/*.LV0'
@@ -82,16 +89,18 @@ def rpg2nc(
             _append_data(f, data, metadata)
     _create_global_attributes(f, header, global_attr)
     f.close()
-    logging.info(f"Created new file: {output_file}")
+    msg = f"Created new file: {output_file}"
+    logging.info(msg)
 
 
 def rpg2nc_multi(
     file_directory: Path | str | None = None,
     output_directory: Path | str | None = None,
+    global_attr: dict | None = None,
+    base_name: str | None = None,
+    *,
     include_lv0: bool = True,
     recursive: bool = True,
-    base_name: str | None = None,
-    global_attr: dict | None = None,
 ) -> list:
     """Converts several RPG binary files individually.
 
@@ -102,6 +111,7 @@ def rpg2nc_multi(
     just adding the extension '.nc' within directory where the program is executed.
 
     Args:
+    ----
         file_directory: Root directory from which the function will start looking for
             files to convert. Default is the current working directory.
         output_directory: Directory name where files are written.
@@ -112,24 +122,28 @@ def rpg2nc_multi(
         global_attr: Additional global attributes.
 
     Returns:
+    -------
         A list containing the full paths of the created netCDF files.
 
     """
     new_files = []
     file_directory = utils.str2path(file_directory)
     output_directory = utils.str2path(output_directory)
-    for filepath in _generator_files(file_directory, include_lv0, recursive):
-        logging.info(f"Converting {filepath}")
+    for filepath in _generator_files(
+        file_directory, include_lv0=include_lv0, recursive=recursive
+    ):
+        msg = f"Converting {filepath}"
+        logging.info(msg)
         try:
             prefix = f"{base_name}_" if base_name is not None else ""
             new_filename = f"{output_directory}/{prefix}{_new_filename(filepath)}"
             rpg2nc(filepath, new_filename, global_attr)
             new_files.append(new_filename)
         except IndexError as err:
-            logging.warning(
-                f"############### File {filepath} has not been converted: {err}"
-            )
-    logging.info(f"Converted {len(new_files)} files")
+            msg = f"############### File {filepath} has not been converted: {err}"
+            logging.warning(msg)
+    msg = f"Converted {len(new_files)} files"
+    logging.info(msg)
     return new_files
 
 
@@ -140,11 +154,8 @@ def _check_header_consistency(f: netCDF4.Dataset, header: dict) -> None:
             try:
                 assert_array_almost_equal(array, f.variables[key])
             except AssertionError:
-                print(
-                    "Warning: inconsistent header data in " + key,
-                    array,
-                    f.variables[key][:],
-                )
+                msg = f"Inconsistent header data in {key}, {array}, {f.variables[key]}"
+                logging.warning(msg)
 
 
 def _create_dimensions(f: netCDF4.Dataset, header: dict, level: int) -> None:
@@ -185,13 +196,13 @@ def _append_data(f: netCDF4.Dataset, data: dict, metadata: dict) -> None:
     for key, array in data.items():
         if key in SKIP_ME:
             continue
-        key = metadata[key].name
+        name = metadata[key].name
         if array.ndim == 1:
-            f.variables[key][ind0:ind1] = array
+            f.variables[name][ind0:ind1] = array
         elif array.ndim == 2:
-            f.variables[key][ind0:ind1, :] = array
+            f.variables[name][ind0:ind1, :] = array
         else:
-            f.variables[key][ind0:ind1, :, :] = array
+            f.variables[name][ind0:ind1, :, :] = array
 
 
 def _get_dtype(array: np.ndarray) -> str:
@@ -205,14 +216,16 @@ def _get_rpg_files(path_to_files: Path) -> tuple[list, int]:
     files = glob.glob(str(path_to_files))
     files.sort()
     if not files:
-        raise RuntimeError("No proper RPG binary files found")
+        msg = f"No RPG binary files found in {path_to_files}"
+        raise RuntimeError(msg)
     extension = [file[-4:] for file in files]
     if all(ext.lower() == ".lv1" for ext in extension):
         level = 1
     elif all(ext.lower() == ".lv0" for ext in extension):
         level = 0
     else:
-        raise RuntimeError("No consistent RPG level (0 or 1) files found.")
+        msg = "No consistent RPG level (0 or 1) files found."
+        raise RuntimeError(msg)
     return files, level
 
 
@@ -220,19 +233,21 @@ def _get_dim(f: netCDF4.Dataset, array: np.ndarray) -> tuple:
     """Finds correct dimensions for a variable."""
     if utils.isscalar(array):
         return ()
-    variable_size = []
     file_dims = f.dimensions
-    for length in array.shape:
-        try:
-            dim = [key for key in file_dims.keys() if file_dims[key].size == length][0]
-        except IndexError:
-            dim = "time"
-        variable_size.append(dim)
-    return tuple(variable_size)
+
+    def get_dimension(length):
+        for key in file_dims:
+            if file_dims[key].size == length:
+                return key
+        return "time"
+
+    return tuple(get_dimension(length) for length in array.shape)
 
 
 def _create_global_attributes(
-    f: netCDF4.Dataset, header: dict, global_attr: dict | None
+    f: netCDF4.Dataset,
+    header: dict,
+    global_attr: dict | None,
 ):
     level, rpg_file_version = utils.get_rpg_file_type(header)
     f.Conventions = "CF-1.7"
@@ -253,11 +268,12 @@ def _get_measurement_date(file: netCDF4.Dataset) -> list:
     date_times = utils.rpg_seconds2datetime64(time, time_ms)
     dates = np.unique(date_times.astype("datetime64[D]"))
     if len(np.unique(dates)) > 1:
-        raise RuntimeError("More than one date in the file")
+        msg = "More than one date in the file"
+        raise RuntimeError(msg)
     return str(dates[0]).split("-")
 
 
-def _generator_files(dir_name: Path, include_lv0: bool, recursive: bool):
+def _generator_files(dir_name: Path, *, include_lv0: bool, recursive: bool):
     includes = (".lv1",) if include_lv0 is False else (".lv0", "lv1")
     if recursive is False:
         for file in os.listdir(str(dir_name)):
@@ -278,6 +294,7 @@ def _fix_metadata(metadata: dict, header: dict) -> dict:
     fixed_metadata = metadata.copy()
     if header["DualPol"] == 2:
         fixed_metadata["RefRat"] = rpgpy.metadata.Meta(
-            name="zdr", long_name="Differential Reflectivity Ratio"
+            name="zdr",
+            long_name="Differential Reflectivity Ratio",
         )
     return fixed_metadata
