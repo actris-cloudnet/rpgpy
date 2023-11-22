@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.15.0 – 2023-11-22
+
+- Revise time conversion functions
+
 ## 0.14.6 – 2023-10-03
 
 - Skip StartTime and StopTime check (with older file versions)
