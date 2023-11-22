@@ -12,35 +12,26 @@ def get_current_time() -> str:
     return datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
 
-def rpg_seconds2date(time_stamp: float, date_only: bool = False) -> list:
-    """Convert RPG timestamp to UTC date + time.
+def rpg_seconds2datetime64(
+    seconds: np.ndarray, milliseconds: np.ndarray | None = None
+) -> np.ndarray:
+    """Convert RPG timestamps to datetime64 in UTC.
 
     Args:
-        time_stamp (int): RPG timestamp.
-        date_only (bool): If true, return only date (no time).
+        seconds (np.ndarray): A NumPy array of seconds since 2001-01-01.
+        milliseconds (np.ndarray, optional): A NumPy array of milliseconds.
 
     Returns:
-        list: UTC date + optionally time in format ['YYYY', 'MM', 'DD', 'hh', 'min', 'sec']
+        np.ndarray: A NumPy array of datetime64 timestamps in UTC.
 
     """
-    epoch = (2001, 1, 1)
-    epoch_in_seconds = datetime.datetime.timestamp(
-        datetime.datetime(*epoch, tzinfo=datetime.timezone.utc)
+    if milliseconds is None:
+        milliseconds = np.zeros_like(seconds)
+    return (
+        np.datetime64("2001-01-01")
+        + seconds.astype("timedelta64[s]")
+        + milliseconds.astype("timedelta64[ms]")
     )
-    time_stamp += epoch_in_seconds
-    date_time = (
-        datetime.datetime.utcfromtimestamp(time_stamp)
-        .strftime("%Y %m %d %H %M %S")
-        .split()
-    )
-    if date_only:
-        return date_time[:3]
-    return date_time
-
-
-def rpg_seconds2datetime64(timestamps: np.ndarray) -> np.ndarray:
-    """Convert NumPy array of RPG timestamps to datetime64 in UTC."""
-    return np.datetime64("2001-01-01") + timestamps.astype("timedelta64[s]")
 
 
 class RpgStatusFlags(NamedTuple):

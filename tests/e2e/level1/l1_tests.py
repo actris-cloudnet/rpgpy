@@ -23,10 +23,9 @@ class TestRpgPy:
     def test_time_vector(self):
         assert self.data is not None
         time = self.data["Time"]
-        t0 = utils.rpg_seconds2date(time[0])[:4]
-        for t in time:
-            assert t > 0
-            assert utils.rpg_seconds2date(t)[:4] == t0
+        datetimes = utils.rpg_seconds2datetime64(time)
+        dates = np.unique(datetimes.astype("datetime64[D]"))
+        assert len(dates) == 1
 
     @pytest.mark.level1
     def test_no_negative_Ze_values(self):

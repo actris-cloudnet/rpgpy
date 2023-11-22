@@ -9,7 +9,7 @@ from typing import Optional, Tuple, Union
 import netCDF4
 import numpy as np
 from numpy import ma
-from numpy.testing import assert_array_almost_equal, assert_array_equal
+from numpy.testing import assert_array_almost_equal
 from tqdm import tqdm
 
 import rpgpy.metadata
@@ -250,9 +250,12 @@ def _create_global_attributes(
 
 def _get_measurement_date(file: netCDF4.Dataset) -> list:
     time = file.variables["time"][:]
-    date = utils.rpg_seconds2date(ma.min(time), date_only=True)
-    assert_array_equal(date, utils.rpg_seconds2date(ma.max(time), date_only=True))
-    return date
+    time_ms = file.variables["time_ms"][:]
+    date_times = utils.rpg_seconds2datetime64(time, time_ms)
+    dates = np.unique(date_times.astype("datetime64[D]"))
+    if len(np.unique(dates)) > 1:
+        raise RuntimeError("More than one date in the file")
+    return str(dates[0]).split("-")
 
 
 def _generator_files(dir_name: Path, include_lv0: bool, recursive: bool):

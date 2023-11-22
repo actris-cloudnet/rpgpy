@@ -1,35 +1,13 @@
 import numpy as np
-import pytest
 from numpy.testing import assert_array_equal
 
 from rpgpy import spcutil, utils
 
 
-def test_rpg_seconds2date():
-    date = utils.rpg_seconds2date(0)
-    date_only = utils.rpg_seconds2date(0, date_only=True)
-    res = ["2001", "01", "01", "00", "00", "00"]
-    assert_array_equal(date, res)
-    assert_array_equal(date_only, res[:3])
-
-
-@pytest.mark.parametrize(
-    "data, result",
-    [
-        (0, ["2001", "01", "01", "00", "00", "00"]),
-        (24 * 60 * 60 * 10 + 1, ["2001", "01", "11", "00", "00", "01"]),
-        (24 * 60 * 60 - 1, ["2001", "01", "01", "23", "59", "59"]),
-        (625107602, ["2020", "10", "23", "01", "00", "02"]),
-    ],
-)
-def test_seconds2date(data, result):
-    assert utils.rpg_seconds2date(data) == result
-
-
 def test_seconds2datetime64():
     assert_array_equal(
         utils.rpg_seconds2datetime64(
-            np.array([0, 24 * 60 * 60 * 10 + 1, 24 * 60 * 60 - 1, 625107602])
+            np.array([0, 24 * 60 * 60 * 10 + 1, 24 * 60 * 60 - 1, 625107602]),
         ),
         np.array(
             [
@@ -37,6 +15,24 @@ def test_seconds2datetime64():
                 "2001-01-11T00:00:01",
                 "2001-01-01T23:59:59",
                 "2020-10-23T01:00:02",
+            ],
+            dtype="datetime64",
+        ),
+    )
+
+
+def test_seconds2datetime64_ms():
+    assert_array_equal(
+        utils.rpg_seconds2datetime64(
+            np.array([0, 24 * 60 * 60 * 10 + 1, 24 * 60 * 60 - 1, 625107602]),
+            milliseconds=np.array([0, 0, 1, 999]),
+        ),
+        np.array(
+            [
+                "2001-01-01T00:00:00.000",
+                "2001-01-11T00:00:01.000",
+                "2001-01-01T23:59:59.001",
+                "2020-10-23T01:00:02.999",
             ],
             dtype="datetime64",
         ),
