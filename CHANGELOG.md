@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.15.1 – 2023-11-30
+
+- Build and upload binary wheels to PyPI
+
 ## 0.15.0 – 2023-11-22
 
 - Revise time conversion functions
