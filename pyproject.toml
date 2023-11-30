@@ -74,6 +74,9 @@ ignore = [
 [tool.ruff.lint.extend-per-file-ignores]
 "__init__.py" = ["F401"]
 
+[tool.setuptools]
+packages = ["rpgpy"]
+
 [tool.setuptools.dynamic]
 version = {attr = "rpgpy.version.__version__"}
 
