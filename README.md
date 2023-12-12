@@ -15,9 +15,6 @@ RpgPy is a Python / Cython software for
 
     python3 -m pip install rpgpy
 
-NOTE: A C-compiler is required because the Cython code is compiled locally during installation.
-If you get an error about missing `Python.h`, you need to install the missing header files with `$ apt install python3-dev` (or similar).
-
 ## From source
 
     git clone  https://github.com/actris-cloudnet/rpgpy/
@@ -27,6 +24,9 @@ If you get an error about missing `Python.h`, you need to install the missing he
     python3 -m pip install --upgrade pip
     python3 -m pip install .
     python3 setup.py build_ext --inplace
+
+NOTE: A C-compiler is required because the Cython code is compiled locally during installation.
+If you get an error about missing `Python.h`, you need to install the missing header files with `$ apt install python3-dev` (or similar).
 
 # Quickstart
 
