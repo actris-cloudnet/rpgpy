@@ -1,13 +1,14 @@
 """Module for reading RPG 94 GHz radar header."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, BinaryIO, Iterator
+from typing import TYPE_CHECKING, BinaryIO
 
 import numpy as np
 
 from rpgpy import utils
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from pathlib import Path
 
 

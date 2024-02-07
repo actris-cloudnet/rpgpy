@@ -144,7 +144,7 @@ def create_velocity_vectors(header: dict) -> np.ndarray:
     # zeros will be automatically masked in the netCDF file:
     velocity_vectors = np.zeros((n_chirps, n_bins_max))
     for ind, (n_bins, chirp_max_vel) in enumerate(
-        zip(header["SpecN"], header["MaxVel"]),
+        zip(header["SpecN"], header["MaxVel"], strict=True),
     ):
         bins_to_shift = (n_bins_max - n_bins) // 2
         dopp_res = chirp_max_vel / n_bins
