@@ -11,12 +11,7 @@ from rpgpy import header as head
 from rpgpy import utils
 from rpgpy.metadata import METADATA
 
-
-class RPGFileError(Exception):
-    """Base class for exceptions in this module."""
-    def __init__(self, msg: str = "Problem with reading file"):
-        self.message = msg
-        super().__init__(self.message)
+from rpgpy.utils import RPGFileError
 
 
 def read_rpg(file_name: Path | str, rpg_names: bool = True) -> tuple[dict, dict]:

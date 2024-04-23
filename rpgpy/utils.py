@@ -9,6 +9,14 @@ import numpy as np
 from numpy import ma
 
 
+class RPGFileError(Exception):
+    """Base class for exceptions in this module."""
+
+    def __init__(self, msg: str = "Problem with reading file"):
+        self.message = msg
+        super().__init__(self.message)
+
+
 def get_current_time() -> str:
     """Returns current UTC time."""
     return datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
@@ -100,7 +108,7 @@ def get_rpg_file_type(header: dict) -> tuple[int, float]:
     if file_code == 889348:
         return 1, 4.0
     msg = f"Unknown file type. File code: {file_code}"
-    raise RuntimeError(msg)
+    raise RPGFileError(msg)
 
 
 def isscalar(array) -> bool:
