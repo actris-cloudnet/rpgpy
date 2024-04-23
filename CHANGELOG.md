@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.15.3 – 2024-04-23
+
+- Update workflow
+
 ## 0.15.2 – 2024-04-23
 
 - Raise RPGFileError if corrupted file code
