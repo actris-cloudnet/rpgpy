@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.15.4 – 2024-04-23
+
+- Fix publish GitHub Actions workflow
+
 ## 0.15.3 – 2024-04-23
 
 - Update workflow
