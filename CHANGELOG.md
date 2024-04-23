@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.15.2 – 2024-04-23
+
+- Raise RPGFileError if corrupted file code
+
 ## 0.15.1 – 2023-11-30
 
 - Build and upload binary wheels to PyPI
