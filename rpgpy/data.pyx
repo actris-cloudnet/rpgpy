@@ -58,16 +58,16 @@ def _read_rpg_l0(file_name: Path, header: dict) -> dict:
         FILE *ptr
         int header_length=0, n_samples=0, sample=0, n=0, m=0
         int alt_ind=0, n_points=0, bins_to_shift=0
-        char n_blocks
+        unsigned char n_blocks
         int n_spectra = max(header['SpecN'])
         int n_levels = header['RAltN']
         int compression = header['CompEna']
         int polarization = header['DualPol']
         int anti_alias = header['AntiAlias']
-        short int min_ind[100]  # 100 is the maximum number of blocks
-        short int max_ind[100]
-        short int n_block_points[100]
-        short int spec_ind[100]
+        short int[256] min_ind  # n_blocks is 8 bits
+        short int[256] max_ind
+        short int[256] n_block_points
+        short int[256] spec_ind
         char *is_data = <char *> malloc(n_levels * sizeof(char))
         int *n_samples_at_each_height = <int *> malloc(n_levels * sizeof(int))
 
@@ -239,8 +239,6 @@ def _read_rpg_l0(file_name: Path, header: dict) -> dict:
     fclose(ptr)
     free(is_data)
     free(n_samples_at_each_height)
-
-    # If big-endian machine: need to swap bytes..?
 
     var_names = locals()
     keys = _get_valid_l0_keys(header)
