@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.15.6 – 2024-05-10
+
+- Fix overflow in n_blocks
+
 ## 0.15.5 – 2024-04-23
 
 - Adjust GitHub Actions workflows
