@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.15.8 – 2024-05-13
+
+- Improve index checks
+
 ## 0.15.7 – 2024-05-13
 
 - Check indices while reading data
