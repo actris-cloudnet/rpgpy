@@ -193,6 +193,8 @@ def _read_rpg_l0(file_name: Path, header: dict) -> dict:
                     fread(&max_ind[0], 2, n_blocks, ptr)
 
                     for m in range(n_blocks):
+                        if min_ind[m] < 0 or max_ind[m] < 0:
+                            raise RPGFileError('Invalid data: negative min_ind or max_ind')
                         if min_ind[m] > max_ind[m]:
                             raise RPGFileError('Invalid data: min_ind[m] > max_ind[m]')
                         n_block_points[m] = max_ind[m] - min_ind[m] + 1
