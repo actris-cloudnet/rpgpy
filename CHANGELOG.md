@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.15.7 – 2024-05-13
+
+- Check indices while reading data
+
 ## 0.15.6 – 2024-05-10
 
 - Fix overflow in n_blocks
