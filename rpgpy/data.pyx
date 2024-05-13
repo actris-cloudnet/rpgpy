@@ -193,8 +193,12 @@ def _read_rpg_l0(file_name: Path, header: dict) -> dict:
                     fread(&max_ind[0], 2, n_blocks, ptr)
 
                     for m in range(n_blocks):
+                        if min_ind[m] > max_ind[m]:
+                            raise RPGFileError('Invalid data: min_ind[m] > max_ind[m]')
                         n_block_points[m] = max_ind[m] - min_ind[m] + 1
                         spec_ind[m] = min_ind[m] + bins_to_shift
+                        if spec_ind[m] >= n_spectra:
+                            raise RPGFileError('Invalid data: spec_ind[m] > n_spectra')
                         fread(&TotSpec[sample, alt_ind, spec_ind[m]], 4, n_block_points[m], ptr)
 
                     if polarization > 0:
