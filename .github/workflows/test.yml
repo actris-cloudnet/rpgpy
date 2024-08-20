@@ -21,11 +21,14 @@ jobs:
           cache: "pip"
       - name: Configure Pagefile
         if: runner.os == 'Windows'
-        uses: al-cheb/configure-pagefile-action@v1.3
+        uses: al-cheb/configure-pagefile-action@v1.4
         with:
-          minimum-size: 8GB
+          minimum-size: 16GB
+          maximum-size: 16GB
+          disk-root: "C:"
       - name: Install dependencies
         run: |
+          python3 -m pip install setuptools
           python3 -m pip install .[test,dev]
           python3 setup.py build_ext --inplace
       - name: Run pre-commit checks
