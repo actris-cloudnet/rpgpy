@@ -97,15 +97,15 @@ def get_rpg_file_type(header: dict) -> tuple[int, float]:
     file_code = header["FileCode"]
     if file_code == 789346:
         return 0, 2.0
-    if file_code == 889346:
+    if file_code in (889346, 1889346):
         return 0, 3.5
     if file_code == 789345:
         return 1, 1.0
     if file_code == 789347:
         return 1, 2.0
-    if file_code == 889347:
+    if file_code in (889347, 1889347):
         return 1, 3.5
-    if file_code == 889348:
+    if file_code in (889348, 1889348):
         return 1, 4.0
     msg = f"Unknown file type. File code: {file_code}"
     raise RPGFileError(msg)
