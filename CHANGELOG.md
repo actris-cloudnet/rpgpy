@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.15.9 – 2024-08-20
+
+- Support consistency checked files
+
 ## 0.15.8 – 2024-05-13
 
 - Improve index checks
