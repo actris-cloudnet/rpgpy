@@ -43,7 +43,6 @@ def spectra2moments(
     ranges = np.append(header["RngOffs"], header["RAltN"])
 
     for ind_chirp in range(header["SequN"]):
-        dopp_res = np.mean(np.diff(header["velocity_vectors"][ind_chirp]))
         for ind_range in range(ranges[ind_chirp], ranges[ind_chirp + 1]):
             for ind_time in range(n_time):
                 if no_signal[ind_time, ind_range]:
@@ -62,7 +61,8 @@ def spectra2moments(
                 )
 
         # shift mean Doppler velocity by half a bin
-        moments[:, ranges[ind_chirp] : ranges[ind_chirp + 1], 1] -= dopp_res / 2.0
+        half_bin_width = header["MaxVel"][ind_chirp] / header["SpecN"][ind_chirp]
+        moments[:, ranges[ind_chirp] : ranges[ind_chirp + 1], 1] -= half_bin_width
 
     output = {
         key: moments[:, :, i]
