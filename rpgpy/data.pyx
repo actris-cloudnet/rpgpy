@@ -3,7 +3,7 @@ from libc.stdio cimport *
 from libc.stdlib cimport free, malloc
 
 import logging
-from pathlib import Path
+import os
 
 import numpy as np
 
@@ -14,7 +14,7 @@ from rpgpy.metadata import METADATA
 from rpgpy.utils import RPGFileError
 
 
-def read_rpg(file_name: Path | str, rpg_names: bool = True) -> tuple[dict, dict]:
+def read_rpg(file_name: os.PathLike | str, rpg_names: bool = True) -> tuple[dict, dict]:
     """ Reads RPG Level 1 / Level 0 binary file.
 
     Args:
@@ -26,14 +26,14 @@ def read_rpg(file_name: Path | str, rpg_names: bool = True) -> tuple[dict, dict]
         2-element tuple containing header (dict) and data (dict).
 
     """
-    file_name = utils.str2path(file_name)
+    file_name_bytes = os.fsencode(file_name)
     logging.debug(f'Reading {file_name}')
     header, _ = head.read_rpg_header(file_name)
     level, version = utils.get_rpg_file_type(header)
     if level == 0:
-        data = _read_rpg_l0(file_name, header)
+        data = _read_rpg_l0(file_name_bytes, header)
     else:
-        data = _read_rpg_l1(file_name, header, version)
+        data = _read_rpg_l1(file_name_bytes, header, version)
     if not rpg_names:
         data = _change_keys(data)
         header = _change_keys(header)
@@ -49,12 +49,11 @@ def _change_keys(a_dict: dict) -> dict:
     return dict_new
 
 
-def _read_rpg_l0(file_name: Path, header: dict) -> dict:
+def _read_rpg_l0(file_name: bytes, header: dict) -> dict:
     """Reads RPG LV0 binary file."""
 
-    filename_byte_string = str(file_name).encode("UTF-8")
     cdef:
-        char* fname = filename_byte_string
+        char* fname = file_name
         FILE *ptr
         int header_length=0, n_samples=0, sample=0, n=0, m=0
         int alt_ind=0, n_points=0, bins_to_shift=0
@@ -290,12 +289,11 @@ def _get_valid_l0_keys(header: dict) -> list:
     return keys
 
 
-def _read_rpg_l1(file_name: Path, header: dict, version: float) -> dict:
+def _read_rpg_l1(file_name: bytes, header: dict, version: float) -> dict:
     """Reads RPG LV1 binary file."""
 
-    filename_byte_string = str(file_name).encode("UTF-8")
     cdef:
-        char* fname = filename_byte_string
+        char* fname = file_name
         FILE *ptr
         int header_length=0, n_samples=0, sample=0, alt_ind=0
         int n_levels = header['RAltN']

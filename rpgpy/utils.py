@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import datetime
-import os
-from pathlib import Path
 from typing import NamedTuple
 
 import numpy as np
@@ -163,10 +161,3 @@ def create_velocity_vectors(header: dict) -> np.ndarray:
         )
         velocity_vectors[ind, bins_to_shift : bins_to_shift + len(velocity)] = velocity
     return velocity_vectors
-
-
-def str2path(path: Path | str | None) -> Path:
-    """Converts path as str to pathlib.Path."""
-    if path is None:
-        return Path(os.getcwd())
-    return Path(path) if isinstance(path, str) else path

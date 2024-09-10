@@ -9,10 +9,10 @@ from rpgpy import utils
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
-    from pathlib import Path
+    from os import PathLike
 
 
-def read_rpg_header(file_name: Path) -> tuple[dict, int]:
+def read_rpg_header(file_name: PathLike) -> tuple[dict, int]:
     """Reads header from RPG binary file.
 
     Supports Level 0 (version 2.0, 3.5, 4.0) and Level 1 (version 1.0, 2.0, 3.5, 4.0)

@@ -17,15 +17,15 @@ import rpgpy.metadata
 from rpgpy import read_rpg, utils, version
 from rpgpy.spcutil import spectra2moments
 
-if TYPE_CHECKING:
-    from pathlib import Path
-
 SKIP_ME = ("ProgName", "CustName", "HAlts", "TAlts", "StartTime", "StopTime")
+
+if TYPE_CHECKING:
+    from os import PathLike
 
 
 def spectra2nc(
-    input_file: Path | str,
-    output_file: Path | str,
+    input_file: PathLike | str,
+    output_file: PathLike | str,
     n_points_min: int = 4,
     global_attr: dict | None = None,
 ) -> None:
@@ -39,8 +39,6 @@ def spectra2nc(
         global_attr: Additional global attributes.
 
     """
-    input_file = utils.str2path(input_file)
-    output_file = utils.str2path(output_file)
     f = netCDF4.Dataset(output_file, "w", format="NETCDF4_CLASSIC")
     header, data = read_rpg(input_file)
     moments = spectra2moments(data, header, fill_value=0, n_points_min=n_points_min)
@@ -56,8 +54,8 @@ def spectra2nc(
 
 
 def rpg2nc(
-    path_to_files: Path | str,
-    output_file: Path | str,
+    path_to_files: PathLike | str,
+    output_file: PathLike | str,
     global_attr: dict | None = None,
 ) -> None:
     """Converts RPG binary files into a netCDF4 file.
@@ -71,8 +69,6 @@ def rpg2nc(
         global_attr: Additional global attributes.
 
     """
-    path_to_files = utils.str2path(path_to_files)
-    output_file = utils.str2path(output_file)
     files, level = _get_rpg_files(path_to_files)
     f = netCDF4.Dataset(output_file, "w", format="NETCDF4_CLASSIC")
     header, data = read_rpg(files[0])
@@ -94,8 +90,8 @@ def rpg2nc(
 
 
 def rpg2nc_multi(
-    file_directory: Path | str | None = None,
-    output_directory: Path | str | None = None,
+    file_directory: PathLike | str | None = None,
+    output_directory: PathLike | str | None = None,
     global_attr: dict | None = None,
     base_name: str | None = None,
     *,
@@ -127,8 +123,10 @@ def rpg2nc_multi(
 
     """
     new_files = []
-    file_directory = utils.str2path(file_directory)
-    output_directory = utils.str2path(output_directory)
+    if file_directory is None:
+        file_directory = os.getcwd()
+    if output_directory is None:
+        output_directory = os.getcwd()
     for filepath in _generator_files(
         file_directory, include_lv0=include_lv0, recursive=recursive
     ):
@@ -211,7 +209,7 @@ def _get_dtype(array: np.ndarray) -> str:
     return "f4"
 
 
-def _get_rpg_files(path_to_files: Path) -> tuple[list, int]:
+def _get_rpg_files(path_to_files: PathLike | str) -> tuple[list, int]:
     """Returns list of RPG files for one day sorted by filename and level (0 or 1)."""
     files = glob.glob(str(path_to_files))
     files.sort()
@@ -273,14 +271,14 @@ def _get_measurement_date(file: netCDF4.Dataset) -> list:
     return str(dates[0]).split("-")
 
 
-def _generator_files(dir_name: Path, *, include_lv0: bool, recursive: bool):
+def _generator_files(dir_name: PathLike | str, *, include_lv0: bool, recursive: bool):
     includes = (".lv1",) if include_lv0 is False else (".lv0", "lv1")
     if recursive is False:
-        for file in os.listdir(str(dir_name)):
+        for file in os.listdir(dir_name):
             if file.lower().endswith(includes):
                 yield os.path.join(dir_name, file)
     else:
-        for subdir, _, files in sorted(os.walk(dir_name)):
+        for subdir, _, files in sorted(os.walk(str(dir_name))):
             for file in files:
                 if file.lower().endswith(includes):
                     yield os.path.join(subdir, file)
