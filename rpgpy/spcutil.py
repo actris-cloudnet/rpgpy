@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Literal
+
 import numpy as np
 from numba import jit
 
@@ -7,7 +9,7 @@ from numba import jit
 def spectra2moments(
     data: dict,
     header: dict,
-    spec_var: str = "TotSpec",
+    spec_var: Literal["TotSpec", "VSpec", "HSpec"] = "TotSpec",
     fill_value: float = -999.0,
     n_points_min: int = 4,
 ) -> dict:
@@ -22,7 +24,8 @@ def spectra2moments(
         data: Level 0 nD variables.
         header: Level 0 metadata.
         spec_var: Name of the spectral variable. Possible names are 'TotSpec', 'VSpec',
-            and 'HSpec'. fill_value: Clear sky fill value.
+            and 'HSpec'.
+        fill_value: Clear sky fill value.
         n_points_min: Minimum number of points in a valid spectral line.
 
     Returns:
