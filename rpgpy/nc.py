@@ -39,18 +39,17 @@ def spectra2nc(
         global_attr: Additional global attributes.
 
     """
-    f = netCDF4.Dataset(output_file, "w", format="NETCDF4_CLASSIC")
-    header, data = read_rpg(input_file)
-    moments = spectra2moments(data, header, fill_value=0, n_points_min=n_points_min)
-    data = {key: data[key] for key, array in data.items() if array.ndim == 1}
-    data = {**data, **moments}
-    metadata = rpgpy.metadata.METADATA
-    logging.info("Writing compressed netCDF4 file")
-    _create_dimensions(f, header, level=0)
-    _write_initial_data(f, header, metadata)
-    _write_initial_data(f, data, metadata)
-    _create_global_attributes(f, header, global_attr)
-    f.close()
+    with netCDF4.Dataset(output_file, "w", format="NETCDF4_CLASSIC") as f:
+        header, data = read_rpg(input_file)
+        moments = spectra2moments(data, header, fill_value=0, n_points_min=n_points_min)
+        data = {key: data[key] for key, array in data.items() if array.ndim == 1}
+        data = {**data, **moments}
+        metadata = rpgpy.metadata.METADATA
+        logging.info("Writing compressed netCDF4 file")
+        _create_dimensions(f, header, level=0)
+        _write_initial_data(f, header, metadata)
+        _write_initial_data(f, data, metadata)
+        _create_global_attributes(f, header, global_attr)
 
 
 def rpg2nc(
@@ -70,21 +69,20 @@ def rpg2nc(
 
     """
     files, level = _get_rpg_files(path_to_files)
-    f = netCDF4.Dataset(output_file, "w", format="NETCDF4_CLASSIC")
-    header, data = read_rpg(files[0])
-    metadata = rpgpy.metadata.METADATA
-    metadata = _fix_metadata(metadata, header)
-    logging.info("Writing compressed netCDF4 file")
-    _create_dimensions(f, header, level)
-    _write_initial_data(f, header, metadata)
-    _write_initial_data(f, data, metadata)
-    if len(files) > 1:
-        for file in tqdm(files[1:]):
-            header, data = read_rpg(file)
-            _check_header_consistency(f, header)
-            _append_data(f, data, metadata)
-    _create_global_attributes(f, header, global_attr)
-    f.close()
+    with netCDF4.Dataset(output_file, "w", format="NETCDF4_CLASSIC") as f:
+        header, data = read_rpg(files[0])
+        metadata = rpgpy.metadata.METADATA
+        metadata = _fix_metadata(metadata, header)
+        logging.info("Writing compressed netCDF4 file")
+        _create_dimensions(f, header, level)
+        _write_initial_data(f, header, metadata)
+        _write_initial_data(f, data, metadata)
+        if len(files) > 1:
+            for file in tqdm(files[1:]):
+                header, data = read_rpg(file)
+                _check_header_consistency(f, header)
+                _append_data(f, data, metadata)
+        _create_global_attributes(f, header, global_attr)
     msg = f"Created new file: {output_file}"
     logging.info(msg)
 
