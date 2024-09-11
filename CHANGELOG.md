@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.15.10 – 2024-09-11
+
+- Fix bin width calculation in `spectra2moments`
+- Support `os.PathLike` as argument
+
 ## 0.15.9 – 2024-08-20
 
 - Support consistency checked files
