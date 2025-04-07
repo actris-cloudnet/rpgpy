@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.15.11 – 2025-04-07
+
+- Test with Python3.13
+
 ## 0.15.10 – 2024-09-11
 
 - Fix bin width calculation in `spectra2moments`
