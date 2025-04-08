@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.15.12 – 2025-04-08
+
+- Update binary wheels
+
 ## 0.15.11 – 2025-04-07
 
 - Test with Python3.13
