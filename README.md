@@ -5,7 +5,7 @@
 
 RpgPy is a Python / Cython software for
 
-- Reading [RPG cloud radar](https://www.radiometer-physics.de/products/microwave-remote-sensing-instruments/94-ghz-fmcw-doppler-cloud-radar/) Level 0 and Level 1 binary files
+- Reading [RPG cloud radar](https://www.radiometer-physics.de/products/microwave-remote-sensing-instruments/fmcw-doppler-cloud-radar/) Level 0 and Level 1 binary files
 - Calculating spectral moments from RPG Level 0 data
 - Converting RPG binary data to [netCDF4](https://www.unidata.ucar.edu/software/netcdf/) format
 
