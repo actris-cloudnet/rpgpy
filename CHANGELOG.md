@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.15.13 – 2025-11-04
+
+- Make numba optional
+
 ## 0.15.12 – 2025-04-08
 
 - Update binary wheels
