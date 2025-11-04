@@ -1,9 +1,29 @@
 from __future__ import annotations
 
+import logging
 from typing import Literal
 
 import numpy as np
-from numba import jit
+
+_first_call = True
+
+try:
+    from numba import jit
+
+    JIT = jit(nopython=True, fastmath=True)
+except ImportError:
+
+    def JIT(func):
+        def wrapper(*args, **kwargs):
+            global _first_call  # noqa: PLW0603
+            if _first_call:
+                logging.warning(
+                    "Numba not installed — running without JIT acceleration."
+                )
+                _first_call = False
+            return func(*args, **kwargs)
+
+        return wrapper
 
 
 def spectra2moments(
@@ -76,7 +96,7 @@ def spectra2moments(
     return output
 
 
-@jit(nopython=True, fastmath=True)
+@JIT
 def radar_moment_calculation(signal: np.ndarray, vel_bins: np.ndarray) -> np.ndarray:
     """Calculates radar moments from one a single spectral line.
 
@@ -116,7 +136,7 @@ def radar_moment_calculation(signal: np.ndarray, vel_bins: np.ndarray) -> np.nda
     return np.array((ze_lin, vel, sw, skew, kurt), dtype=np.float32)
 
 
-@jit(nopython=True, fastmath=True)
+@JIT
 def find_peak_edges(signal: np.ndarray) -> tuple[int, int]:
     """Returns the indices of left and right edge of the main signal peak in a Doppler
     spectra.

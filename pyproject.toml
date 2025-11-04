@@ -19,10 +19,11 @@ classifiers = [
   "Programming Language :: Python :: 3.13",
   "Topic :: Scientific/Engineering",
 ]
-dependencies = ["cython", "netCDF4", "numba", "numpy", "tqdm"]
+dependencies = ["cython", "netCDF4", "numpy", "tqdm"]
 dynamic = ["version"]
 
 [project.optional-dependencies]
+full = ["numba"]
 test = [
   "mypy",
   "pytest-flakefinder",
