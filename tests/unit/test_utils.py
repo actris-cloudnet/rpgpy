@@ -65,38 +65,24 @@ def test_with_invalid_status_flags():
 
 def test_create_velocity_vectors():
     inp = {"SpecN": [20], "MaxVel": [10], "SequN": 1}
-    res = [
-        [
-            -9.5,
-            -8.5,
-            -7.5,
-            -6.5,
-            -5.5,
-            -4.5,
-            -3.5,
-            -2.5,
-            -1.5,
-            -0.5,
-            0.5,
-            1.5,
-            2.5,
-            3.5,
-            4.5,
-            5.5,
-            6.5,
-            7.5,
-            8.5,
-            9.5,
-        ]
-    ]
-    assert_array_equal(utils.create_velocity_vectors(inp), res)
+    res = np.ma.array(
+        [[-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]]
+    )
+    actual = utils.create_velocity_vectors(inp)
+    assert_array_equal(actual, res)
+    assert_array_equal(actual.mask, res.mask)
 
-    inp = {"SpecN": [4, 10], "MaxVel": [8, 5], "SequN": 2}
-    res = [
-        [0, 0, 0, -6, -2, 2, 6, 0, 0, 0],
-        [-4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 4.5],
-    ]
-    assert_array_equal(utils.create_velocity_vectors(inp), res)
+    inp2 = {"SpecN": [4, 10], "MaxVel": [8, 5], "SequN": 2}
+    res2 = np.ma.masked_equal(
+        [
+            [-999, -999, -999, -8, -4, 0, 4, -999, -999, -999],
+            [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4],
+        ],
+        -999,
+    )
+    actual2 = utils.create_velocity_vectors(inp2)
+    assert_array_equal(actual2, res2)
+    assert_array_equal(actual2.mask, res2.mask)
 
 
 def test_find_peak_edges():
