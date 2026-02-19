@@ -77,7 +77,7 @@ def _read_rpg_l0(file_name: bytes, header: dict) -> dict:
     fread(&n_samples, 4, 1, ptr)
 
     cdef:
-        int [:] SampBytes = np.empty(n_samples, np.int32)
+        int SampBytes, SpecBytes
         unsigned int [:] Time = np.empty(n_samples, np.uint32)
         int [:] MSec = np.empty(n_samples, np.int32)
         char [:] QF = np.empty(n_samples, np.int8)
@@ -136,11 +136,19 @@ def _read_rpg_l0(file_name: bytes, header: dict) -> dict:
             n_samples_at_each_height[i] = n
 
     chirp_of_level = np.digitize(range(n_levels), header['RngOffs'])
+    n_samples_read = 0
 
     for sample in range(n_samples):
-        fread(&SampBytes[sample], 4, 1, ptr)
+
+        fread(&SampBytes, 4, 1, ptr)
+        if SampBytes <= 0:
+            logging.warning('Invalid data: SampBytes[%d] is nonpositive', sample)
+            break
+        sample_offset = ftell(ptr)
         fread(&Time[sample], 4, 1, ptr)
-        _check_timestamp(Time[sample], header)
+        if not (header['StartTime'] <= Time[sample] <= header['StopTime']):
+            logging.debug('Timestamp %d is outside the expected range [%d, %d].', Time[sample], header["StartTime"], header["StopTime"])
+            break
         fread(&MSec[sample], 4, 1, ptr)
         fread(&QF[sample], 1, 1, ptr)
         fread(&RR[sample], 4, 1, ptr)
@@ -168,11 +176,18 @@ def _read_rpg_l0(file_name: bytes, header: dict) -> dict:
 
         fread(is_data, 1, n_levels, ptr)
 
+        invalid_sample = False
+
         for alt_ind in range(n_levels):
 
             if is_data[alt_ind] == 1:
 
-                fseek(ptr, 4, SEEK_CUR)
+                fread(&SpecBytes, 4, 1, ptr)
+                if SpecBytes <= 0:
+                    logging.debug('SpecBytes[%d,%d] is nonpositive', sample, alt_ind)
+                    invalid_sample = True
+                    break
+                spec_offset = ftell(ptr)
                 n_bins = header['SpecN'][chirp_of_level[alt_ind] - 1]
                 bins_to_shift = (n_spectra - n_bins) // 2
 
@@ -193,14 +208,22 @@ def _read_rpg_l0(file_name: bytes, header: dict) -> dict:
 
                     for m in range(n_blocks):
                         if min_ind[m] < 0 or max_ind[m] < 0:
-                            raise RPGFileError('Invalid data: negative min_ind or max_ind')
+                            logging.debug('negative min_ind or max_ind')
+                            invalid_sample = True
+                            break
                         if min_ind[m] > max_ind[m]:
-                            raise RPGFileError('Invalid data: min_ind[m] > max_ind[m]')
+                            logging.debug('min_ind[m] > max_ind[m]')
+                            invalid_sample = True
+                            break
                         n_block_points[m] = max_ind[m] - min_ind[m] + 1
                         spec_ind[m] = min_ind[m] + bins_to_shift
                         if spec_ind[m] >= n_spectra:
-                            raise RPGFileError('Invalid data: spec_ind[m] > n_spectra')
+                            logging.debug('spec_ind[m] > n_spectra')
+                            invalid_sample = True
+                            break
                         fread(&TotSpec[sample, alt_ind, spec_ind[m]], 4, n_block_points[m], ptr)
+                    if invalid_sample:
+                        break
 
                     if polarization > 0:
                         for m in range(n_blocks):
@@ -235,11 +258,28 @@ def _read_rpg_l0(file_name: bytes, header: dict) -> dict:
                         fread(&AliasMsk[sample, alt_ind], 1, 1, ptr)
                         fread(&MinVel[sample, alt_ind], 4, 1, ptr)
 
-    current_position = ftell(ptr)
-    fseek(ptr, 0, SEEK_END)
-    end_position = ftell(ptr)
-    if current_position != end_position:
-        raise RPGFileError('File position is not at the end of the file.')
+                spec_bytes = ftell(ptr) - spec_offset
+                if spec_bytes != SpecBytes:
+                    logging.debug("SpecBytes[%d,%d] is %d but read %d bytes", sample, alt_ind, SpecBytes, spec_bytes)
+                    invalid_sample = True
+                    break
+
+        if invalid_sample:
+            break
+        sample_bytes = ftell(ptr) - sample_offset
+        if SampBytes != sample_bytes:
+            logging.debug("SampBytes[%d] is %d but read %d bytes", sample, SampBytes, sample_bytes)
+            break
+        n_samples_read += 1
+
+    if n_samples_read == n_samples:
+        current_position = ftell(ptr)
+        fseek(ptr, 0, SEEK_END)
+        end_position = ftell(ptr)
+        if current_position != end_position:
+            logging.warning('File contains more data than expected')
+    else:
+        logging.warning('Failed to read last %d timesteps out of %d', n_samples - n_samples_read, n_samples)
 
     fclose(ptr)
     free(is_data)
@@ -248,7 +288,7 @@ def _read_rpg_l0(file_name: bytes, header: dict) -> dict:
     var_names = locals()
     keys = _get_valid_l0_keys(header)
 
-    return {key: np.asarray(var_names[key]) for key in keys}
+    return {key: np.asarray(var_names[key])[:n_samples_read] for key in keys}
 
 
 def _get_n_samples(header: dict) -> np.ndarray:
@@ -308,7 +348,7 @@ def _read_rpg_l1(file_name: bytes, header: dict, version: float) -> dict:
     fread(&n_samples, 4, 1, ptr)
 
     cdef:
-        int [:] SampBytes = np.empty(n_samples, np.int32)
+        int SampBytes;
         unsigned int [:] Time = np.empty(n_samples, np.uint32)
         int [:] MSec = np.empty(n_samples, np.int32)
         char [:] QF = np.empty(n_samples, np.int8)
@@ -332,7 +372,10 @@ def _read_rpg_l1(file_name: bytes, header: dict, version: float) -> dict:
 
     for sample in range(n_samples):
 
-        fread(&SampBytes[sample], 4, 1, ptr)
+        fread(&SampBytes, 4, 1, ptr)
+        if SampBytes <= 0:
+            raise RPGFileError(f'Invalid data: SampBytes[{sample}] is nonpositive')
+        sample_offset = ftell(ptr)
         fread(&Time[sample], 4, 1, ptr)
         _check_timestamp(Time[sample], header)
         fread(&MSec[sample], 4, 1, ptr)
@@ -380,13 +423,16 @@ def _read_rpg_l1(file_name: bytes, header: dict, version: float) -> dict:
                         fread(&CorrCoeff[sample, alt_ind], 4, 1, ptr)
                         fread(&DiffPh[sample, alt_ind], 4, 1, ptr)
 
-                    if  polarization == 2:
+                    if polarization == 2:
                         fseek(ptr, 4, SEEK_CUR)
                         fread(&SLDR[sample, alt_ind], 4, 1, ptr)
                         fread(&SCorrCoeff[sample, alt_ind], 4, 1, ptr)
                         fread(&KDP[sample, alt_ind], 4, 1, ptr)
                         fread(&DiffAtt[sample, alt_ind], 4, 1, ptr)
 
+        sample_bytes = ftell(ptr) - sample_offset
+        if SampBytes != sample_bytes:
+            raise RPGFileError(f"SampBytes[{sample}] is {SampBytes} but read {sample_bytes} bytes")
 
     current_position = ftell(ptr)
     fseek(ptr, 0, SEEK_END)
