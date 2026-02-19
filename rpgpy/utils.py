@@ -147,17 +147,12 @@ def create_velocity_vectors(header: dict) -> np.ndarray:
     """
     n_chirps = header["SequN"]
     n_bins_max = np.max(header["SpecN"])
-    # zeros will be automatically masked in the netCDF file:
     velocity_vectors = np.zeros((n_chirps, n_bins_max))
     for ind, (n_bins, chirp_max_vel) in enumerate(
         zip(header["SpecN"], header["MaxVel"], strict=True),
     ):
         bins_to_shift = (n_bins_max - n_bins) // 2
-        dopp_res = chirp_max_vel / n_bins
-        velocity = np.linspace(
-            -chirp_max_vel + dopp_res,
-            +chirp_max_vel - dopp_res,
-            n_bins,
-        )
-        velocity_vectors[ind, bins_to_shift : bins_to_shift + len(velocity)] = velocity
+        dopp_res = 2 * chirp_max_vel / n_bins
+        velocity = np.linspace(-chirp_max_vel, chirp_max_vel - dopp_res, n_bins)
+        velocity_vectors[ind, bins_to_shift : bins_to_shift + n_bins] = velocity
     return velocity_vectors

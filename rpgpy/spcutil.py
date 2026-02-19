@@ -77,15 +77,10 @@ def spectra2moments(
                 velocity_vector = header["velocity_vectors"][ind_chirp][
                     edge_left:edge_right
                 ]
-                assert np.all(velocity_vector != 0)
                 moments[ind_time, ind_range, :] = radar_moment_calculation(
                     spectra[ind_time, ind_range, edge_left:edge_right],
                     velocity_vector,
                 )
-
-        # shift mean Doppler velocity by half a bin
-        half_bin_width = header["MaxVel"][ind_chirp] / header["SpecN"][ind_chirp]
-        moments[:, ranges[ind_chirp] : ranges[ind_chirp + 1], 1] -= half_bin_width
 
     output = {
         key: moments[:, :, i]
