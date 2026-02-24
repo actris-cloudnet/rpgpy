@@ -28,3 +28,21 @@ def test_long_names_level1_stsr():
     assert header["Dual Polarisation"] == 2
     assert "Linear Depolarisation Ratio" not in data
     assert "Differential Reflectivity Ratio" in data
+
+
+def test_level0_ldr():
+    filename = f"{FILE_PATH}/../data/level0/v3-889346/200704_000002_P10_ZEN.LV0"
+    header, data = read_rpg(filename)
+    assert header["DualPol"] == 1
+    assert "TotSpec" not in data
+    assert "HSpec" in data
+    assert "VSpec" in data
+
+
+def test_level0_stsr():
+    filename = f"{FILE_PATH}/../data/level0/v3-889346/190912_060003_P05_ZEN.LV0"
+    header, data = read_rpg(filename)
+    assert header["DualPol"] == 2
+    assert "TotSpec" in data
+    assert "HSpec" in data
+    assert "VSpec" not in data

@@ -32,6 +32,10 @@ def read_rpg(file_name: os.PathLike | str, rpg_names: bool = True) -> tuple[dict
     level, version = utils.get_rpg_file_type(header)
     if level == 0:
         data = _read_rpg_l0(file_name_bytes, header)
+        if header["DualPol"] != 2:
+            data["VSpec"] = data.pop("TotSpec")
+            if header["CompEna"] > 0:
+                data["VNoisePow"] = data.pop("TotNoisePow")
     else:
         data = _read_rpg_l1(file_name_bytes, header, version)
     if not rpg_names:
