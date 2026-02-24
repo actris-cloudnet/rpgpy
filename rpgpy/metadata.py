@@ -292,7 +292,12 @@ METADATA = {
     "TotSpec": Meta(
         name="doppler_spectrum",
         long_name="Doppler Spectrum",
-        comment="linear Ze",
+        comment="combined spectrum in STSR mode, linear Ze",
+    ),
+    "VSpec": Meta(
+        name="doppler_spectrum_v",
+        long_name="Doppler Spectrum V",
+        comment="vertical polarisation, linear Ze",
     ),
     "HSpec": Meta(
         name="doppler_spectrum_h",
@@ -352,7 +357,12 @@ METADATA = {
     "TotNoisePow": Meta(
         name="integrated_noise",
         long_name="Integrated Noise",
-        comment="integrated Doppler spectrum noise power",
+        comment="integrated combined Doppler spectrum noise power in STSR mode",
+    ),
+    "VNoisePow": Meta(
+        name="integrated_noise_v",
+        long_name="Integrated Noise V",
+        comment="integrated Doppler spectrum noise power in vertical polarisation",
     ),
     "HNoisePow": Meta(
         name="integrated_noise_h",

@@ -29,7 +29,7 @@ except ImportError:
 def spectra2moments(
     data: dict,
     header: dict,
-    spec_var: Literal["TotSpec", "VSpec", "HSpec"] = "TotSpec",
+    spec_var: Literal["TotSpec", "VSpec", "HSpec"] | None = None,
     fill_value: float = -999.0,
     n_points_min: int = 4,
 ) -> dict:
@@ -44,7 +44,7 @@ def spectra2moments(
         data: Level 0 nD variables.
         header: Level 0 metadata.
         spec_var: Name of the spectral variable. Possible names are 'TotSpec', 'VSpec',
-            and 'HSpec'.
+            and 'HSpec'. Defaults to 'TotSpec' in STSR mode and 'VSpec' otherwise.
         fill_value: Clear sky fill value.
         n_points_min: Minimum number of points in a valid spectral line.
 
@@ -59,6 +59,8 @@ def spectra2moments(
         >>> moments = spectra2moments(data, header)
 
     """
+    if spec_var is None:
+        spec_var = "TotSpec" if header["DualPol"] == 2 else "VSpec"
     spectra = data[spec_var]
     n_time, n_range, _ = spectra.shape
     moments = np.full((n_time, n_range, 5), np.nan)

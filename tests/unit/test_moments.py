@@ -50,7 +50,7 @@ class TestFindPeaks:
 class TestMoments:
     input_file = f"{FILE_PATH}/../data/level0/v3-889346/200704_000002_P10_ZEN.LV0"
     header, data = read_rpg(input_file)
-    source_data_mean = np.mean(data["TotSpec"])
+    source_data_mean = np.mean(data["VSpec"])
     start = time()
     moments = spectra2moments(data, header)
     stop = time()
@@ -62,7 +62,7 @@ class TestMoments:
         assert self.header["FileCode"] == 889346
 
     def test_that_does_not_alter_input_data(self):
-        assert_array_almost_equal(self.source_data_mean, np.mean(self.data["TotSpec"]))
+        assert_array_almost_equal(self.source_data_mean, np.mean(self.data["VSpec"]))
 
     def test_that_we_get_the_reference_value(self):
         moments = spectra2moments(self.data, self.header, n_points_min=1)
