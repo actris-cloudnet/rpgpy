@@ -124,8 +124,8 @@ def radar_moment_calculation(signal: np.ndarray, vel_bins: np.ndarray) -> np.nda
     vel = np.sum(vel_bins * pwr_nrm)
     vel_diff = vel_bins - vel
     vel_diff2 = vel_diff * vel_diff
-    sw = np.sqrt(np.abs(np.sum(pwr_nrm * vel_diff2)))
-    sw2 = sw * sw
+    sw2 = np.sum(pwr_nrm * vel_diff2)
+    sw = np.sqrt(sw2)
     skew = np.sum(pwr_nrm * vel_diff * vel_diff2 / (sw * sw2))
     kurt = np.sum(pwr_nrm * vel_diff2 * vel_diff2 / (sw2 * sw2))
     return np.array((ze_lin, vel, sw, skew, kurt), dtype=np.float32)
