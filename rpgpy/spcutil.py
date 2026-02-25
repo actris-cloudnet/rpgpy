@@ -30,14 +30,16 @@ def spectra2moments(
     data: dict,
     header: dict,
     spec_var: Literal["TotSpec", "VSpec", "HSpec"] | None = None,
+    *,
     fill_value: float = -999.0,
     n_points_min: int = 4,
+    largest_peak: bool = True,
 ) -> dict:
-    """Calculates radar moments from the main peak.
+    """Calculates radar moments.
 
     This routine calculates the radar moments: reflectivity, mean Doppler velocity,
     spectrum width, skewness and kurtosis from compressed level 0 spectrum files
-    (NoiseFactor > 0) of the 94 GHz RPG cloud radar. Considering only the largest peak.
+    (NoiseFactor > 0) of the 94 GHz RPG cloud radar.
 
     Args:
     ----
@@ -47,6 +49,8 @@ def spectra2moments(
             and 'HSpec'. Defaults to 'TotSpec' in STSR mode and 'VSpec' otherwise.
         fill_value: Clear sky fill value.
         n_points_min: Minimum number of points in a valid spectral line.
+        largest_peak: If True, consider only the largest peak. Otherwise, use
+            the whole spectra. Defaults to True.
 
     Returns:
     -------
@@ -62,12 +66,16 @@ def spectra2moments(
     if spec_var is None:
         spec_var = "TotSpec" if header["DualPol"] == 2 else "VSpec"
     spectra = data[spec_var]
-    n_time, n_range, _ = spectra.shape
+    n_time, n_range, max_n_spec = spectra.shape
     moments = np.full((n_time, n_range, 5), np.nan)
     no_signal = np.all(spectra == 0, axis=2)
     ranges = np.append(header["RngOffs"], header["RAltN"])
+    velocity_vector = header["velocity_vectors"]
 
     for ind_chirp in range(header["SequN"]):
+        n_spec = header["SpecN"][ind_chirp]
+        spec_left = (max_n_spec - n_spec) // 2
+        spec_right = spec_left + n_spec
         for ind_range in range(ranges[ind_chirp], ranges[ind_chirp + 1]):
             for ind_time in range(n_time):
                 if no_signal[ind_time, ind_range]:
@@ -76,12 +84,11 @@ def spectra2moments(
                 if (edge_right - edge_left) < n_points_min:
                     no_signal[ind_time, ind_range] = True
                     continue
-                velocity_vector = header["velocity_vectors"][ind_chirp][
-                    edge_left:edge_right
-                ]
+                if not largest_peak:
+                    edge_left, edge_right = spec_left, spec_right
                 moments[ind_time, ind_range, :] = radar_moment_calculation(
                     spectra[ind_time, ind_range, edge_left:edge_right],
-                    velocity_vector,
+                    velocity_vector[ind_chirp, edge_left:edge_right],
                 )
 
     output = {
