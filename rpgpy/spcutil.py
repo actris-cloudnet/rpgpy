@@ -140,6 +140,62 @@ def radar_moment_calculation(signal: np.ndarray, vel_bins: np.ndarray) -> np.nda
     return np.array((ze_lin, vel, sw, skew, kurt), dtype=np.float32)
 
 
+@jit(nopython=True, fastmath=True)
+def _screen_noise(spectra, ranges, sequ_n, spec_n):
+    n_time, n_range, max_n_spec = spectra.shape
+    for ind_time in range(n_time):
+        for ind_chirp in range(sequ_n):
+            n_spec = spec_n[ind_chirp]
+            for ind_range in range(ranges[ind_chirp], ranges[ind_chirp + 1]):
+                ind_left = (max_n_spec - n_spec) // 2
+                ind_right = ind_left + n_spec
+                signal = spectra[ind_time, ind_range, ind_left:ind_right]
+                ssignal = np.sort(signal)
+                Sum = 0
+                SumSq = 0
+                for i in range(n_spec):
+                    N = i + 1
+                    LastSum = Sum
+                    LastSumSq = SumSq
+                    Sum += ssignal[i]
+                    SumSq += ssignal[i] ** 2
+                    if 2 * Sum**2 < N * SumSq:
+                        Sum = LastSum
+                        SumSq = LastSumSq
+                        N -= 1
+                        break
+                Mean = Sum / N
+                Var = SumSq / N - Mean**2
+                Std = np.sqrt(Var)
+                threshold = Mean + 6 * Std
+                signal[signal < threshold] = 0
+
+
+def screen_noise(data: dict, header: dict):
+    """Screen noise from Doppler spectra using Hildebrand and Sehkon (1974).
+
+    Note that given data is modified inplace.
+
+    Args:
+    ----
+        data: Level 0 nD variables.
+        header: Level 0 metadata.
+
+    References:
+    ----------
+
+    Hildebrand, P. H., & Sekhon, R. S. (1974). Objective determination of the
+    noise level in Doppler spectra. Journal of Applied Meteorology and
+    Climatology, 13(7), 808-811.
+    """
+    spec_var = "TotSpec" if header["DualPol"] == 2 else "VSpec"
+    spectra = data[spec_var]
+    ranges = np.append(header["RngOffs"], header["RAltN"])
+    sequ_n = header["SequN"]
+    spec_n = header["SpecN"]
+    _screen_noise(spectra, ranges, sequ_n, spec_n)
+
+
 @JIT
 def find_peak_edges(signal: np.ndarray) -> tuple[int, int]:
     """Returns the indices of left and right edge of the main signal peak in a Doppler
