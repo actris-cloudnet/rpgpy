@@ -281,6 +281,51 @@ def calc_spectral_LDR(header: dict, data: dict) -> np.ndarray:
     return sldr
 
 
+def calc_polarimetric(data: dict, header: dict) -> dict:
+    """Calculate integrated polarimetric variables.
+
+    Args:
+    ----
+        header: Level 0 nD variables.
+        data: Level 0 nD metadata.
+
+    Returns:
+    -------
+        Dictionary with keys "RefRat", "CorrCoeff" and "DiffPh". In STSR mode
+        the dictionary also includes "SLDR", "SCorrCoeff", "KDP" and "DiffAtt".
+
+    """
+    if header["DualPol"] == 0:
+        msg = "Cannot calculate polarimetric variables for single polarization radar"
+        raise ValueError(msg)
+    if header["DualPol"] == 1:
+        spec_V = data["VSpec"]
+    else:
+        spec_tot = scale_spectra(data["TotSpec"], header["SWVersion"])
+        spec_V = spec_tot - data["HSpec"] - 2 * data["ReVHSpec"]
+    spec_H = data["HSpec"]
+    spec_VH = data["ReVHSpec"] + 1j * data["ImVHSpec"]
+    Bhv = np.sum(spec_VH, axis=2)
+    Bhh = np.sum(spec_H, axis=2)
+    Bvv = np.sum(spec_V, axis=2)
+    RefRat = 10 * np.log10(Bhh / Bvv)
+    CorrCoeff = np.abs(Bhv) / np.sqrt(Bhh * Bvv)
+    DiffPh = np.angle(Bhv)
+    output = {"RefRat": RefRat, "CorrCoeff": CorrCoeff, "DiffPh": DiffPh}
+    if header["DualPol"] == 2:
+        A = np.sum(spec_H + spec_V - 2 * data["ReVHSpec"], axis=2)
+        B = np.sum(spec_H + spec_V + 2 * data["ReVHSpec"], axis=2)
+        output["SLDR"] = 10 * np.log10(A / B)
+        C = np.sum(np.abs(spec_H - spec_V + 2j * data["ImVHSpec"]), axis=2)
+        D = np.sum(spec_H + spec_V - 2 * data["ReVHSpec"], axis=2)
+        E = np.sum(spec_H + spec_V + 2 * data["ReVHSpec"], axis=2)
+        output["SCorrCoeff"] = C / np.sqrt(D * E)
+        dR2km = 2e-3 * np.gradient(header["RAlts"])
+        output["KDP"] = np.gradient(DiffPh, axis=1) / dR2km
+        output["DiffAtt"] = np.gradient(RefRat, axis=1) / dR2km
+    return output
+
+
 def scale_spectra(signal: np.ndarray, software_version: float) -> np.ndarray:
     """Scales combined spectrum.
 
