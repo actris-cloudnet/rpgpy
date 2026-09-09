@@ -15,6 +15,10 @@ RpgPy is a Python / Cython software for
 
     python3 -m pip install rpgpy
 
+To speed up the spectral moment calculation with [numba](https://numba.pydata.org/), install the `full` extra:
+
+    python3 -m pip install rpgpy[full]
+
 ## From source
 
     git clone  https://github.com/actris-cloudnet/rpgpy/
@@ -22,8 +26,9 @@ RpgPy is a Python / Cython software for
     python3 -m venv venv
     source venv/bin/activate
     python3 -m pip install --upgrade pip
-    python3 -m pip install .
-    python3 setup.py build_ext --inplace
+    python3 -m pip install -e .
+
+The editable install compiles the Cython extension into the source tree.
 
 NOTE: A C-compiler is required because the Cython code is compiled locally during installation.
 If you get an error about missing `Python.h`, you need to install the missing header files with `$ apt install python3-dev` (or similar).
@@ -253,12 +258,12 @@ Returns:
 
 Install test-dependencies and [pre-commit](https://pre-commit.com/) hooks:
 
-    python3 -m pip install -e .[test,dev]
+    python3 -m pip install -e .[test,dev,full]
     pre-commit install
 
-Compile Cython (repeat if you change `.pyx` files):
+Recompile Cython after changing `.pyx` files by repeating the editable install:
 
-    python3 setup.py build_ext --inplace
+    python3 -m pip install -e .
 
 ### Tests
 
@@ -278,6 +283,9 @@ Force `pre-commit` checks of all files:
 
 For reading RPG binary files, depending on the radar settings, RpgPy is roughly 20-30 times faster
 than equivalent native Python or Matlab implementations.
+
+The spectral moment calculation is JIT-compiled with numba when it is installed (see the `full` extra above).
+Without numba the calculation works but is considerably slower.
 
 ## License
 
