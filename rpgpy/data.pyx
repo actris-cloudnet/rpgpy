@@ -37,7 +37,8 @@ def read_rpg(file_name: os.PathLike | str, rpg_names: bool = True) -> tuple[dict
     if not rpg_names:
         data = _change_keys(data)
         header = _change_keys(header)
-        if header['Dual Polarisation'] == 2:
+        # RefRat is absent from Level 0 output unless CompEna == 2.
+        if header['Dual Polarisation'] == 2 and 'Linear Depolarisation Ratio' in data:
             data['Differential Reflectivity Ratio'] = data.pop('Linear Depolarisation Ratio')
     return header, data
 
