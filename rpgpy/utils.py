@@ -1,10 +1,29 @@
 from __future__ import annotations
 
 import datetime
-from typing import NamedTuple
+import importlib
+from typing import TYPE_CHECKING, NamedTuple
 
 import numpy as np
 from numpy import ma
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+
+def _find_madvise_hugepage_setter() -> Callable[[bool], bool] | None:
+    for module_name in ("numpy._core.multiarray", "numpy.core.multiarray"):
+        try:
+            module = importlib.import_module(module_name)
+        except ImportError:
+            continue
+        setter = getattr(module, "_set_madvise_hugepage", None)
+        if setter is not None:
+            return setter
+    return None
+
+
+_set_madvise_hugepage = _find_madvise_hugepage_setter()
 
 
 class RPGFileError(Exception):
@@ -13,6 +32,24 @@ class RPGFileError(Exception):
     def __init__(self, msg: str = "Problem with reading file"):
         self.message = msg
         super().__init__(self.message)
+
+
+def zeros_no_hugepage(shape: tuple[int, ...], dtype: type | str) -> np.ndarray:
+    """Allocates a zero-filled array without transparent huge pages.
+
+    NumPy asks the kernel for huge pages on large allocations. Sparse writes into
+    such an array (e.g. compressed spectra) then trigger a slow huge page allocation
+    attempt on every first-touched 4 kB page, making the read tens of times slower
+    on Linux. Untouched pages of the returned array stay unmapped, so memory usage
+    follows the amount of actual data instead of the array size.
+    """
+    if _set_madvise_hugepage is None:
+        return np.zeros(shape, dtype)
+    previous = _set_madvise_hugepage(False)  # noqa: FBT003
+    try:
+        return np.zeros(shape, dtype)
+    finally:
+        _set_madvise_hugepage(previous)
 
 
 def get_current_time() -> str:

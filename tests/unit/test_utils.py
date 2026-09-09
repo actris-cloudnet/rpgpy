@@ -112,3 +112,10 @@ def test_find_peak_edges():
 def test_scale_spectra():
     assert spcutil.scale_spectra(np.array([1]), 540) == 4
     assert spcutil.scale_spectra(np.array([1]), 539) == 2
+
+
+def test_zeros_no_hugepage():
+    array = utils.zeros_no_hugepage((3, 4), np.float32)
+    assert array.shape == (3, 4)
+    assert array.dtype == np.float32
+    assert not array.any()

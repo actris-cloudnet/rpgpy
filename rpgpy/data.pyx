@@ -83,59 +83,59 @@ def _read_rpg_l0(file_name: bytes, header: dict) -> dict:
         char [:] QF = np.empty(n_samples, np.int8)
         float [:] RR, RelHum, EnvTemp, BaroP, WS, WD, DDVolt, DDTb, LWP, PowIF,
         float [:] Elev, Azi, Status, TransPow, TransT, RecT, PCT
-        float [:, :, :] TotSpec = np.zeros((n_samples, n_levels, n_spectra), np.float32)
+        float [:, :, :] TotSpec = utils.zeros_no_hugepage((n_samples, n_levels, n_spectra), np.float32)
         float [:, :, :] HSpec, ReVHSpec, ImVHSpec, RefRat, CorrCoeff, DiffPh, SLDR, SCorrCoeff
         float [:, :] KDP, DiffAtt, TotNoisePow, HNoisePow, MinVel, SLh, SLv
         char [:, :] AliasMsk
         int n_dummy = 3 + header['TAltN'] + 2*header['HAltN'] + n_levels
+        tuple shape_2d = (n_samples, n_levels)
+        tuple shape_3d = (n_samples, n_levels, n_spectra)
 
     (RR, RelHum, EnvTemp, BaroP, WS, WD, DDVolt, DDTb, LWP, PowIF, Elev, Azi, Status,
      TransPow, TransT, RecT, PCT) = [np.empty(n_samples, np.float32) for _ in range(17)]
 
-    SLv = np.zeros((n_samples, n_levels), np.float32)
+    # Spectra are written sparsely, so keep the kernel from using huge pages.
+    SLv = utils.zeros_no_hugepage(shape_2d, np.float32)
 
     if polarization > 0:
         n_dummy += n_levels
-        HSpec, ReVHSpec, ImVHSpec = [np.zeros((n_samples, n_levels, n_spectra), np.float32)
+        HSpec, ReVHSpec, ImVHSpec = [utils.zeros_no_hugepage(shape_3d, np.float32)
                                      for _ in range(3)]
-        SLh = np.zeros((n_samples, n_levels), np.float32)
+        SLh = utils.zeros_no_hugepage(shape_2d, np.float32)
     else:
         HSpec, ReVHSpec, ImVHSpec, SLh = [None]*4
 
     if compression > 0:
-        TotNoisePow = np.zeros((n_samples, n_levels), np.float32)
+        TotNoisePow = utils.zeros_no_hugepage(shape_2d, np.float32)
     else:
         TotNoisePow = None
 
     if compression == 2:
-        RefRat, CorrCoeff, DiffPh = [np.zeros((n_samples, n_levels, n_spectra), np.float32)
+        RefRat, CorrCoeff, DiffPh = [utils.zeros_no_hugepage(shape_3d, np.float32)
                                      for _ in range(3)]
     else:
         RefRat, CorrCoeff, DiffPh = [None]*3
 
     if anti_alias == 1:
-        MinVel = np.zeros((n_samples, n_levels), np.float32)
-        AliasMsk = np.zeros((n_samples, n_levels), np.int8)
+        MinVel = utils.zeros_no_hugepage(shape_2d, np.float32)
+        AliasMsk = utils.zeros_no_hugepage(shape_2d, np.int8)
     else:
         MinVel, AliasMsk = [None]*2
 
     if compression > 0 and polarization > 0:
-        HNoisePow = np.zeros((n_samples, n_levels), np.float32)
+        HNoisePow = utils.zeros_no_hugepage(shape_2d, np.float32)
     else:
         HNoisePow = None
 
     if compression == 2 and polarization == 2:
-        SLDR, SCorrCoeff = [np.zeros((n_samples, n_levels, n_spectra), np.float32)
+        SLDR, SCorrCoeff = [utils.zeros_no_hugepage(shape_3d, np.float32)
                             for _ in range(2)]
-        KDP, DiffAtt = [np.zeros((n_samples, n_levels), np.float32) for _ in range(2)]
+        KDP, DiffAtt = [utils.zeros_no_hugepage(shape_2d, np.float32) for _ in range(2)]
     else:
         SLDR, SCorrCoeff, KDP, DiffAtt = [None]*4
 
-    if compression == 0:
-        for i, n in enumerate(_get_n_samples(header)):
-            n_samples_at_each_height[i] = n
-
-    chirp_of_level = np.digitize(range(n_levels), header['RngOffs'])
+    for i, n in enumerate(_get_n_samples(header)):
+        n_samples_at_each_height[i] = n
 
     for sample in range(n_samples):
         fread(&SampBytes[sample], 4, 1, ptr)
@@ -173,11 +173,10 @@ def _read_rpg_l0(file_name: bytes, header: dict) -> dict:
             if is_data[alt_ind] == 1:
 
                 fseek(ptr, 4, SEEK_CUR)
-                n_bins = header['SpecN'][chirp_of_level[alt_ind] - 1]
-                bins_to_shift = (n_spectra - n_bins) // 2
+                n_points = n_samples_at_each_height[alt_ind]
+                bins_to_shift = (n_spectra - n_points) // 2
 
                 if compression == 0:
-                    n_points = n_samples_at_each_height[alt_ind]
                     fread(&TotSpec[sample, alt_ind, bins_to_shift], 4, n_points, ptr)
 
                     if polarization > 0:
@@ -198,8 +197,8 @@ def _read_rpg_l0(file_name: bytes, header: dict) -> dict:
                             raise RPGFileError('Invalid data: min_ind[m] > max_ind[m]')
                         n_block_points[m] = max_ind[m] - min_ind[m] + 1
                         spec_ind[m] = min_ind[m] + bins_to_shift
-                        if spec_ind[m] >= n_spectra:
-                            raise RPGFileError('Invalid data: spec_ind[m] > n_spectra')
+                        if spec_ind[m] + n_block_points[m] > n_spectra:
+                            raise RPGFileError('Invalid data: spectral block exceeds n_spectra')
                         fread(&TotSpec[sample, alt_ind, spec_ind[m]], 4, n_block_points[m], ptr)
 
                     if polarization > 0:

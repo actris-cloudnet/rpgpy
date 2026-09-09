@@ -10,7 +10,7 @@ _first_call = True
 try:
     from numba import jit
 
-    JIT = jit(nopython=True, fastmath=True)
+    JIT = jit(nopython=True, fastmath=True, cache=True)
 except ImportError:
 
     def JIT(func):
@@ -62,7 +62,7 @@ def spectra2moments(
     spectra = data[spec_var]
     n_time, n_range, _ = spectra.shape
     moments = np.full((n_time, n_range, 5), np.nan)
-    no_signal = np.all(spectra == 0, axis=2)
+    no_signal = ~spectra.any(axis=2)  # avoids a full-size temporary array
     ranges = np.append(header["RngOffs"], header["RAltN"])
 
     for ind_chirp in range(header["SequN"]):
