@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.16.0 – 2026-09-09
+
+- Avoid huge pages when allocating spectra arrays and cache numba functions
+- Fix KeyError when reading Level 0 STSR files with rpg_names=False
+
 ## 0.15.13 – 2025-11-04
 
 - Make numba optional
