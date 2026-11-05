@@ -154,7 +154,7 @@ def _read_rpg_l0(file_name: bytes, header: dict) -> dict:
             break
         sample_offset = ftell(ptr)
         fread(&Time[sample], 4, 1, ptr)
-        if not (header['StartTime'] <= Time[sample] <= header['StopTime']):
+        if 'StartTime' in header and 'StopTime' in header and not (header['StartTime'] <= Time[sample] <= header['StopTime']):
             logging.debug('Timestamp %d is outside the expected range [%d, %d].', Time[sample], header["StartTime"], header["StopTime"])
             break
         fread(&MSec[sample], 4, 1, ptr)
@@ -477,6 +477,8 @@ def _get_valid_l1_keys(header: dict) -> list:
 
 def _check_timestamp(timestamp: int, header: dict):
     """Checks if timestamp is within the expected range."""
+    if 'StartTime' not in header or 'StopTime' not in header:
+        return
     try:
         if not (header['StartTime'] <= timestamp <= header['StopTime']):
             raise RPGFileError(f'Timestamp {timestamp} is outside the expected range '
