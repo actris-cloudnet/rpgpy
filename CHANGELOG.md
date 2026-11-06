@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.17.0 – 2026-11-06
+
+- Support partially valid LV0 files
+- Adjust velocity vectors to start of bin instead of center
+- Use name `TotSpec` or `VSpec` depending on radar mode
+- Add `largest_peak` argument to `spectra2moments`
+- Fix reading LV0 version 2.0 files
+
 ## 0.16.0 – 2026-09-09
 
 - Avoid huge pages when allocating spectra arrays and cache numba functions
