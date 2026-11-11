@@ -41,7 +41,7 @@ jobs:
           disk-root: "C:"
       - name: Install dependencies
         run: |
-          python3 -m pip install setuptools
+          python3 -m pip install "setuptools>=77.0.3"
           python3 -m pip install .[test,dev,full]
           python3 setup.py build_ext --inplace
       - name: Run pre-commit checks
